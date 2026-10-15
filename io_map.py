@@ -208,16 +208,30 @@ ERAS = [
     {"from": "2026-10-10", "to": "2026-10-11", "name": "Event-driven Flow (V3)",
      "what": "Cloud sessions, @claude mentions, QC waking the orchestrator, then FLOW-AUTO-EVENT-001: GitHub events wake a self-hosted Windows runner that prepares, writes, verifies and records tasks. Missing product decisions are recommended, never invented.",
      "lesson": "The workflow canary passed on 2026-10-11 after failed attempts on 10 Oct."},
-    {"from": "2026-10-12", "to": "2026-10-15", "name": "Stall",
+    {"from": "2026-10-12", "to": "2026-10-14", "name": "Stall",
      "what": "Continuity repair #110 used both repairs and was frozen. HUD work #113 is blocked because resumed native sessions do not keep their model and effort. The adapter fix #114 failed twice before writing anything.",
      "lesson": "Green workflow runs did not mean tasks moved. See the V3 status tab."},
+    {"from": "2026-10-15", "to": "2026-10-15", "name": "Retreat (PR open)",
+     "what": "FLOW-RECOVERY-001 (#115) removes the event controller, the local runner, paired admission and their tests, and keeps contract, ACCEPT, one writer, independent QC, preflight and the playtest gate. #114 was closed. Not merged yet, so it is not counted below.",
+     "lesson": "Removing about 13,000 lines is the first flow change that makes the process smaller."},
 ]
 
 # --- V3 status snapshot. Every row cites its source. Recorded 2026-10-15.
 SNAPSHOT_DATE = "2026-10-15"
 R = "https://github.com/Mozar-Team/factory-that-builds-itself"
 SNAPSHOT_V3 = {
-    "summary": "The automation runs, but no task can move through it right now. The event workflow fires and finishes green, yet the two open flow tasks are blocked and game work waits behind them.",
+    "recovery": {
+        "title": "Retreat in progress: FLOW-RECOVERY-001",
+        "pr": f"{R}/pull/115",
+        "state": "Accepted by you on 2026-10-15 05:41 UTC (ACCEPT FLOW-RECOVERY-001 GOVERNANCE). Implementation at 3307237; validate and Godot checks green. Waiting for Independent QC, closeout, your playtest receipt and your merge.",
+        "removes": ["Event controller and its workflow (flow-auto-events.yml)", "Local runner and native session adapters", "Paired writer admission (writer-admission.yml)", "Runner documentation (FLOW_AUTO_RUNNER.md)", "Their tests"],
+        "keeps": ["Task contract in the PR", "Your ACCEPT before any write", "One active writer at a time", "Independent QC in a separate session", "Start and final preflight", "Your playtest receipt and manual merge"],
+        "adds": ["contract.py: one shared contract parser", "governance-guard.yml: trusted check for governance paths", "docs/briefs/HUD-SPRITE-001.md: the HUD brief for #113"],
+        "numbers": [("27", "files changed"), ("+2,672", "lines added"), ("−12,967", "lines removed"), ("−276", "net lines in the policy file")],
+        "src": [("PR #115", f"{R}/pull/115"), ("ACCEPT", f"{R}/pull/115#issuecomment-6185317650"), ("#114 closed", f"{R}/pull/114#issuecomment-6185490239")],
+        "cmd": "curl -s https://api.github.com/repos/Mozar-Team/factory-that-builds-itself/pulls/115 | jq '.changed_files,.additions,.deletions'",
+    },
+    "summary": "Before the retreat: the automation ran, but no task could move through it. The event workflow fires and finishes green, yet the two open flow tasks are blocked and game work waits behind them.",
     "components": [
         {"name": "Event workflow (flow-auto-events.yml)", "state": "ok",
          "status": "Running. 100 most recent runs: 91 green, 9 red (13–15 Oct).",
@@ -250,14 +264,14 @@ SNAPSHOT_V3 = {
     ],
     "chain": [
         {"id": "#113", "title": "HUD-SPRITE-001", "state": "bad", "why": "Native launch blocked until model/effort pinning is fixed.", "url": f"{R}/pull/113"},
-        {"id": "#114", "title": "FLOW-NATIVE-ROLE-PIN-001", "state": "bad", "why": "Fix for the pinning defect. Two blocked writer attempts. Third attempt authorized 15 Oct after correcting the prompt conflict; binding still pending.", "url": f"{R}/pull/114"},
+        {"id": "#114", "title": "FLOW-NATIVE-ROLE-PIN-001", "state": "frozen", "why": "Fix for the pinning defect. Two blocked writer attempts. Closed 15 Oct 05:53 UTC by your decision in #115; the adapter it would fix is removed.", "url": f"{R}/pull/114"},
         {"id": "#110", "title": "FLOW-AUTO-CONTINUITY-001", "state": "frozen", "why": "Repair budget 2/2 used. Writer authority withdrawn, kept as evidence.", "url": f"{R}/pull/110"},
     ],
     "last_merges": "Last game change merged: GENERATOR-BURN-001 (#111) on 2026-10-13. Last process change merged: GFX-QUEUE-TRACKER-001 (#112) on 2026-10-14.",
     "next": [
-        "Finish #114 with the corrected writer prompt, then Independent QC.",
-        "Rerun the workflow canary on the new main before restarting #113.",
-        "Mark one graphics task po-ready so the queue has work.",
+        "Independent QC on #115 at 3307237, from a session other than the writer.",
+        "Closeout, your playtest receipt, your merge of #115.",
+        "Restart #113 (HUD) by hand under the simpler flow, using the brief that #115 adds.",
     ],
 }
 

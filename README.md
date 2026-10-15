@@ -35,7 +35,9 @@ A new step, category or policy section that `io_map.py` does not describe appear
 
 ## V3 status on 2026-10-15 (summary)
 
-The automation runs, but no task can move through it.
+**Retreat in progress:** [#115](https://github.com/Mozar-Team/factory-that-builds-itself/pull/115) FLOW-RECOVERY-001, accepted 2026-10-15, removes the event controller, local runner and paired admission (27 files, +2,672 / −12,967 lines) and keeps contract, ACCEPT, one writer, independent QC, preflight and the playtest gate. Not merged yet.
+
+Before the retreat, the automation ran but no task could move through it.
 
 - Game task [#113](https://github.com/Mozar-Team/factory-that-builds-itself/pull/113) (HUD-SPRITE-001) waits for [#114](https://github.com/Mozar-Team/factory-that-builds-itself/pull/114), the fix that pins model and effort when native sessions resume.
 - [#114](https://github.com/Mozar-Team/factory-that-builds-itself/pull/114) (FLOW-NATIVE-ROLE-PIN-001) had two writer attempts, both blocked before any change: first by GitHub HTTP 404/401, then by a conflict between the runner's fixed writer prompt ("Do not … alter policy", `scripts/workflow/local_runner.py:1668`) and a contract that requires a policy edit.

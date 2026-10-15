@@ -291,11 +291,32 @@ def v3_tab():
   <span class="badge b-{c['state']}">{STATE_LABEL[c['state']]}</span><p>{e(c['why'])}</p></li>""" for c in s["chain"])
     nxt = "".join(f"<li>{e(n)}</li>" for n in s["next"])
     counts = {k: sum(1 for c in s["components"] if c["state"] == k) for k in ("ok", "warn", "bad")}
-    return f"""
+    rec = s.get("recovery")
+    rec_html = ""
+    if rec:
+        li = lambda xs: "".join(f"<li>{e(x)}</li>" for x in xs)
+        nums = "".join(f'<div><b>{e(n)}</b><span>{e(l)}</span></div>' for n, l in rec["numbers"])
+        rec_html = f"""
+<section class="recovery">
+  <header>
+    <p class="eyebrow">Latest · {e(M.SNAPSHOT_DATE)}</p>
+    <h2><a href="{e(rec['pr'])}">{e(rec['title'])}</a></h2>
+    <p class="lede">{e(rec['state'])}</p>
+  </header>
+  <div class="tally nums">{nums}</div>
+  <div class="cards mt">
+    <div class="card"><h4>Removed</h4><ul>{li(rec['removes'])}</ul></div>
+    <div class="card"><h4>Kept</h4><ul>{li(rec['keeps'])}</ul></div>
+    <div class="card"><h4>Added</h4><ul>{li(rec['adds'])}</ul></div>
+  </div>
+  <p class="src mt">{' · '.join(f'<a href="{e(u)}">{e(n)}</a>' for n, u in rec['src'])}</p>
+  {tech([f"Numbers: <code>{e(rec['cmd'])}</code>"])}
+</section>"""
+    return rec_html + f"""
 <section>
   <header>
-    <p class="eyebrow">Snapshot recorded {e(M.SNAPSHOT_DATE)}</p>
-    <h2>Flow V3: what works and what does not</h2>
+    <p class="eyebrow">Snapshot recorded {e(M.SNAPSHOT_DATE)}, before the retreat</p>
+    <h2>Flow V3: what worked and what did not</h2>
     <p class="lede">{e(s['summary'])}</p>
   </header>
   <div class="tally">
@@ -305,7 +326,7 @@ def v3_tab():
   </div>
 </section>
 <section>
-  <header><h3>Why nothing moves</h3><p class="lede">Game work waits on a fix to the automation, and that fix is itself stuck.</p></header>
+  <header><h3>Why nothing moved</h3><p class="lede">Game work waited on a fix to the automation, and that fix was itself stuck.</p></header>
   <ol class="chain">{chain}</ol>
   <p class="lede mt">{e(s['last_merges'])}</p>
 </section>
@@ -314,7 +335,7 @@ def v3_tab():
   <div class="statuses">{comps}</div>
 </section>
 <section>
-  <header><h3>Shortest way back to moving</h3><p class="lede">The writer's reading of the evidence above, not a Product Owner decision.</p></header>
+  <header><h3>Next steps on #115</h3><p class="lede">From the #115 contract and its current state; your merge stays manual.</p></header>
   <ol class="next">{nxt}</ol>
 </section>"""
 

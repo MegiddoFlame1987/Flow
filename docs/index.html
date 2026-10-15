@@ -172,6 +172,9 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 .tally { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px }
 .tally div { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 4px; padding: 10px 16px; min-width: 120px }
 .tally b { display: block; font: 700 2.2rem/1 var(--display) }
+.nums div { --c: var(--accent) }
+.recovery h2 a { color: inherit; text-decoration-color: var(--accent) }
+.recovery { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px }
 .tally span { color: var(--muted); font-size: .85rem }
 .t-ok { --c: var(--ok) } .t-warn { --c: var(--warnc) } .t-bad { --c: var(--bad) }
 .badge { font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: 3px; white-space: nowrap; color: var(--panel); background: var(--c) }
@@ -232,7 +235,7 @@ details.tech h5 { margin-top: 10px }
     <div class="source">
       <span>rules as of <b>2026-10-14</b></span>
       <span>version <b>3370cfc</b></span>
-      <span>page built <b>2026-10-15 05:30 UTC</b></span>
+      <span>page built <b>2026-10-15 06:48 UTC</b></span>
     </div>
   </div>
 
@@ -687,11 +690,26 @@ details.tech h5 { margin-top: 10px }
   </div>
 
   <div class="panel" id="v3" role="tabpanel" aria-labelledby="t-v3" hidden>
+<section class="recovery">
+  <header>
+    <p class="eyebrow">Latest · 2026-10-15</p>
+    <h2><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/115">Retreat in progress: FLOW-RECOVERY-001</a></h2>
+    <p class="lede">Accepted by you on 2026-10-15 05:41 UTC (ACCEPT FLOW-RECOVERY-001 GOVERNANCE). Implementation at 3307237; validate and Godot checks green. Waiting for Independent QC, closeout, your playtest receipt and your merge.</p>
+  </header>
+  <div class="tally nums"><div><b>27</b><span>files changed</span></div><div><b>+2,672</b><span>lines added</span></div><div><b>−12,967</b><span>lines removed</span></div><div><b>−276</b><span>net lines in the policy file</span></div></div>
+  <div class="cards mt">
+    <div class="card"><h4>Removed</h4><ul><li>Event controller and its workflow (flow-auto-events.yml)</li><li>Local runner and native session adapters</li><li>Paired writer admission (writer-admission.yml)</li><li>Runner documentation (FLOW_AUTO_RUNNER.md)</li><li>Their tests</li></ul></div>
+    <div class="card"><h4>Kept</h4><ul><li>Task contract in the PR</li><li>Your ACCEPT before any write</li><li>One active writer at a time</li><li>Independent QC in a separate session</li><li>Start and final preflight</li><li>Your playtest receipt and manual merge</li></ul></div>
+    <div class="card"><h4>Added</h4><ul><li>contract.py: one shared contract parser</li><li>governance-guard.yml: trusted check for governance paths</li><li>docs/briefs/HUD-SPRITE-001.md: the HUD brief for #113</li></ul></div>
+  </div>
+  <p class="src mt"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/115">PR #115</a> · <a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/115#issuecomment-6185317650">ACCEPT</a> · <a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/114#issuecomment-6185490239">#114 closed</a></p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Numbers: <code>curl -s https://api.github.com/repos/Mozar-Team/factory-that-builds-itself/pulls/115 | jq &#x27;.changed_files,.additions,.deletions&#x27;</code></li></ul></details>
+</section>
 <section>
   <header>
-    <p class="eyebrow">Snapshot recorded 2026-10-15</p>
-    <h2>Flow V3: what works and what does not</h2>
-    <p class="lede">The automation runs, but no task can move through it right now. The event workflow fires and finishes green, yet the two open flow tasks are blocked and game work waits behind them.</p>
+    <p class="eyebrow">Snapshot recorded 2026-10-15, before the retreat</p>
+    <h2>Flow V3: what worked and what did not</h2>
+    <p class="lede">Before the retreat: the automation ran, but no task could move through it. The event workflow fires and finishes green, yet the two open flow tasks are blocked and game work waits behind them.</p>
   </header>
   <div class="tally">
     <div class="t-ok"><b>2</b><span>working</span></div>
@@ -700,12 +718,12 @@ details.tech h5 { margin-top: 10px }
   </div>
 </section>
 <section>
-  <header><h3>Why nothing moves</h3><p class="lede">Game work waits on a fix to the automation, and that fix is itself stuck.</p></header>
+  <header><h3>Why nothing moved</h3><p class="lede">Game work waited on a fix to the automation, and that fix was itself stuck.</p></header>
   <ol class="chain">
 <li class="link s-bad"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/113"><b>#113</b> HUD-SPRITE-001</a>
   <span class="badge b-bad">broken</span><p>Native launch blocked until model/effort pinning is fixed.</p></li>
-<li class="link s-bad"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/114"><b>#114</b> FLOW-NATIVE-ROLE-PIN-001</a>
-  <span class="badge b-bad">broken</span><p>Fix for the pinning defect. Two blocked writer attempts. Third attempt authorized 15 Oct after correcting the prompt conflict; binding still pending.</p></li>
+<li class="link s-frozen"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/114"><b>#114</b> FLOW-NATIVE-ROLE-PIN-001</a>
+  <span class="badge b-frozen">frozen</span><p>Fix for the pinning defect. Two blocked writer attempts. Closed 15 Oct 05:53 UTC by your decision in #115; the adapter it would fix is removed.</p></li>
 <li class="link s-frozen"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/110"><b>#110</b> FLOW-AUTO-CONTINUITY-001</a>
   <span class="badge b-frozen">frozen</span><p>Repair budget 2/2 used. Writer authority withdrawn, kept as evidence.</p></li></ol>
   <p class="lede mt">Last game change merged: GENERATOR-BURN-001 (#111) on 2026-10-13. Last process change merged: GFX-QUEUE-TRACKER-001 (#112) on 2026-10-14.</p>
@@ -757,8 +775,8 @@ details.tech h5 { margin-top: 10px }
 </article></div>
 </section>
 <section>
-  <header><h3>Shortest way back to moving</h3><p class="lede">The writer's reading of the evidence above, not a Product Owner decision.</p></header>
-  <ol class="next"><li>Finish #114 with the corrected writer prompt, then Independent QC.</li><li>Rerun the workflow canary on the new main before restarting #113.</li><li>Mark one graphics task po-ready so the queue has work.</li></ol>
+  <header><h3>Next steps on #115</h3><p class="lede">From the #115 contract and its current state; your merge stays manual.</p></header>
+  <ol class="next"><li>Independent QC on #115 at 3307237, from a session other than the writer.</li><li>Closeout, your playtest receipt, your merge of #115.</li><li>Restart #113 (HUD) by hand under the simpler flow, using the brief that #115 adds.</li></ol>
 </section></div>
   <div class="panel" id="gov" role="tabpanel" aria-labelledby="t-gov" hidden>
 <section>
@@ -858,18 +876,27 @@ details.tech h5 { margin-top: 10px }
   </div>
 </li>
 <li class="era">
-  <div class="when">10-12 → 10-15</div>
+  <div class="when">10-12 → 10-14</div>
   <div class="what">
     <h4>Stall</h4>
     <p>Continuity repair #110 used both repairs and was frozen. HUD work #113 is blocked because resumed native sessions do not keep their model and effort. The adapter fix #114 failed twice before writing anything.</p>
     <p class="note"><b>Lesson</b> Green workflow runs did not mean tasks moved. See the V3 status tab.</p>
     <p class="stats"><span>0 process commits</span><span>0 tasks</span><span>0 policy key changes</span></p>
   </div>
+</li>
+<li class="era">
+  <div class="when">10-15 → 10-15</div>
+  <div class="what">
+    <h4>Retreat (PR open)</h4>
+    <p>FLOW-RECOVERY-001 (#115) removes the event controller, the local runner, paired admission and their tests, and keeps contract, ACCEPT, one writer, independent QC, preflight and the playtest gate. #114 was closed. Not merged yet, so it is not counted below.</p>
+    <p class="note"><b>Lesson</b> Removing about 13,000 lines is the first flow change that makes the process smaller.</p>
+    <p class="stats"><span>0 process commits</span><span>0 tasks</span><span>0 policy key changes</span></p>
+  </div>
 </li></ol>
 </section>
 <section>
   <header><h3>Policy size at the end of each era</h3><p class="lede">Number of keys in <code>.codex/workflow-policy.toml</code>. It did not exist before Flow V2.</p></header>
-  <div class="bars"><div class="bar"><span class="lab">Foundations</span><span class="track"><span style="width:0%"></span></span><span class="val">0</span></div><div class="bar"><span class="lab">Flow V2 pilot</span><span class="track"><span style="width:34%"></span></span><span class="val">104</span></div><div class="bar"><span class="lab">Simplify and harden</span><span class="track"><span style="width:54%"></span></span><span class="val">166</span></div><div class="bar"><span class="lab">Local runner</span><span class="track"><span style="width:69%"></span></span><span class="val">211</span></div><div class="bar"><span class="lab">Event-driven Flow (V3)</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Stall</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div></div>
+  <div class="bars"><div class="bar"><span class="lab">Foundations</span><span class="track"><span style="width:0%"></span></span><span class="val">0</span></div><div class="bar"><span class="lab">Flow V2 pilot</span><span class="track"><span style="width:34%"></span></span><span class="val">104</span></div><div class="bar"><span class="lab">Simplify and harden</span><span class="track"><span style="width:54%"></span></span><span class="val">166</span></div><div class="bar"><span class="lab">Local runner</span><span class="track"><span style="width:69%"></span></span><span class="val">211</span></div><div class="bar"><span class="lab">Event-driven Flow (V3)</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Stall</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Retreat (PR open)</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div></div>
 </section>
 <section id="changes">
   <header class="tracker-head">
