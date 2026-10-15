@@ -1,6 +1,7 @@
 # Flow 2 — Mazor Ship Flow Map
 
 A generated page that explains the delivery flow of [`Mozar-Team/factory-that-builds-itself`](https://github.com/Mozar-Team/factory-that-builds-itself) in plain language. It lives outside the game repository so the game's git history stays clean; the game repository is only read.
+
 It has four tabs:
 
 | Tab | What it shows | Source |
@@ -36,9 +37,9 @@ A new step, category or policy section that `io_map.py` does not describe appear
 
 The automation runs, but no task can move through it.
 
-- Game task #113 (HUD-SPRITE-001) waits for #114, the fix that pins model and effort when native sessions resume.
-- #114 (FLOW-NATIVE-ROLE-PIN-001) had two writer attempts, both blocked before any change: first by GitHub HTTP 404/401, then by a conflict between the runner's fixed writer prompt ("Do not … alter policy", `scripts/workflow/local_runner.py:1668`) and a contract that requires a policy edit.
-- #110 (FLOW-AUTO-CONTINUITY-001) used its two repairs and is frozen.
+- Game task [#113](https://github.com/Mozar-Team/factory-that-builds-itself/pull/113) (HUD-SPRITE-001) waits for [#114](https://github.com/Mozar-Team/factory-that-builds-itself/pull/114), the fix that pins model and effort when native sessions resume.
+- [#114](https://github.com/Mozar-Team/factory-that-builds-itself/pull/114) (FLOW-NATIVE-ROLE-PIN-001) had two writer attempts, both blocked before any change: first by GitHub HTTP 404/401, then by a conflict between the runner's fixed writer prompt ("Do not … alter policy", `scripts/workflow/local_runner.py:1668`) and a contract that requires a policy edit.
+- [#110](https://github.com/Mozar-Team/factory-that-builds-itself/pull/110) (FLOW-AUTO-CONTINUITY-001) used its two repairs and is frozen.
 - Last workflow canary pass: 2026-10-11 on `4d834d4`; `main` is six merges ahead.
 
 Details and links are on the V3 status tab.
