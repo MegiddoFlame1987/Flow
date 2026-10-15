@@ -1,0 +1,1492 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mazor Ship Flow Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: control-room sheet. Source bar, page tabs, route switch, sequence diagram, step cards, status board, timeline. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --fg: #18212b; --muted: #5a6876; --line: #c9d1da;
+  --accent: #c2410c; --accent-soft: #fde6d8;
+  --a-po: #b45309; --a-orch: #1d4ed8; --a-rev: #6d28d9; --a-arch: #0f766e;
+  --a-writer: #15803d; --a-ci: #475569; --a-qc: #be123c;
+  --ok: #15803d; --bad: #b91c1c; --warnc: #b45309; --warn-bg: #fff4d6; --warn-fg: #7a4a00;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f151c; --panel: #17202a; --fg: #e3e9ef; --muted: #93a2b1; --line: #2c3a48;
+  --accent: #fb8a4c; --accent-soft: #3a2216;
+  --a-po: #f2a541; --a-orch: #7aa2ff; --a-rev: #b794f6; --a-arch: #4fd1c5;
+  --a-writer: #5fd38a; --a-ci: #9fb0c2; --a-qc: #ff7a95;
+  --ok: #5fd38a; --bad: #ff8080; --warnc: #f2a541; --warn-bg: #3a2f12; --warn-fg: #ffd98a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f151c; --panel: #17202a; --fg: #e3e9ef; --muted: #93a2b1; --line: #2c3a48;
+  --accent: #fb8a4c; --accent-soft: #3a2216;
+  --a-po: #f2a541; --a-orch: #7aa2ff; --a-rev: #b794f6; --a-arch: #4fd1c5;
+  --a-writer: #5fd38a; --a-ci: #9fb0c2; --a-qc: #ff7a95;
+  --ok: #5fd38a; --bad: #ff8080; --warnc: #f2a541; --warn-bg: #3a2f12; --warn-fg: #ffd98a; color-scheme: dark }
+
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); margin: 0 }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 64px; display: grid; gap: 40px }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: .01em }
+h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1; font-weight: 700 }
+h2 { font-size: 1.9rem; font-weight: 600 }
+h3 { font-size: 1.3rem; font-weight: 600 }
+h4 { font-size: 1.15rem; font-weight: 600 }
+h5 { font: 600 .72rem/1 var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 6px }
+code { font: .86em var(--mono); overflow-wrap: anywhere }
+p { margin: 0 }
+.lede { color: var(--muted); max-width: 68ch }
+.eyebrow { font: 500 .78rem var(--mono); color: var(--accent); letter-spacing: .06em; text-transform: uppercase }
+
+.top { display: grid; gap: 14px }
+.road { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0; counter-reset: r }
+.road li { position: relative; padding: 10px 12px 10px 14px; background: var(--panel); border: 1px solid var(--line); margin-left: -1px; display: grid; gap: 2px; min-width: 0 }
+.road li::before { counter-increment: r; content: counter(r); font: 600 .75rem var(--mono); color: var(--accent) }
+.road b { font: 600 1.05rem var(--display) }
+.road span { font-size: .8rem; color: var(--muted) }
+.source { display: flex; flex-wrap: wrap; gap: 8px 22px; font: .85rem var(--mono); color: var(--muted);
+  border-block: 1px solid var(--line); padding-block: 10px }
+.source b { color: var(--fg); font-weight: 500 }
+
+section > header { display: grid; gap: 6px; margin-bottom: 18px }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap }
+.tab { font: 600 1rem var(--display); letter-spacing: .06em; padding: 8px 18px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--fg); border-radius: 4px; cursor: pointer }
+.tab[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.tab:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+.lane { display: grid; gap: 20px; margin-top: 16px }
+.facts { display: flex; flex-wrap: wrap; gap: 0; margin: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--panel) }
+.facts div { padding: 10px 16px; border-right: 1px solid var(--line); min-width: 0 }
+.facts dt { font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted) }
+.facts dd { margin: 2px 0 0; font: 600 1.15rem var(--display); font-variant-numeric: tabular-nums }
+
+.scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px }
+.seq { display: block; max-width: none; height: auto }
+.seq .life { stroke: var(--line); stroke-dasharray: 3 4 }
+.seq .actor { fill: var(--panel); stroke-width: 2 }
+.seq .actor-t { font: 600 14px var(--display); fill: var(--fg); text-anchor: middle; letter-spacing: .03em }
+.seq .msg { stroke: var(--fg); stroke-width: 1.4; fill: none }
+.seq .msg.warn { stroke: var(--accent); stroke-dasharray: 5 3 }
+.seq .ahead { fill: var(--fg) }
+.seq .msg-t { font: 600 13px var(--body); fill: var(--fg) }
+.seq .msg-s { font: 11px var(--mono); fill: var(--muted) }
+.seq .dot { stroke: none }
+.seq .dot-t { font: 600 12px var(--mono); fill: var(--bg); text-anchor: middle }
+.a-po { --c: var(--a-po) } .a-orch { --c: var(--a-orch) } .a-rev { --c: var(--a-rev) } .a-arch { --c: var(--a-arch) }
+.a-writer { --c: var(--a-writer) } .a-ci { --c: var(--a-ci) } .a-qc { --c: var(--a-qc) }
+.seq .actor { stroke: var(--c) } .seq .dot { fill: var(--c) }
+
+.steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 14px }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 12px; align-content: start; min-width: 0 }
+.step header { display: flex; gap: 12px; align-items: flex-start; margin: 0 }
+.step header > div { min-width: 0 }
+.num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--c); color: var(--bg);
+  display: grid; place-items: center; font: 600 .9rem var(--mono) }
+.meta { font-size: .8rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px }
+.who { color: var(--fg); font-weight: 600 }
+.io { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+.io ul { margin: 0; padding-left: 16px; font-size: .9rem; display: grid; gap: 4px }
+.io > div { min-width: 0 }
+.gate { font-size: .88rem; border-top: 1px dashed var(--line); padding-top: 10px }
+.gate b { font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--accent); margin-right: 6px }
+.warn-t { background: var(--warn-bg); color: var(--warn-fg); padding: 8px 10px; border-radius: 4px; font-size: .88rem }
+
+.loop { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start }
+.loop svg { width: 100%; height: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 4px }
+.loop svg text { fill: var(--fg); font: 13px var(--body) }
+.loop svg .s { fill: var(--muted); font: 11px var(--mono) }
+.loop svg rect { fill: var(--panel); stroke: var(--fg); stroke-width: 1.4 }
+.loop svg .pass { stroke: var(--ok) } .loop svg .fail { stroke: var(--bad) }
+.loop svg path, .loop svg line { stroke: var(--fg); fill: none; stroke-width: 1.4 }
+.loop svg .lf { stroke: var(--bad) } .loop svg .lp { stroke: var(--ok) }
+.loop svg .ah { fill: var(--fg) }
+.numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+.numbers div { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px }
+.numbers b { display: block; font: 700 2rem/1 var(--display); font-variant-numeric: tabular-nums }
+.numbers span { font-size: .85rem; color: var(--muted) }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 18px }
+.rules > div { min-width: 0; display: grid; gap: 8px; align-content: start }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: .78rem var(--mono); padding: 2px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--panel) }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; background: var(--panel) }
+td { border-bottom: 1px solid var(--line); padding: 6px 10px; vertical-align: top }
+
+.tracker-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; justify-content: space-between }
+.tracker-head input { font: 1rem var(--body); padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel); color: var(--fg); width: min(100%, 320px) }
+.log { list-style: none; margin: 0; padding: 0; display: grid; border-left: 2px solid var(--line) }
+.entry { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 12px 0 12px 16px; position: relative }
+.entry::before { content: ""; position: absolute; left: -6px; top: 18px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent) }
+.entry + .entry { border-top: 1px solid var(--line) }
+.when { font: .85rem var(--mono); color: var(--muted); padding-top: 3px; font-variant-numeric: tabular-nums }
+.what { display: grid; gap: 6px; min-width: 0 }
+.pr { font: .8rem var(--mono); color: var(--accent) }
+.areas { display: flex; flex-wrap: wrap; gap: 4px }
+details { font-size: .88rem }
+summary { cursor: pointer; color: var(--muted) }
+details ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px }
+.pol .old { color: var(--bad); font: .8rem var(--mono); overflow-wrap: anywhere }
+.pol .new { color: var(--ok); font: .8rem var(--mono); overflow-wrap: anywhere }
+.k { font: 600 .68rem var(--body); text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 3px; background: var(--accent-soft) }
+.files code { color: var(--muted) }
+.plain { font-size: 1rem }
+details.tech { font-size: .85rem; border-top: 1px dashed var(--line); padding-top: 8px }
+details.tech summary { color: var(--muted); font-size: .8rem }
+details.tech h5 { margin-top: 10px }
+.gate { font-size: .9rem }
+.auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0 }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: .95rem }
+.pill { display: inline-block; padding: 6px 12px; border-radius: 4px; font-weight: 600; margin-bottom: 14px }
+.pill.ok { background: color-mix(in srgb, var(--ok) 16%, var(--panel)); color: var(--ok) }
+.pill.bad { background: color-mix(in srgb, var(--bad) 16%, var(--panel)); color: var(--bad) }
+.pill.unk { background: var(--warn-bg); color: var(--warn-fg) }
+.pill a { color: inherit }
+.chip { font: .85rem var(--body) }
+.chip.raw { font: .76rem var(--mono) }
+.chip.new { background: var(--warn-bg); color: var(--warn-fg); font: .76rem var(--mono) }
+.chip.hot { border-color: var(--accent); color: var(--accent) }
+.what .meta code { color: var(--muted) }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 14px }
+
+@media (max-width: 760px) {
+  .loop { grid-template-columns: 1fr }
+  .io { grid-template-columns: 1fr }
+  .entry { grid-template-columns: 1fr; gap: 4px }
+}
+.pages { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 2px solid var(--fg); position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 5 }
+.pages button { font: 600 1.1rem var(--display); letter-spacing: .04em; padding: 10px 18px; border: 0; background: none; color: var(--muted); cursor: pointer; border-bottom: 4px solid transparent; margin-bottom: -2px }
+.pages button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent) }
+.pages button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px }
+.panel { display: grid; gap: 40px }
+.mt { margin-top: 12px }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 14px }
+.tally { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px }
+.tally div { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 4px; padding: 10px 16px; min-width: 120px }
+.tally b { display: block; font: 700 2.2rem/1 var(--display) }
+.tally span { color: var(--muted); font-size: .85rem }
+.t-ok { --c: var(--ok) } .t-warn { --c: var(--warnc) } .t-bad { --c: var(--bad) }
+.badge { font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: 3px; white-space: nowrap; color: var(--panel); background: var(--c) }
+.b-ok, .s-ok { --c: var(--ok) } .b-warn, .s-warn { --c: var(--warnc) } .b-bad, .s-bad { --c: var(--bad) } .b-frozen, .s-frozen { --c: var(--muted) }
+.statuses { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 14px }
+.status { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--c); border-radius: 4px; padding: 12px 16px; display: grid; gap: 6px; align-content: start; min-width: 0 }
+.status header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 0 }
+.note { color: var(--muted); font-size: .9rem }
+.src { font-size: .8rem }
+.src a, .chain a { color: var(--accent) }
+.chain { list-style: none; margin: 0; padding: 0; display: grid; gap: 0 }
+.chain .link { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--c); padding: 10px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; position: relative }
+.chain .link + .link { margin-top: 24px }
+.chain .link + .link::before { content: "waits on ↓"; position: absolute; top: -21px; left: 16px; font: .75rem var(--mono); color: var(--muted) }
+.chain .link p { grid-column: 1 / -1; font-size: .9rem; color: var(--muted) }
+.next { margin: 0; padding-left: 22px; display: grid; gap: 6px }
+table.controls th { text-align: left; font: 600 .72rem var(--body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--line) }
+table.controls td p { color: var(--muted); font-size: .85rem; margin-top: 2px }
+table.controls td.maps { font-size: .85rem; min-width: 160px }
+.gaps { margin: 0; padding-left: 18px; display: grid; gap: 10px }
+.gaps p { color: var(--muted); font-size: .9rem }
+.eras { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); display: grid }
+.era { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 14px 0 14px 16px; position: relative }
+.era::before { content: ""; position: absolute; left: -7px; top: 20px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent) }
+.era + .era { border-top: 1px solid var(--line) }
+.era .what { display: grid; gap: 6px }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 14px; font: .8rem var(--mono); color: var(--muted) }
+.bars { display: grid; gap: 8px; max-width: 720px }
+.bar { display: grid; grid-template-columns: 170px minmax(0, 1fr) 40px; gap: 10px; align-items: center; font-size: .9rem }
+.bar .track { height: 14px; background: var(--line); border-radius: 2px; overflow: hidden }
+.bar .track span { display: block; height: 100%; background: var(--accent) }
+.bar .val { font: .85rem var(--mono); font-variant-numeric: tabular-nums; text-align: right }
+.plain { font-size: 1rem }
+details.tech { font-size: .85rem; border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 4px }
+details.tech summary { color: var(--muted); font-size: .8rem }
+details.tech ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px }
+details.tech h5 { margin-top: 10px }
+.pill { display: inline-block; padding: 6px 12px; border-radius: 4px; font-weight: 600; margin-bottom: 14px }
+.pill.ok { background: color-mix(in srgb, var(--ok) 16%, var(--panel)); color: var(--ok) }
+.pill.bad { background: color-mix(in srgb, var(--bad) 16%, var(--panel)); color: var(--bad) }
+.pill.unk { background: var(--warn-bg); color: var(--warn-fg) }
+.pill a { color: inherit }
+.chip { font: .85rem var(--body) }
+.chip.raw { font: .76rem var(--mono) }
+.chip.new { background: var(--warn-bg); color: var(--warn-fg); font: .76rem var(--mono) }
+.chip.hot { border-color: var(--accent); color: var(--accent) }
+.card h4 { margin-bottom: 4px }
+@media (max-width: 760px) { .era { grid-template-columns: 1fr; gap: 4px } .bar { grid-template-columns: 110px minmax(0, 1fr) 36px } }
+
+</style>
+
+</head><body><main class="wrap">
+  <div class="top">
+    <p class="eyebrow">factory-that-builds-itself · how every change is made</p>
+    <h1>Mazor Ship Flow Map</h1>
+    <p class="lede">Every change to the game travels the same road: you give the idea, AI plans, you approve, AI builds, a separate AI checks, you play and merge. The map is built from the project's rule file, so it changes when the rules change.</p>
+    
+    <div class="source">
+      <span>rules as of <b>2026-10-14</b></span>
+      <span>version <b>3370cfc</b></span>
+      <span>page built <b>2026-10-15 05:30 UTC</b></span>
+    </div>
+  </div>
+
+  <nav class="pages" role="tablist" aria-label="Pages">
+    <button type="button" role="tab" id="t-map" data-page="map" aria-selected="true">Flow map</button>
+    <button type="button" role="tab" id="t-v3" data-page="v3" aria-selected="false">V3 status</button>
+    <button type="button" role="tab" id="t-gov" data-page="gov" aria-selected="false">Governance</button>
+    <button type="button" role="tab" id="t-history" data-page="history" aria-selected="false">History</button>
+  </nav>
+
+  <div class="panel" id="map" role="tabpanel" aria-labelledby="t-map">
+    <ol class="road">
+      <li><b>Idea</b><span>you</span></li><li><b>Plan</b><span>AI</span></li><li><b>Approval</b><span>you</span></li>
+      <li><b>Build</b><span>AI writer</span></li><li><b>Check</b><span>separate AI</span></li><li><b>Playtest and merge</b><span>you</span></li>
+    </ol>
+    <section id="routes">
+      <header>
+        <h2>Two routes</h2>
+        <p class="lede">By default a task takes the <b>STANDARD</b> route. The number on the diagram is the number of the card below it.</p>
+      </header>
+      <div class="tabs" role="group" aria-label="Route"><button type="button" class="tab" data-lane-tab="STANDARD" aria-pressed="true">STANDARD</button><button type="button" class="tab" data-lane-tab="ELEVATED" aria-pressed="false">ELEVATED</button></div>
+      
+<div class="lane" data-lane="STANDARD" >
+  <dl class="facts"><div><dt>Separate AI sessions</dt><dd>2</dd></div><div><dt>Your approval first</dt><dd>yes</dd></div><div><dt>Independent check</dt><dd>yes</dd></div><div><dt>Who merges</dt><dd>only you</dd></div><div><dt>Architect</dt><dd>no</dd></div></dl>
+  <p class="lede">Ordinary, small tasks. One AI session writes and runs the task, a second, separate one checks it.</p>
+  <div class="scroll"><svg class="seq" viewBox="0 0 790 740" width="790" role="img" aria-label="STANDARD sequence diagram">
+<defs><marker id="ah-STANDARD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahead"/></marker></defs>
+<line x1="95.0" y1="54" x2="95.0" y2="730" class="life"/>
+<rect x="29.0" y="10" width="132" height="40" rx="6" class="actor a-po"/>
+<text x="95.0" y="35" class="actor-t">You (Product Owner)</text>
+<line x1="245.0" y1="54" x2="245.0" y2="730" class="life"/>
+<rect x="179.0" y="10" width="132" height="40" rx="6" class="actor a-rev"/>
+<text x="245.0" y="35" class="actor-t">Reviewers</text>
+<line x1="395.0" y1="54" x2="395.0" y2="730" class="life"/>
+<rect x="329.0" y="10" width="132" height="40" rx="6" class="actor a-writer"/>
+<text x="395.0" y="35" class="actor-t">Writer = Orchestrator</text>
+<line x1="545.0" y1="54" x2="545.0" y2="730" class="life"/>
+<rect x="479.0" y="10" width="132" height="40" rx="6" class="actor a-ci"/>
+<text x="545.0" y="35" class="actor-t">Automated checks</text>
+<line x1="695.0" y1="54" x2="695.0" y2="730" class="life"/>
+<rect x="629.0" y="10" width="132" height="40" rx="6" class="actor a-qc"/>
+<text x="695.0" y="35" class="actor-t">Independent QC</text>
+<line x1="395.0" y1="100" x2="259.0" y2="100" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="245.0" cy="100" r="11" class="dot a-rev"/>
+<text x="245.0" y="104" class="dot-t">1</text>
+<text x="320.0" y="90" text-anchor="middle" class="msg-t">Reviewers assess the idea</text>
+<text x="320.0" y="122" text-anchor="middle" class="msg-s">→ Notes for the plan</text>
+<line x1="245.0" y1="164" x2="381.0" y2="164" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="395.0" cy="164" r="11" class="dot a-writer"/>
+<text x="395.0" y="168" class="dot-t">2</text>
+<text x="320.0" y="154" text-anchor="middle" class="msg-t">The task contract is written</text>
+<text x="320.0" y="186" text-anchor="middle" class="msg-s">→ Draft PR with the contract</text>
+<line x1="395.0" y1="228" x2="109.0" y2="228" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="95.0" cy="228" r="11" class="dot a-po"/>
+<text x="95.0" y="232" class="dot-t">3</text>
+<text x="245.0" y="218" text-anchor="middle" class="msg-t">You approve (ACCEPT)</text>
+<text x="245.0" y="250" text-anchor="middle" class="msg-s">→ Your ACCEPT comment</text>
+<line x1="95.0" y1="292" x2="531.0" y2="292" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="545.0" cy="292" r="11" class="dot a-ci"/>
+<text x="545.0" y="296" class="dot-t">4</text>
+<text x="320.0" y="282" text-anchor="middle" class="msg-t">Start check</text>
+<text x="320.0" y="314" text-anchor="middle" class="msg-s">→ Go or stop</text>
+<line x1="545.0" y1="356" x2="409.0" y2="356" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="395.0" cy="356" r="11" class="dot a-writer"/>
+<text x="395.0" y="360" class="dot-t">5</text>
+<text x="470.0" y="346" text-anchor="middle" class="msg-t">Writer builds the change</text>
+<text x="470.0" y="378" text-anchor="middle" class="msg-s">→ Finished change</text>
+<line x1="395.0" y1="420" x2="531.0" y2="420" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="545.0" cy="420" r="11" class="dot a-ci"/>
+<text x="545.0" y="424" class="dot-t">6</text>
+<text x="470.0" y="410" text-anchor="middle" class="msg-t">Automated checks</text>
+<text x="470.0" y="442" text-anchor="middle" class="msg-s">→ Green or red checks</text>
+<line x1="395.0" y1="484" x2="681.0" y2="484" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="695.0" cy="484" r="11" class="dot a-qc"/>
+<text x="695.0" y="488" class="dot-t">7</text>
+<text x="545.0" y="474" text-anchor="middle" class="msg-t">Independent QC</text>
+<text x="545.0" y="506" text-anchor="middle" class="msg-s">→ Verdict comment</text>
+<line x1="695.0" y1="548" x2="409.0" y2="548" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="395.0" cy="548" r="11" class="dot a-writer"/>
+<text x="395.0" y="552" class="dot-t">8</text>
+<text x="545.0" y="538" text-anchor="middle" class="msg-t">Result is recorded</text>
+<text x="545.0" y="570" text-anchor="middle" class="msg-s">→ Task list entry</text>
+<line x1="395.0" y1="612" x2="531.0" y2="612" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="545.0" cy="612" r="11" class="dot a-ci"/>
+<text x="545.0" y="616" class="dot-t">9</text>
+<text x="470.0" y="602" text-anchor="middle" class="msg-t">Final check and playtest package</text>
+<text x="470.0" y="634" text-anchor="middle" class="msg-s">→ Go</text>
+<line x1="545.0" y1="676" x2="109.0" y2="676" class="msg" marker-end="url(#ah-STANDARD)"/>
+<circle cx="95.0" cy="676" r="11" class="dot a-po"/>
+<text x="95.0" y="680" class="dot-t">10</text>
+<text x="320.0" y="666" text-anchor="middle" class="msg-t">You playtest and merge</text>
+<text x="320.0" y="698" text-anchor="middle" class="msg-s">→ Your playtest confirmation</text>
+</svg></div>
+  <div class="steps">
+<article class="step" id="standard-1">
+  <header><span class="num a-rev">1</span>
+    <div><h4>Reviewers assess the idea</h4><p class="meta"><span class="who">Reviewers</span></p></div></header>
+  
+  <p class="plain">Specialists for gameplay, story, world physics and architecture review the idea. They only read and change nothing.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Brief</li><li>Which areas the change touches</li></ul></div><div><h5>Gives</h5><ul><li>Notes for the plan</li></ul></div></div>
+  
+  <details class="tech"><summary>Technical details</summary><ul><li>Mapping: <code>reviewer_mapping</code></li><li>Roles: <code>.codex/agents/*.toml</code></li><li>Policy step: <code>relevant-reviewers</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-2">
+  <header><span class="num a-writer">2</span>
+    <div><h4>The task contract is written</h4><p class="meta"><span class="who">Writer = Orchestrator</span></p></div></header>
+  
+  <p class="plain">The pull request description becomes a contract: which files may change, the plan, how it will be checked and what decision the player gains.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Brief</li><li>Reviewer notes</li><li>Current state of the game</li></ul></div><div><h5>Gives</h5><ul><li>Draft PR with the contract</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Waits for your approval.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Contract schema 5 between <code>&lt;!-- FLOW-V2-CONTRACT:START --&gt;</code> and <code>END</code></li><li>Fields: allowed paths, plan, tests, <code>## Player decision</code>, product_test_matrix</li><li>Base = exact <code>main</code> SHA</li><li>Policy step: <code>task-contract-plan</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-3">
+  <header><span class="num a-po">3</span>
+    <div><h4>You approve (ACCEPT)</h4><p class="meta"><span class="who">You (Product Owner)</span></p></div></header>
+  
+  <p class="plain">You accept the plan and pick who writes: Codex or Claude Code. Only from this moment may the repository change.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Task contract</li></ul></div><div><h5>Gives</h5><ul><li>Your ACCEPT comment</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Without your approval nobody writes anything.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>ACCEPT names: route, orchestrator, writer + session, allowed paths, plan</li><li>Automation requires a contract code: <code>automation.accept_requires_contract_code</code></li><li>Policy step: <code>product-owner-accept-with-writer</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-4">
+  <header><span class="num a-ci">4</span>
+    <div><h4>Start check</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">A script checks that everything matches and that the writer has a free slot. At most two writers work at once.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Pull request</li><li>Slot grant (lease)</li></ul></div><div><h5>Gives</h5><ul><li>Go or stop</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> No go, no writing.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py start --pr N --writer P --writer-session S</code></li><li>Lease from <code>.github/workflows/writer-admission.yml</code></li><li>Policy step: <code>start-preflight</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-5">
+  <header><span class="num a-writer">5</span>
+    <div><h4>Writer builds the change</h4><p class="meta"><span class="who">Writer = Orchestrator</span></p></div></header>
+  
+  <p class="plain">In small tasks one session writes the code and runs the task. It makes the smallest change in the plan, tests it and leaves evidence.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Your approval</li><li>Contract and the list of files it may change</li></ul></div><div><h5>Gives</h5><ul><li>Finished change</li><li>Test results</li><li>Evidence comment</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Stops and waits for QC.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Status: PENDING VERIFICATION + SHA</li><li>Godot headless tests</li><li>Writer no. 2 waits for refresh (pending refresh)</li><li>Policy step: <code>selected-writer-orchestrator</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-6">
+  <header><span class="num a-ci">6</span>
+    <div><h4>Automated checks</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">GitHub validates the configuration and runs the game without a screen to catch errors.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Latest version of the change</li></ul></div><div><h5>Gives</h5><ul><li>Green or red checks</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Red checks must be fixed by the writer.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Checks: <code>validate</code>, <code>Godot 4.7.1 headless smoke check</code></li><li>Logs as CI artifacts</li><li>Policy step: <code>validation</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-7">
+  <header><span class="num a-qc">7</span>
+    <div><h4>Independent QC</h4><p class="meta"><span class="who">Independent QC</span></p></div></header>
+  
+  <p class="plain">A new, separate session trusts nothing it is told. It checks the change and the tests itself and gives a verdict: PASS, FAIL or BLOCKED.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>The change to verify</li></ul></div><div><h5>Gives</h5><ul><li>Verdict comment</li><li>Wake-up signal to the orchestrator</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> PASS moves on. FAIL or BLOCKED stops and sends you one message.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Start: <code>/qc-comment PR N notify &lt;session&gt;</code></li><li>Comment has 8 keys (see the QC loop)</li><li>Wake-up: <code>send_message</code></li><li>Policy step: <code>independent-qc-comment</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-8">
+  <header><span class="num a-writer">8</span>
+    <div><h4>Result is recorded</h4><p class="meta"><span class="who">Writer = Orchestrator</span></p></div></header>
+  
+  <p class="plain">After PASS one commit writes the result into the task list.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>PASS verdict</li></ul></div><div><h5>Gives</h5><ul><li>Task list entry</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Only touches the task list (and the findings report on ELEVATED).</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Paths: <code>TASKS.md</code>, <code>docs/verification/{task_id}-findings.md</code></li><li>Policy step: <code>conditional-closeout</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-9">
+  <header><span class="num a-ci">9</span>
+    <div><h4>Final check and playtest package</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">A script confirms everything is green and ready to merge. You get short instructions on what to click in the game.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>QC verdict</li><li>Check results</li></ul></div><div><h5>Gives</h5><ul><li>Go</li><li>Playtest package: what to click, what should happen, what changes, what stays open</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Checks must be green on the latest version.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...</code></li><li>Policy step: <code>final-preflight</code></li></ul></details>
+</article>
+
+<article class="step" id="standard-10">
+  <header><span class="num a-po">10</span>
+    <div><h4>You playtest and merge</h4><p class="meta"><span class="who">You (Product Owner)</span></p></div></header>
+  
+  <p class="plain">You play by the package, confirm with a comment and merge the change yourself. Only then does it enter the game.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Playtest package</li></ul></div><div><h5>Gives</h5><ul><li>Your playtest confirmation</li><li>Merge into the main version</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Agents never merge.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Check <code>po-playtest</code> reads your comment through the GitHub API</li><li>A new code or base version invalidates the confirmation</li><li>Policy step: <code>product-owner-playtest-manual-merge</code></li></ul></details>
+</article></div>
+</div>
+<div class="lane" data-lane="ELEVATED" hidden>
+  <dl class="facts"><div><dt>Separate AI sessions</dt><dd>3</dd></div><div><dt>Your approval first</dt><dd>yes</dd></div><div><dt>Independent check</dt><dd>yes</dd></div><div><dt>Who merges</dt><dd>only you</dd></div><div><dt>Architect</dt><dd>depends on category</dd></div></dl>
+  <p class="lede">Large or risky tasks: architecture, canon, economy, saves, gameplay numbers. Running, writing and checking are three separate sessions.</p>
+  <div class="scroll"><svg class="seq" viewBox="0 0 1090 804" width="1090" role="img" aria-label="ELEVATED sequence diagram">
+<defs><marker id="ah-ELEVATED" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahead"/></marker></defs>
+<line x1="95.0" y1="54" x2="95.0" y2="794" class="life"/>
+<rect x="29.0" y="10" width="132" height="40" rx="6" class="actor a-po"/>
+<text x="95.0" y="35" class="actor-t">You (Product Owner)</text>
+<line x1="245.0" y1="54" x2="245.0" y2="794" class="life"/>
+<rect x="179.0" y="10" width="132" height="40" rx="6" class="actor a-orch"/>
+<text x="245.0" y="35" class="actor-t">Orchestrator</text>
+<line x1="395.0" y1="54" x2="395.0" y2="794" class="life"/>
+<rect x="329.0" y="10" width="132" height="40" rx="6" class="actor a-rev"/>
+<text x="395.0" y="35" class="actor-t">Reviewers</text>
+<line x1="545.0" y1="54" x2="545.0" y2="794" class="life"/>
+<rect x="479.0" y="10" width="132" height="40" rx="6" class="actor a-arch"/>
+<text x="545.0" y="35" class="actor-t">Architect</text>
+<line x1="695.0" y1="54" x2="695.0" y2="794" class="life"/>
+<rect x="629.0" y="10" width="132" height="40" rx="6" class="actor a-writer"/>
+<text x="695.0" y="35" class="actor-t">Writer</text>
+<line x1="845.0" y1="54" x2="845.0" y2="794" class="life"/>
+<rect x="779.0" y="10" width="132" height="40" rx="6" class="actor a-ci"/>
+<text x="845.0" y="35" class="actor-t">Automated checks</text>
+<line x1="995.0" y1="54" x2="995.0" y2="794" class="life"/>
+<rect x="929.0" y="10" width="132" height="40" rx="6" class="actor a-qc"/>
+<text x="995.0" y="35" class="actor-t">Independent QC</text>
+<line x1="95.0" y1="100" x2="231.0" y2="100" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="245.0" cy="100" r="11" class="dot a-orch"/>
+<text x="245.0" y="104" class="dot-t">1</text>
+<text x="170.0" y="90" text-anchor="middle" class="msg-t">Orchestrator takes the task</text>
+<text x="170.0" y="122" text-anchor="middle" class="msg-s">→ Route decision</text>
+<line x1="245.0" y1="164" x2="381.0" y2="164" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="395.0" cy="164" r="11" class="dot a-rev"/>
+<text x="395.0" y="168" class="dot-t">2</text>
+<text x="320.0" y="154" text-anchor="middle" class="msg-t">Required reviewers assess the idea</text>
+<text x="320.0" y="186" text-anchor="middle" class="msg-s">→ Notes for the plan</text>
+<line x1="245.0" y1="228" x2="531.0" y2="228" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="545.0" cy="228" r="11" class="dot a-arch"/>
+<text x="545.0" y="232" class="dot-t">3</text>
+<text x="395.0" y="218" text-anchor="middle" class="msg-t">Architect writes a specification (when needed)</text>
+<text x="395.0" y="250" text-anchor="middle" class="msg-s">→ Specification inside the contract</text>
+<line x1="245.0" y1="292" x2="109.0" y2="292" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="95.0" cy="292" r="11" class="dot a-po"/>
+<text x="95.0" y="296" class="dot-t">4</text>
+<text x="170.0" y="282" text-anchor="middle" class="msg-t">You approve (ACCEPT)</text>
+<text x="170.0" y="314" text-anchor="middle" class="msg-s">→ Your ACCEPT comment</text>
+<line x1="95.0" y1="356" x2="831.0" y2="356" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="845.0" cy="356" r="11" class="dot a-ci"/>
+<text x="845.0" y="360" class="dot-t">5</text>
+<text x="470.0" y="346" text-anchor="middle" class="msg-t">Start check</text>
+<text x="470.0" y="378" text-anchor="middle" class="msg-s">→ Go or stop</text>
+<line x1="845.0" y1="420" x2="709.0" y2="420" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="695.0" cy="420" r="11" class="dot a-writer"/>
+<text x="695.0" y="424" class="dot-t">6</text>
+<text x="770.0" y="410" text-anchor="middle" class="msg-t">Writer builds the change</text>
+<text x="770.0" y="442" text-anchor="middle" class="msg-s">→ Finished change</text>
+<line x1="695.0" y1="484" x2="831.0" y2="484" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="845.0" cy="484" r="11" class="dot a-ci"/>
+<text x="845.0" y="488" class="dot-t">7</text>
+<text x="770.0" y="474" text-anchor="middle" class="msg-t">Automated checks</text>
+<text x="770.0" y="506" text-anchor="middle" class="msg-s">→ Green or red checks</text>
+<line x1="245.0" y1="548" x2="981.0" y2="548" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="995.0" cy="548" r="11" class="dot a-qc"/>
+<text x="995.0" y="552" class="dot-t">8</text>
+<text x="620.0" y="538" text-anchor="middle" class="msg-t">Independent QC</text>
+<text x="620.0" y="570" text-anchor="middle" class="msg-s">→ Verdict comment</text>
+<line x1="995.0" y1="612" x2="259.0" y2="612" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="245.0" cy="612" r="11" class="dot a-orch"/>
+<text x="245.0" y="616" class="dot-t">9</text>
+<text x="620.0" y="602" text-anchor="middle" class="msg-t">Result is recorded</text>
+<text x="620.0" y="634" text-anchor="middle" class="msg-s">→ Task list entry</text>
+<line x1="245.0" y1="676" x2="831.0" y2="676" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="845.0" cy="676" r="11" class="dot a-ci"/>
+<text x="845.0" y="680" class="dot-t">10</text>
+<text x="545.0" y="666" text-anchor="middle" class="msg-t">Final check and playtest package</text>
+<text x="545.0" y="698" text-anchor="middle" class="msg-s">→ Go</text>
+<line x1="845.0" y1="740" x2="109.0" y2="740" class="msg" marker-end="url(#ah-ELEVATED)"/>
+<circle cx="95.0" cy="740" r="11" class="dot a-po"/>
+<text x="95.0" y="744" class="dot-t">11</text>
+<text x="470.0" y="730" text-anchor="middle" class="msg-t">You playtest and merge</text>
+<text x="470.0" y="762" text-anchor="middle" class="msg-s">→ Your playtest confirmation</text>
+</svg></div>
+  <div class="steps">
+<article class="step" id="elevated-1">
+  <header><span class="num a-orch">1</span>
+    <div><h4>Orchestrator takes the task</h4><p class="meta"><span class="who">Orchestrator</span></p></div></header>
+  
+  <p class="plain">Reads your brief and confirms the task is large or risky, so it takes the ELEVATED route.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Your brief: what to change and what the player should see</li><li>Task status from the task list</li><li>Relevant parts of the game documents</li></ul></div><div><h5>Gives</h5><ul><li>Route decision</li><li>Reviewers to ask</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> If the brief is unclear, it asks you and waits.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Brief starts with <code>SHIP:</code></li><li>Categories: <code>routing.forced_elevated_categories</code></li><li>Sources: <code>docs/gdd.md</code>, <code>docs/LORE_BIBLE.md</code>, <code>docs/WORLD_MECHANICS.md</code></li><li>Policy step: <code>orchestrator</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-2">
+  <header><span class="num a-rev">2</span>
+    <div><h4>Required reviewers assess the idea</h4><p class="meta"><span class="who">Reviewers</span></p></div></header>
+  
+  <p class="plain">For a large change the review is mandatory. Reviewers only read.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Brief</li><li>List of risk areas</li></ul></div><div><h5>Gives</h5><ul><li>Notes for the plan</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Without a required reviewer the task stops.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Mapping: <code>reviewer_mapping</code></li><li>Missing reviewer = BLOCKED</li><li>Policy step: <code>required-reviewers</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-3">
+  <header><span class="num a-arch">3</span>
+    <div><h4>Architect writes a specification (when needed)</h4><p class="meta"><span class="who">Architect</span></p></div></header>
+  
+  <p class="plain">Only for changes to code structure, saves or public interfaces. The Architect describes how to build it.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Draft contract</li></ul></div><div><h5>Gives</h5><ul><li>Specification inside the contract</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Skipped when only game documentation changes.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Categories: <code>routing.architect_required_categories</code></li><li>Exception: <code>canonical_docs_only</code></li><li>Policy step: <code>conditional-architect-specification-in-pr-contract</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-4">
+  <header><span class="num a-po">4</span>
+    <div><h4>You approve (ACCEPT)</h4><p class="meta"><span class="who">You (Product Owner)</span></p></div></header>
+  
+  <p class="plain">You accept the plan and pick who writes: Codex or Claude Code. Only from this moment may the repository change.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Task contract</li></ul></div><div><h5>Gives</h5><ul><li>Your ACCEPT comment</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Without your approval nobody writes anything.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>ACCEPT names: route, orchestrator, writer + session, allowed paths, plan</li><li>Automation requires a contract code: <code>automation.accept_requires_contract_code</code></li><li>Policy step: <code>product-owner-accept-with-writer</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-5">
+  <header><span class="num a-ci">5</span>
+    <div><h4>Start check</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">A script checks that everything matches and that the writer has a free slot. At most two writers work at once.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Pull request</li><li>Slot grant (lease)</li></ul></div><div><h5>Gives</h5><ul><li>Go or stop</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> No go, no writing.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py start --pr N --writer P --writer-session S</code></li><li>Lease from <code>.github/workflows/writer-admission.yml</code></li><li>Policy step: <code>start-preflight</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-6">
+  <header><span class="num a-writer">6</span>
+    <div><h4>Writer builds the change</h4><p class="meta"><span class="who">Writer</span></p></div></header>
+  
+  <p class="plain">A separate writer session makes the change from the plan and specification, tests it and leaves evidence.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Your approval</li><li>Contract, specification and file list</li></ul></div><div><h5>Gives</h5><ul><li>Finished change</li><li>Test results</li><li>Evidence comment</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Stops and waits for QC.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Status: PENDING VERIFICATION + SHA</li><li>Godot headless tests</li><li>Writer no. 2 waits for refresh (pending refresh)</li><li>Policy step: <code>selected-writer</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-7">
+  <header><span class="num a-ci">7</span>
+    <div><h4>Automated checks</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">GitHub validates the configuration and runs the game without a screen to catch errors.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Latest version of the change</li></ul></div><div><h5>Gives</h5><ul><li>Green or red checks</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Red checks must be fixed by the writer.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Checks: <code>validate</code>, <code>Godot 4.7.1 headless smoke check</code></li><li>Logs as CI artifacts</li><li>Policy step: <code>validation</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-8">
+  <header><span class="num a-qc">8</span>
+    <div><h4>Independent QC</h4><p class="meta"><span class="who">Independent QC</span></p></div></header>
+  
+  <p class="plain">A new, separate session trusts nothing it is told. It checks the change and the tests itself and gives a verdict: PASS, FAIL or BLOCKED.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>The change to verify</li></ul></div><div><h5>Gives</h5><ul><li>Verdict comment</li><li>Wake-up signal to the orchestrator</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> PASS moves on. FAIL or BLOCKED stops and sends you one message.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Start: <code>/qc-comment PR N notify &lt;session&gt;</code></li><li>Comment has 8 keys (see the QC loop)</li><li>Wake-up: <code>send_message</code></li><li>Policy step: <code>independent-qc-comment</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-9">
+  <header><span class="num a-orch">9</span>
+    <div><h4>Result is recorded</h4><p class="meta"><span class="who">Orchestrator</span></p></div></header>
+  
+  <p class="plain">After PASS one commit writes the result into the task list.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>PASS verdict</li></ul></div><div><h5>Gives</h5><ul><li>Task list entry</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Only touches the task list (and the findings report on ELEVATED).</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Paths: <code>TASKS.md</code>, <code>docs/verification/{task_id}-findings.md</code></li><li>Policy step: <code>conditional-closeout</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-10">
+  <header><span class="num a-ci">10</span>
+    <div><h4>Final check and playtest package</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">A script confirms everything is green and ready to merge. You get short instructions on what to click in the game.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>QC verdict</li><li>Check results</li></ul></div><div><h5>Gives</h5><ul><li>Go</li><li>Playtest package: what to click, what should happen, what changes, what stays open</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Checks must be green on the latest version.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...</code></li><li>Policy step: <code>final-preflight</code></li></ul></details>
+</article>
+
+<article class="step" id="elevated-11">
+  <header><span class="num a-po">11</span>
+    <div><h4>You playtest and merge</h4><p class="meta"><span class="who">You (Product Owner)</span></p></div></header>
+  
+  <p class="plain">You play by the package, confirm with a comment and merge the change yourself. Only then does it enter the game.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Playtest package</li></ul></div><div><h5>Gives</h5><ul><li>Your playtest confirmation</li><li>Merge into the main version</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Agents never merge.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Check <code>po-playtest</code> reads your comment through the GitHub API</li><li>A new code or base version invalidates the confirmation</li><li>Policy step: <code>product-owner-playtest-manual-merge</code></li></ul></details>
+</article></div>
+</div>
+    </section>
+
+    
+<section id="automation">
+  <header>
+    <h2>The automation (runner)</h2>
+    <p class="lede">A runner on your Windows machine moves tasks between steps by itself. A GitHub event wakes it: a comment, a new commit, finished checks. Each time it does at most one thing and goes back to waiting.</p>
+  </header>
+  <p class="pill ok">Last canary passed 2026-10-11 02:08 UTC on 4d834d4. <a href="https://github.com/Mozar-Team/factory-that-builds-itself/actions/runs/38104153978">run</a></p>
+  <div class="cards">
+    <div class="card"><h3>What it does by itself</h3><ul>
+      <li>Picks tasks you marked as ready when a writer is free.</li>
+      <li>Prepares the contract. If a product decision is missing, it recommends one and you decide.</li>
+      <li>Starts the writer, then a separate QC session, then records the result.</li>
+      <li>After each action it wakes once more to see if there is a next step.</li>
+    </ul></div>
+    <div class="card"><h3>What it never does</h3><ul><li>approve (ACCEPT) for you</li><li>merge changes</li><li>run on a timer</li><li>poll when nothing changed</li><li>retry failed actions blindly</li><li>execute comment text</li><li>invent requirements</li><li>apply its own recommendations</li></ul></div>
+    <div class="card"><h3>When it messages you</h3><div class="chips"><span class="chip" title="READY_TO_ACCEPT">a contract waits for your approval</span><span class="chip" title="READY_TO_PLAYTEST">a change waits for your playtest</span><span class="chip" title="READY_TO_MERGE">everything is ready to merge</span><span class="chip" title="NEEDS_PO">something is stuck and needs your decision</span></div>
+      <h3 class="mt">When it stops</h3><div class="chips"><span class="chip" title="NO_CAPACITY">no free writer</span><span class="chip" title="NO_ELIGIBLE_TASK">no task you marked as ready</span><span class="chip" title="MISSING_PRODUCT_DECISION">a product decision of yours is missing</span></div></div>
+    <div class="card"><h3>Your playtest</h3><p>After playing you leave a comment with your verdict. A GitHub check confirms you wrote it. Any new code or base version invalidates the confirmation, so you play again.</p></div>
+  </div>
+  <details class="tech"><summary>Technical details</summary><ul><li>Controller: <code>scripts/workflow/event_dispatcher.py</code></li><li>Workflow: <code>.github/workflows/flow-auto-events.yml</code>, only from <code>refs/heads/main</code></li><li>Runner labels: <span class="chip raw">self-hosted</span><span class="chip raw">Windows</span><span class="chip raw">mazor-flow-auto</span></li><li>Events: <span class="chip raw">issue_comment</span><span class="chip raw">workflow_run</span><span class="chip raw">pull_request_target</span><span class="chip raw">workflow_dispatch</span></li><li>Also woken when these finish: <span class="chip raw">Workflow configuration validation</span><span class="chip raw">Godot Headless CI</span></li><li>Profile schema 3, journal schema 4</li><li>Notifications: <code>ntfy_https_environment_only</code></li><li>Canary: <code>gh workflow run flow-auto-events.yml --ref main -f mode=canary -f pr=0</code></li><li>Playtest: check <code>po-playtest</code>, script <code>scripts/workflow/po_playtest.py</code>, invalidated by <span class="chip raw">head</span><span class="chip raw">base</span><span class="chip raw">refresh</span></li><li>Queue: <code>TASKS.md</code>, marker <code>po-ready</code></li></ul></details>
+</section>
+
+    <section id="loop">
+      <header>
+        <h2>When the check finds a problem</h2>
+        <p class="lede">If QC finds a defect (FAIL), a new writer session fixes it, but only with your approval. Every attempt is checked again by a new QC session. After 2 failed checks everything stops and you decide.</p>
+      </header>
+      <div class="loop">
+        <svg viewBox="0 0 560 300" role="img" aria-label="PASS goes to recording the result, FAIL goes to a repair, after the limit it stops">
+          <defs><marker id="lah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+          <rect x="20" y="120" width="130" height="56" rx="6"/><text x="85" y="144" text-anchor="middle">Writer</text><text x="85" y="162" text-anchor="middle" class="s">change ready</text>
+          <rect x="215" y="120" width="130" height="56" rx="6"/><text x="280" y="144" text-anchor="middle">Independent QC</text><text x="280" y="162" text-anchor="middle" class="s">new session</text>
+          <rect x="410" y="30" width="130" height="56" rx="6" class="pass"/><text x="475" y="54" text-anchor="middle">Record result</text><text x="475" y="72" text-anchor="middle" class="s">→ your playtest</text>
+          <rect x="410" y="210" width="130" height="56" rx="6" class="fail"/><text x="475" y="234" text-anchor="middle">Stop</text><text x="475" y="252" text-anchor="middle" class="s">you decide</text>
+          <line x1="150" y1="148" x2="213" y2="148" marker-end="url(#lah)"/>
+          <path d="M345,135 C380,120 380,60 408,58" class="lp" marker-end="url(#lah)"/><text x="372" y="92" class="s">PASS</text>
+          <path d="M345,165 C380,180 380,238 408,238" class="lf" marker-end="url(#lah)"/><text x="326" y="222" class="s">FAIL no. 2 or BLOCKED</text>
+          <path d="M280,176 C280,250 85,250 85,178" class="lf" marker-end="url(#lah)"/><text x="182" y="268" text-anchor="middle" class="s">FAIL: repair with your approval</text>
+        </svg>
+        <div class="numbers">
+          <div><b>2</b><span>times QC may reject a change before everything stops</span></div>
+          <div><b>2</b><span>tasks that may be built at once, one per writer</span></div>
+          <div><b>0</b><span>times an AI may merge on its own</span></div>
+          <div><b>1</b><span>action the automation takes per wake-up</span></div>
+        </div>
+      </div>
+      <details class="tech"><summary>Technical details</summary>
+        <p>Status after the limit: <code>NEEDS PRODUCT OR ARCHITECT DECISION</code>. QC comment fields:</p><div class="chips mt"><span class="chip raw">verdict</span><span class="chip raw">task_id</span><span class="chip raw">verified_head_sha</span><span class="chip raw">qc_provider</span><span class="chip raw">qc_session</span><span class="chip raw">verified_products</span><span class="chip raw">checks</span><span class="chip raw">limitations</span></div></details>
+    </section>
+
+    <section id="rules">
+      <header>
+        <h2>When a task counts as large</h2>
+        <p class="lede">If a change touches any of these areas it must take the ELEVATED route. It cannot be downgraded.</p>
+      </header>
+      <div class="rules">
+        <div><h3>Always ELEVATED</h3><div class="chips"><span class="chip" title="architecture">code structure</span><span class="chip" title="canon">story canon</span><span class="chip" title="gdd">game design document</span><span class="chip" title="core_loop">core game loop</span><span class="chip" title="power_rules">power rules</span><span class="chip" title="survival">survival</span><span class="chip" title="economy">economy</span><span class="chip" title="broad_progression">broad progression changes</span><span class="chip" title="persistence">saved state</span><span class="chip" title="save_or_schema_migration">save migration</span><span class="chip" title="quantum_detector_prediction_endgame">detector endgame</span><span class="chip" title="iro_core">IRO core</span><span class="chip" title="public_api">public interfaces</span><span class="chip" title="broad_refactor">large refactor</span><span class="chip" title="multiple_systems">several systems at once</span><span class="chip" title="unclear_blast_radius">unclear impact</span><span class="chip" title="numerical_gameplay_values">gameplay numbers</span></div></div>
+        <div><h3>Architect required</h3><div class="chips"><span class="chip" title="architecture">code structure</span><span class="chip" title="persistence">saved state</span><span class="chip" title="save_or_schema_migration">save migration</span><span class="chip" title="public_api">public interfaces</span><span class="chip" title="broad_refactor">large refactor</span><span class="chip" title="multiple_systems">several systems at once</span><span class="chip" title="unclear_blast_radius">unclear impact</span></div></div>
+        <div><h3>Who reviews what</h3><div class="scroll" style="padding:0"><table><tr><td>tuning numbers within agreed ranges</td><td>gameplay reviewer</td></tr><tr><td>docs/LORE_BIBLE.md</td><td>canon reviewer</td></tr><tr><td>docs/WORLD_MECHANICS.md</td><td>world and physics reviewer</td></tr><tr><td>docs/gdd.md</td><td>gameplay reviewer</td></tr><tr><td>code structure</td><td>architecture reviewer</td></tr><tr><td>saved state</td><td>architecture reviewer</td></tr><tr><td>public interfaces</td><td>architecture reviewer</td></tr><tr><td>save migration</td><td>architecture reviewer</td></tr><tr><td>large refactor</td><td>architecture reviewer</td></tr><tr><td>several systems at once</td><td>architecture reviewer</td></tr><tr><td>unclear impact</td><td>architecture reviewer</td></tr></table></div></div>
+      </div>
+      <details class="tech"><summary>Technical details: files that need an exclusive writer</summary><div class="chips mt"><span class="chip raw">.codex/</span><span class="chip raw">.github/</span><span class="chip raw">.claude/</span><span class="chip raw">AGENTS.md</span><span class="chip raw">CLAUDE.md</span><span class="chip raw">TASKS.md</span><span class="chip raw">docs/workflow/</span><span class="chip raw">docs/verification/</span><span class="chip raw">scripts/workflow/</span><span class="chip raw">project.godot</span></div></details>
+    </section>
+  </div>
+
+  <div class="panel" id="v3" role="tabpanel" aria-labelledby="t-v3" hidden>
+<section>
+  <header>
+    <p class="eyebrow">Snapshot recorded 2026-10-15</p>
+    <h2>Flow V3: what works and what does not</h2>
+    <p class="lede">The automation runs, but no task can move through it right now. The event workflow fires and finishes green, yet the two open flow tasks are blocked and game work waits behind them.</p>
+  </header>
+  <div class="tally">
+    <div class="t-ok"><b>2</b><span>working</span></div>
+    <div class="t-warn"><b>3</b><span>need attention</span></div>
+    <div class="t-bad"><b>2</b><span>broken</span></div>
+  </div>
+</section>
+<section>
+  <header><h3>Why nothing moves</h3><p class="lede">Game work waits on a fix to the automation, and that fix is itself stuck.</p></header>
+  <ol class="chain">
+<li class="link s-bad"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/113"><b>#113</b> HUD-SPRITE-001</a>
+  <span class="badge b-bad">broken</span><p>Native launch blocked until model/effort pinning is fixed.</p></li>
+<li class="link s-bad"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/114"><b>#114</b> FLOW-NATIVE-ROLE-PIN-001</a>
+  <span class="badge b-bad">broken</span><p>Fix for the pinning defect. Two blocked writer attempts. Third attempt authorized 15 Oct after correcting the prompt conflict; binding still pending.</p></li>
+<li class="link s-frozen"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/110"><b>#110</b> FLOW-AUTO-CONTINUITY-001</a>
+  <span class="badge b-frozen">frozen</span><p>Repair budget 2/2 used. Writer authority withdrawn, kept as evidence.</p></li></ol>
+  <p class="lede mt">Last game change merged: GENERATOR-BURN-001 (#111) on 2026-10-13. Last process change merged: GFX-QUEUE-TRACKER-001 (#112) on 2026-10-14.</p>
+</section>
+<section>
+  <header><h3>Components</h3></header>
+  <div class="statuses">
+<article class="status s-ok">
+  <header><h4>Event workflow (flow-auto-events.yml)</h4><span class="badge b-ok">working</span></header>
+  <p>Running. 100 most recent runs: 91 green, 9 red (13–15 Oct).</p>
+  <p class="note">Green means the controller ran, not that a task moved. PR #110 states this as its main weak point.</p>
+  <p class="src"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/actions/workflows/flow-auto-events.yml">runs API</a></p>
+</article>
+<article class="status s-warn">
+  <header><h4>Self-hosted runner</h4><span class="badge b-warn">needs attention</span></header>
+  <p>One Windows runner on the Product Owner&#x27;s machine. Jobs still complete on 15 Oct.</p>
+  <p class="note">Live runner registration could not be read: the GitHub proxy denies the runners API. One runner serializes all jobs by design.</p>
+  <p class="src"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/blob/main/.codex/workflow-policy.toml">policy: automation.runner_labels</a></p>
+</article>
+<article class="status s-warn">
+  <header><h4>Workflow canary</h4><span class="badge b-warn">needs attention</span></header>
+  <p>Last pass 2026-10-11 02:08 UTC on 4d834d4, after failed dispatch runs on 10 Oct.</p>
+  <p class="note">Not rerun since. main has moved six merges ahead (to 3370cfc).</p>
+  <p class="src"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/actions/runs/38104153978">canary run</a></p>
+</article>
+<article class="status s-ok">
+  <header><h4>Credential canary (#114)</h4><span class="badge b-ok">working</span></header>
+  <p>Passed 2026-10-14. The writer process can authenticate to GitHub.</p>
+  <p class="note">Fixed the HTTP 404/401 that ended the first writer attempt.</p>
+  <p class="src"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/114#issuecomment-6173375121">comment</a></p>
+</article>
+<article class="status s-bad">
+  <header><h4>Native session adapters</h4><span class="badge b-bad">broken</span></header>
+  <p>Defect: resuming a session does not pin model and effort.</p>
+  <p class="note">A QC session set to gpt-6-astra/low resumed as gpt-5.6-sol/medium. This breaks the effort rules of the policy.</p>
+  <p class="src"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/113#issuecomment-6159838980">defect report</a></p>
+</article>
+<article class="status s-bad">
+  <header><h4>Writer launch</h4><span class="badge b-bad">broken</span></header>
+  <p>Two attempts on #114, both BLOCKED before any change.</p>
+  <p class="note">Attempt 1: GitHub HTTP 404/401. Attempt 2: the runner&#x27;s fixed writer prompt says &quot;Do not … alter policy&quot; (local_runner.py:1668), but the accepted contract requires a policy edit; the writer refused.</p>
+  <p class="src"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/114#issuecomment-6174314657">attempt 2</a> · <a href="https://github.com/Mozar-Team/factory-that-builds-itself/blob/main/scripts/workflow/local_runner.py#L1668">prompt</a></p>
+</article>
+<article class="status s-warn">
+  <header><h4>Task queue (replenishment)</h4><span class="badge b-warn">needs attention</span></header>
+  <p>16 graphics tasks in NEXT, none marked po-ready.</p>
+  <p class="note">By design the automation prepares none of them until you mark one.</p>
+  <p class="src"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/blob/main/TASKS.md">TASKS.md NEXT</a></p>
+</article></div>
+</section>
+<section>
+  <header><h3>Shortest way back to moving</h3><p class="lede">The writer's reading of the evidence above, not a Product Owner decision.</p></header>
+  <ol class="next"><li>Finish #114 with the corrected writer prompt, then Independent QC.</li><li>Rerun the workflow canary on the new main before restarting #113.</li><li>Mark one graphics task po-ready so the queue has work.</li></ol>
+</section></div>
+  <div class="panel" id="gov" role="tabpanel" aria-labelledby="t-gov" hidden>
+<section>
+  <header>
+    <h2>Governance: the flow as an AI delivery framework</h2>
+    <p class="lede">The same rules that keep AI agents in line on this game are a general pattern for any team that lets AI write production changes: a human approves, AI builds, a different AI checks, a human releases, and everything leaves evidence.</p>
+  </header>
+  <p class="warn-t">Weak point first: this is one person's project. It has never run in a company, with several approvers, an auditor or a compliance team. The framework column below is the writer's mapping, not a certification.</p>
+</section>
+<section>
+  <header><h3>The pattern in five gates</h3></header>
+  <ol class="road">
+    <li><b>Intent</b><span>a human states the outcome</span></li>
+    <li><b>Contract</b><span>AI writes scope, plan, tests</span></li>
+    <li><b>Approval</b><span>a human accepts and assigns</span></li>
+    <li><b>Build + verify</b><span>one AI builds, another checks</span></li>
+    <li><b>Release</b><span>a human tests and merges</span></li>
+  </ol>
+</section>
+<section>
+  <header><h3>Controls</h3><p class="lede">11 controls, each enforced by a policy key. The policy has 308 keys in total.</p></header>
+  <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>Control</th><th>Related framework idea</th><th>Policy key</th></tr></thead><tbody><tr><td><b>Human approval before any change</b><p>Product Owner ACCEPT names the route, writer and allowed files before the first write.</p></td>
+<td class="maps">Human oversight (EU AI Act Art. 14); NIST AI RMF Govern/Manage</td><td><code>lanes.*.product_owner_accept_before_write</code></td></tr><tr><td><b>Separation of duties</b><p>The writer cannot pass its own work; QC is a separate read-only session, preferably from another provider.</p></td>
+<td class="maps">Four-eyes principle; ISO/IEC 42001 roles and responsibilities</td><td><code>permissions.builder_may_issue_qc_pass = false</code></td></tr><tr><td><b>Least privilege</b><p>Reviewers, Architect and QC are read-only; one writer per task; protected paths need an exclusive slot.</p></td>
+<td class="maps">Access control</td><td><code>read_only_agents, admission.protected_prefixes</code></td></tr><tr><td><b>Scope control</b><p>The contract lists allowed paths; preflight rejects anything outside them.</p></td>
+<td class="maps">Change management</td><td><code>preflight.start_required_before_content_commit</code></td></tr><tr><td><b>Risk-based routing</b><p>Listed categories force the heavier ELEVATED route and cannot be downgraded.</p></td>
+<td class="maps">Risk tiering (EU AI Act, NIST Map)</td><td><code>routing.forced_elevated_categories</code></td></tr><tr><td><b>Bounded retries</b><p>Two failed QC verdicts stop the task until a human decides.</p></td>
+<td class="maps">Incident escalation</td><td><code>repair.limit</code></td></tr><tr><td><b>Evidence trail</b><p>Every verdict is an immutable PR comment bound to a commit SHA; every number needs the command that reproduces it.</p></td>
+<td class="maps">Record keeping and traceability (EU AI Act Art. 12)</td><td><code>evidence.qc_comment_required</code></td></tr><tr><td><b>No autonomous release</b><p>Agents never merge; your playtest receipt is bound to the exact code and base.</p></td>
+<td class="maps">Release approval</td><td><code>automatic_merge = false, playtest.invalidated_by</code></td></tr><tr><td><b>No invented requirements</b><p>Missing product decisions are recommended for you to decide, never applied.</p></td>
+<td class="maps">Accountability of the human owner</td><td><code>replenishment.invent_requirements = false</code></td></tr><tr><td><b>Proof before rollout</b><p>Automation counts as working only after a live canary passes.</p></td>
+<td class="maps">Validation before deployment</td><td><code>automation.capability_canary_required_before_rollout</code></td></tr><tr><td><b>Model and effort discipline</b><p>Each role has a fixed model effort; high effort only for Architect, writer and QC.</p></td>
+<td class="maps">Cost and capability control</td><td><code>session_usage.high_effort_allowed_roles</code></td></tr></tbody></table></div>
+</section>
+<section>
+  <header><h3>What a company would still need</h3></header>
+  <ul class="gaps"><li><b>Enforcement depends on agent obedience</b><p>The policy itself says runtime obedience is not machine-provable (<code>runtime_obedience_is_machine_provable = false</code>). Validators check declarations, not behaviour.</p></li><li><b>Single human approver</b><p>Every gate is one person. A company needs roles, delegation and approver rotation.</p></li><li><b>Identity is a GitHub login</b><p>No SSO, no per-user roles beyond the Product Owner ID check in po-playtest.</p></li><li><b>Evidence lives in PR comments</b><p>No retention policy, no export to an audit store, no tamper evidence beyond GitHub history.</p></li><li><b>Governance cost is high</b><p>Process code is about the same size as game code (estimate, see History), and the current stall shows governance can block delivery for days.</p></li><li><b>Tied to one repository and two providers</b><p>Policy keys, paths and adapters are specific to this project.</p></li></ul>
+</section>
+<section>
+  <header><h3>What V3 teaches about the product</h3></header>
+  <div class="cards">
+    <div class="card"><h4>Kept the system safe</h4><p>The writer refused to break a rule ("do not alter policy") even when its own contract asked for it. Nothing unapproved reached main.</p></div>
+    <div class="card"><h4>Stopped delivery</h4><p>That refusal, plus the model/effort defect, left game work waiting since 13 Oct. Safety and throughput pull against each other.</p></div>
+    <div class="card"><h4>What to sell, if anything</h4><p>Not the code: the contract format, the gate sequence and the evidence rules. Those transfer between companies; runners and adapters do not.</p></div>
+  </div>
+</section></div>
+  <div class="panel" id="history" role="tabpanel" aria-labelledby="t-history" hidden>
+<section>
+  <header>
+    <h2>How the flow evolved</h2>
+    <p class="lede">From written rules in August to an event-driven automation in October. The eras are the writer's reading of the git log; the counts are computed from it.</p>
+  </header>
+  <ol class="eras">
+<li class="era">
+  <div class="when">08-17 → 08-31</div>
+  <div class="what">
+    <h4>Foundations</h4>
+    <p>Written agent rules, verification records committed with the change, a sequential batch loop and the first Godot headless CI gate.</p>
+    <p class="note"><b>Lesson</b> Rules existed only as text. Nothing enforced them.</p>
+    <p class="stats"><span>8 process commits</span><span>8 tasks</span><span>0 policy key changes</span></p>
+  </div>
+</li>
+<li class="era">
+  <div class="when">09-01 → 09-26</div>
+  <div class="what">
+    <h4>Flow V2 pilot</h4>
+    <p>Workflow automation v1, repository-first governance, then the Flow V2 pilot: task contract in the PR, start and final preflight scripts, Product Owner ACCEPT before writing.</p>
+    <p class="note"><b>Lesson</b> Rules became machine-checked. The first QC FAIL and repair cycle happened on the governance work itself.</p>
+    <p class="stats"><span>11 process commits</span><span>11 tasks</span><span>184 policy key changes</span></p>
+  </div>
+</li>
+<li class="era">
+  <div class="when">09-27 → 10-07</div>
+  <div class="what">
+    <h4>Simplify and harden</h4>
+    <p>FLOW-V3-LITE-001 simplified delivery, the tracker was compacted, products collapsed to one (<code>main</code>), repair rules and resume rules were written down.</p>
+    <p class="note"><b>Lesson</b> After this lighter V3 attempt the rules still call the flow V2; the name V3 returned with the event-driven automation.</p>
+    <p class="stats"><span>25 process commits</span><span>21 tasks</span><span>97 policy key changes</span></p>
+  </div>
+</li>
+<li class="era">
+  <div class="when">10-08 → 10-09</div>
+  <div class="what">
+    <h4>Local runner</h4>
+    <p>A bounded local runner performs one transition at a time with crash-safe intent records, ntfy notifications, a live canary requirement, then two-slot parallel admission with server-issued receipts and per-role effort limits.</p>
+    <p class="note"><b>Lesson</b> Automation was allowed only with proof that it ran live (canary), not only in tests.</p>
+    <p class="stats"><span>12 process commits</span><span>7 tasks</span><span>52 policy key changes</span></p>
+  </div>
+</li>
+<li class="era">
+  <div class="when">10-10 → 10-11</div>
+  <div class="what">
+    <h4>Event-driven Flow (V3)</h4>
+    <p>Cloud sessions, @claude mentions, QC waking the orchestrator, then FLOW-AUTO-EVENT-001: GitHub events wake a self-hosted Windows runner that prepares, writes, verifies and records tasks. Missing product decisions are recommended, never invented.</p>
+    <p class="note"><b>Lesson</b> The workflow canary passed on 2026-10-11 after failed attempts on 10 Oct.</p>
+    <p class="stats"><span>5 process commits</span><span>5 tasks</span><span>97 policy key changes</span></p>
+  </div>
+</li>
+<li class="era">
+  <div class="when">10-12 → 10-15</div>
+  <div class="what">
+    <h4>Stall</h4>
+    <p>Continuity repair #110 used both repairs and was frozen. HUD work #113 is blocked because resumed native sessions do not keep their model and effort. The adapter fix #114 failed twice before writing anything.</p>
+    <p class="note"><b>Lesson</b> Green workflow runs did not mean tasks moved. See the V3 status tab.</p>
+    <p class="stats"><span>0 process commits</span><span>0 tasks</span><span>0 policy key changes</span></p>
+  </div>
+</li></ol>
+</section>
+<section>
+  <header><h3>Policy size at the end of each era</h3><p class="lede">Number of keys in <code>.codex/workflow-policy.toml</code>. It did not exist before Flow V2.</p></header>
+  <div class="bars"><div class="bar"><span class="lab">Foundations</span><span class="track"><span style="width:0%"></span></span><span class="val">0</span></div><div class="bar"><span class="lab">Flow V2 pilot</span><span class="track"><span style="width:34%"></span></span><span class="val">104</span></div><div class="bar"><span class="lab">Simplify and harden</span><span class="track"><span style="width:54%"></span></span><span class="val">166</span></div><div class="bar"><span class="lab">Local runner</span><span class="track"><span style="width:69%"></span></span><span class="val">211</span></div><div class="bar"><span class="lab">Event-driven Flow (V3)</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Stall</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div></div>
+</section>
+<section id="changes">
+  <header class="tracker-head">
+    <div>
+      <h3>Process change log</h3>
+      <p class="lede">Only changes to how the work is done: rules, automation, scripts, process docs. No game changes. 52 tasks, 61 commits.</p>
+      <details class="tech"><summary>Technical details</summary><ul><li>Process paths: <span class="chip raw">.codex/</span><span class="chip raw">.github/</span><span class="chip raw">.claude/</span><span class="chip raw">AGENTS.md</span><span class="chip raw">CLAUDE.md</span><span class="chip raw">docs/workflow/</span><span class="chip raw">scripts/workflow/</span></li><li>Excluded because they record game work: <span class="chip raw">TASKS.md</span><span class="chip raw">docs/verification/</span><span class="chip raw">project.godot</span></li></ul></details>
+    </div>
+    <label for="q"><span class="eyebrow">Search</span><br><input id="q" type="search" placeholder="e.g. runner, QC, playtest"></label>
+  </header>
+  <ol class="log" id="log">
+<li class="entry" data-search="flow-decision-recommend-001 recommend missing product decisions in proposed contracts .codex/workflow-policy.toml agents.md docs/workflow/flow_auto_runner.md docs/workflow/ship_workflow.md scripts/workflow/event_dispatcher.py scripts/workflow/test_event_dispatcher.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-11</div>
+  <div class="what">
+    <h4>recommend missing product decisions in PROPOSED contracts</h4>
+    <p class="meta"><code>FLOW-DECISION-RECOMMEND-001</code> <span class="pr">PR #103</span></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 8 files, 3 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>replenishment.missing_decision_behavior</code> → <span class="new">&quot;recommend_in_proposed_contract&quot;</span></li><li><span class="k">added</span> <code>replenishment.missing_decision_reviewers</code> → <span class="new">[&quot;game-design-reviewer&quot;, &quot;world-systems-reviewer&quot;]</span></li><li><span class="k">added</span> <code>replenishment.recommended_values_auto_applied</code> → <span class="new">false</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>8ab5740</code> 2026-10-11 FLOW-DECISION-RECOMMEND-001: recommend missing product decisions in PROPOSED contracts (#103)</li></ul><ul class="files"><li><code>.codex/workflow-policy.toml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/event_dispatcher.py</code></li><li><code>scripts/workflow/test_event_dispatcher.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-auto-event-001 continuous two-slot event-driven flow .codex/agents/architect.toml .codex/workflow-policy.toml .github/pull_request_template.md .github/workflows/flow-auto-events.yml .github/workflows/po-playtest.yml .github/workflows/writer-admission.yml agents.md docs/workflow/flow_auto_runner.md docs/workflow/ship_workflow.md scripts/workflow/admission.py scripts/workflow/event_dispatcher.py scripts/workflow/local_runner.py scripts/workflow/po_playtest.py scripts/workflow/preflight.py scripts/workflow/test_admission.py scripts/workflow/test_event_dispatcher.py scripts/workflow/test_local_runner.py scripts/workflow/test_po_playtest.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-10</div>
+  <div class="what">
+    <h4>continuous two-slot event-driven Flow</h4>
+    <p class="meta"><code>FLOW-AUTO-EVENT-001</code> <span class="pr">PR #102</span></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 21 files, 94 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>admission.admission_requires_no_prior_content</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.governance_paths_remain_exclusive</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.join_consumes_survivor_authority_once</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.join_edit_is_server_side</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.join_mutable_fields</code> → <span class="new">[&quot;admission_mode&quot;, &quot;admission_peer_pr&quot;, &quot;admission_rank&quot;, &quot;admission_lease&quot;]</span></li><li><span class="k">added</span> <code>admission.join_receipt_binds</code> → <span class="new">[&quot;survivor_prior_authority&quot;, &quot;survivor_pr&quot;, &quot;joiner_pr&quot;, &quot;base&quot;, &quot;contract_digests&quot;, &quot;admission_digests&quot;, &quot;claims&quot;, &quot;providers&quot;]</span></li><li><span class="k">added</span> <code>admission.join_survivor_states</code> → <span class="new">[&quot;exclusive&quot;, &quot;refreshed_exclusive&quot;, &quot;rank_one_with_closed_unmerged_peer&quot;]</span></li><li><span class="k">added</span> <code>admission.legacy_refresh_payload_read_as_lease</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.operations</code> → <span class="new">[&quot;grant&quot;, &quot;join&quot;, &quot;authorize-refresh&quot;]</span></li><li><span class="k">added</span> <code>admission.paired_accept_author_verified</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.paired_sessions_distinct</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.paired_writer_providers</code> → <span class="new">[&quot;codex&quot;, &quot;claude-code&quot;]</span></li><li><span class="k">added</span> <code>admission.pending_joiner_tolerated_by_survivor</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.proposed_holds_slot</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>admission.refresh_binds_lease_or_join</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.refresh_exempts_merged_peer_closeout</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.writer_statuses</code> → <span class="new">[&quot;PROPOSED&quot;, &quot;ACTIVE&quot;]</span></li><li><span class="k">added</span> <code>automation.accept_requires_contract_code</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.admission_completion_wake</code> → <span class="new">&quot;workflow_dispatch_from_admission_workflow&quot;</span></li><li><span class="k">added</span> <code>automation.automatic_accept</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>automation.automatic_merge</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>automation.begun_effect_preserves_intent</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.begun_effect_stops_invocation</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.blind_retry</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>automation.capability_canary_required_before_rollout</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.cloud_sessions_use_existing_qc_wake</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.codex_qc_sandbox</code> → <span class="new">&quot;workspace_write_rooted_at_disposable_copy&quot;</span></li><li><span class="k">added</span> <code>automation.continuation_after_no_effect</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>automation.continuation_wake</code> → <span class="new">&quot;one_workflow_dispatch_after_each_effect&quot;</span></li><li><span class="k">added</span> <code>automation.downgrade_fails_closed</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.event_controller</code> → <span class="new">&quot;scripts/workflow/event_dispatcher.py&quot;</span></li><li><span class="k">added</span> <code>automation.event_credential</code> → <span class="new">&quot;runner_account_token_not_github_token&quot;</span></li><li><span class="k">added</span> <code>automation.event_run_concurrency_group</code> → <span class="new">&quot;per_run&quot;</span></li><li><span class="k">added</span> <code>automation.event_text_executed</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>automation.event_workflow</code> → <span class="new">&quot;.github/workflows/flow-auto-events.yml&quot;</span></li><li><span class="k">added</span> <code>automation.fresh_orchestrator_session_per_task</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.fresh_qc_session_per_attempt</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.global_evaluation_per_wake</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>automation.godot_for_codex_qc</code> → <span class="new">&quot;orchestrator_prepared_artifacts&quot;</span></li><li><span class="k">added</span> <code>automation.job_started_hook_required</code> → <span class="new">true</span></li><li>… and 54 more</li></ul><h5>Commits and files</h5><ul class="commits"><li><code>e6be90c</code> 2026-10-10 FLOW-AUTO-EVENT-001: continuous two-slot event-driven Flow (#102)</li></ul><ul class="files"><li><code>.codex/agents/architect.toml</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>.github/workflows/flow-auto-events.yml</code></li><li><code>.github/workflows/po-playtest.yml</code></li><li><code>.github/workflows/writer-admission.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/admission.py</code></li><li><code>scripts/workflow/event_dispatcher.py</code></li><li><code>scripts/workflow/local_runner.py</code></li><li><code>scripts/workflow/po_playtest.py</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_admission.py</code></li><li><code>scripts/workflow/test_event_dispatcher.py</code></li><li><code>scripts/workflow/test_local_runner.py</code></li><li><code>scripts/workflow/test_po_playtest.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-qc-wake-001 qc wakes the orchestrator via send_message .claude/skills/qc-comment/skill.md docs/workflow/ship_workflow.md">
+  <div class="when">2026-10-10</div>
+  <div class="what">
+    <h4>QC wakes the orchestrator via send_message</h4>
+    <p class="meta"><code>FLOW-QC-WAKE-001</code> <span class="pr">PR #99</span></p>
+    <p class="areas"><span class="chip">Claude tooling</span><span class="chip">process docs</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>d41ad3f</code> 2026-10-10 FLOW-QC-WAKE-001: QC wakes the orchestrator via send_message (#99)</li></ul><ul class="files"><li><code>.claude/skills/qc-comment/SKILL.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-cloud-close-001 rest preflight and in-session qc closeout agents.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py">
+  <div class="when">2026-10-10</div>
+  <div class="what">
+    <h4>REST preflight and in-session QC closeout</h4>
+    <p class="meta"><code>FLOW-CLOUD-CLOSE-001</code> <span class="pr">PR #98</span></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 4 files</summary>
+      <ul class="commits"><li><code>911b1ff</code> 2026-10-10 FLOW-CLOUD-CLOSE-001: REST preflight and in-session QC closeout (#98)</li></ul><ul class="files"><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-claude-mention-001 @claude mention workflow (po-only) .github/workflows/claude.yml">
+  <div class="when">2026-10-10</div>
+  <div class="what">
+    <h4>@claude mention workflow (PO-only)</h4>
+    <p class="meta"><code>FLOW-CLAUDE-MENTION-001</code> <span class="pr">PR #96</span></p>
+    <p class="areas"><span class="chip">GitHub automation</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>ef4de7f</code> 2026-10-10 FLOW-CLAUDE-MENTION-001: @claude mention workflow (PO-only) (#96)</li></ul><ul class="files"><li><code>.github/workflows/claude.yml</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-usage-001 bound session reuse and role effort .codex/workflow-policy.toml agents.md docs/workflow/ship_workflow.md scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-09</div>
+  <div class="what">
+    <h4>bound session reuse and role effort</h4>
+    <p class="meta"><code>FLOW-USAGE-001</code> <span class="pr">PR #93</span></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 5 files, 20 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>session_usage.architect_effort</code> → <span class="new">&quot;high&quot;</span></li><li><span class="k">added</span> <code>session_usage.elevated_writer_effort</code> → <span class="new">&quot;high&quot;</span></li><li><span class="k">added</span> <code>session_usage.fresh_qc_session_per_attempt</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>session_usage.fresh_writer_session_per_qc_repair</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>session_usage.high_effort_allowed_roles</code> → <span class="new">[&quot;architect&quot;, &quot;selected-writer&quot;, &quot;independent-qc&quot;]</span></li><li><span class="k">added</span> <code>session_usage.model_effort_toolset_fixed_per_session</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>session_usage.monitoring_effort</code> → <span class="new">&quot;low&quot;</span></li><li><span class="k">added</span> <code>session_usage.new_task_requires_fresh_session</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>session_usage.orchestrator_effort</code> → <span class="new">&quot;low&quot;</span></li><li><span class="k">added</span> <code>session_usage.orchestrator_pr_limit</code> → <span class="new">1</span></li><li><span class="k">added</span> <code>session_usage.orchestrator_task_limit</code> → <span class="new">1</span></li><li><span class="k">added</span> <code>session_usage.qc_default_effort</code> → <span class="new">&quot;low&quot;</span></li><li><span class="k">added</span> <code>session_usage.qc_high_requires_recorded_difficulty_reason</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>session_usage.runtime_obedience_is_machine_provable</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>session_usage.session_change_resets_repair_state</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>session_usage.standard_combined_effort</code> → <span class="new">&quot;low&quot;</span></li><li><span class="k">added</span> <code>session_usage.successor_writer_po_authorization_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>session_usage.successor_writer_preserves_provider</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>session_usage.terminal_gate_behavior</code> → <span class="new">&quot;stop_and_handoff&quot;</span></li><li><span class="k">added</span> <code>session_usage.unchanged_state_polling_allowed</code> → <span class="new">false</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>52bf95b</code> 2026-10-09 FLOW-USAGE-001: bound session reuse and role effort (#93)</li></ul><ul class="files"><li><code>.codex/workflow-policy.toml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-v2-parallel-001 add bounded parallel admission .codex/workflow-policy.toml .github/pull_request_template.md .github/workflows/writer-admission.yml agents.md docs/workflow/flow_auto_runner.md docs/workflow/ship_workflow.md scripts/workflow/admission.py scripts/workflow/local_runner.py scripts/workflow/preflight.py scripts/workflow/test_admission.py scripts/workflow/test_local_runner.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-09</div>
+  <div class="what">
+    <h4>add bounded parallel admission</h4>
+    <p class="meta"><code>FLOW-V2-PARALLEL-001</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 3 commits, 14 files, 32 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>admission.deterministic_payload_sha256</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.original_lease_required_for_refresh</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.receipt_authority</code> → <span class="new">&quot;github_actions_run_api&quot;</span></li><li><span class="k">added</span> <code>admission.receipt_event</code> → <span class="new">&quot;workflow_dispatch&quot;</span></li><li><span class="k">added</span> <code>admission.receipt_head_branch</code> → <span class="new">&quot;main&quot;</span></li><li><span class="k">added</span> <code>admission.receipt_job</code> → <span class="new">&quot;admission&quot;</span></li><li><span class="k">added</span> <code>admission.receipt_run_fields</code> → <span class="new">[&quot;repository&quot;, &quot;path&quot;, &quot;event&quot;, &quot;head_branch&quot;, &quot;head_sha&quot;, &quot;display_title&quot;, &quot;run_id&quot;, &quot;run_attempt&quot;, &quot;status&quot;, &quot;conclusion&quot;]</span></li><li><span class="k">added</span> <code>admission.receipt_workflow_path</code> → <span class="new">&quot;.github/workflows/writer-admission.yml&quot;</span></li><li><span class="k">changed</span> <code>admission.protected_prefixes</code> <span class="old">[&quot;.codex/&quot;, &quot;.github/&quot;, &quot;.claude/&quot;, &quot;AGENTS.md&quot;, &quot;CLAUDE.md&quot;, &quot;TASKS.md&quot;, &quot;docs/workflow/&quot;, &quot;docs/verification/&quot;, &quot;project.godot&quot;]</span> → <span class="new">[&quot;.codex/&quot;, &quot;.github/&quot;, &quot;.claude/&quot;, &quot;AGENTS.md&quot;, &quot;CLAUDE.md&quot;, &quot;TASKS.md&quot;, &quot;docs/workflow/&quot;, &quot;docs/verification/&quot;, &quot;scripts/workflow/&quot;, &quot;project.godot&quot;]</span></li><li><span class="k">added</span> <code>admission.agents_may_merge</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>admission.claims</code> → <span class="new">[&quot;write_claims&quot;, &quot;read_claims&quot;, &quot;dependency_claims&quot;, &quot;derived_sidecars&quot;]</span></li><li><span class="k">added</span> <code>admission.conflicts_fail_closed</code> → <span class="new">[&quot;write_write&quot;, &quot;write_read_both_directions&quot;, &quot;protected_path&quot;, &quot;unresolved_dependency&quot;, &quot;malformed_or_legacy_peer&quot;, &quot;third_writer&quot;, &quot;undeclared_tracked_sidecar&quot;]</span></li><li><span class="k">added</span> <code>admission.default_mode</code> → <span class="new">&quot;exclusive&quot;</span></li><li><span class="k">added</span> <code>admission.fresh_tests_and_qc_after_refresh</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.lease_bound</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.maximum_authoring_slots</code> → <span class="new">2</span></li><li><span class="k">added</span> <code>admission.paired_contracts_symmetric</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.protected_prefixes</code> → <span class="new">[&quot;.codex/&quot;, &quot;.github/&quot;, &quot;.claude/&quot;, &quot;AGENTS.md&quot;, &quot;CLAUDE.md&quot;, &quot;TASKS.md&quot;, &quot;docs/workflow/&quot;, &quot;docs/verification/&quot;, &quot;project.godot&quot;]</span></li><li><span class="k">added</span> <code>admission.rank_one_stages</code> → <span class="new">[&quot;author&quot;, &quot;qc&quot;, &quot;closeout&quot;, &quot;manual_merge&quot;]</span></li><li><span class="k">added</span> <code>admission.rank_two_stages</code> → <span class="new">[&quot;author&quot;, &quot;pending_refresh&quot;]</span></li><li><span class="k">added</span> <code>admission.refresh_invalidates</code> → <span class="new">[&quot;ci&quot;, &quot;qc&quot;]</span></li><li><span class="k">added</span> <code>admission.refresh_is_mechanical</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>admission.refresh_preserves</code> → <span class="new">[&quot;contract&quot;, &quot;scope&quot;, &quot;patch&quot;, &quot;output&quot;, &quot;repair_history&quot;]</span></li><li><span class="k">added</span> <code>admission.serialization</code> → <span class="new">&quot;github_actions_concurrency&quot;</span></li><li><span class="k">added</span> <code>admission.workflow</code> → <span class="new">&quot;.github/workflows/writer-admission.yml&quot;</span></li><li><span class="k">added</span> <code>admission.writers_per_task</code> → <span class="new">1</span></li><li><span class="k">changed</span> <code>preflight.lock_is_atomic</code> <span class="old">false</span> → <span class="new">true</span></li><li><span class="k">changed</span> <code>preflight.procedural_writer_lock</code> <span class="old">&quot;open_pr_any_active_writer&quot;</span> → <span class="new">&quot;server_serialized_admission_lease&quot;</span></li><li><span class="k">changed</span> <code>products.active_writer_limit</code> <span class="old">1</span> → <span class="new">2</span></li><li><span class="k">changed</span> <code>products.any_active_writer_holds_lock</code> <span class="old">true</span> → <span class="new">false</span></li><li><span class="k">changed</span> <code>schema_version</code> <span class="old">4</span> → <span class="new">5</span></li><li><span class="k">changed</span> <code>writer_parallelism</code> <span class="old">1</span> → <span class="new">2</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>49c5843</code> 2026-10-09 FLOW-V2-PARALLEL-001: bind receipts to canonical runs</li><li><code>11ae6ff</code> 2026-10-09 FLOW-V2-PARALLEL-001: repair admission authority gaps</li><li><code>488cdea</code> 2026-10-09 FLOW-V2-PARALLEL-001: add bounded parallel admission</li></ul><ul class="files"><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>.github/workflows/writer-admission.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/admission.py</code></li><li><code>scripts/workflow/local_runner.py</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_admission.py</code></li><li><code>scripts/workflow/test_local_runner.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-auto-006 record live canary requirement docs/workflow/flow_auto_runner.md">
+  <div class="when">2026-10-08</div>
+  <div class="what">
+    <h4>record live canary requirement</h4>
+    <p class="meta"><code>FLOW-AUTO-006</code></p>
+    <p class="areas"><span class="chip">process docs</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>cd1a948</code> 2026-10-08 FLOW-AUTO-006: record live canary requirement</li></ul><ul class="files"><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-auto-005 add safe ntfy notifications docs/workflow/flow_auto_runner.md scripts/workflow/local_runner.py scripts/workflow/test_local_runner.py">
+  <div class="when">2026-10-08</div>
+  <div class="what">
+    <h4>add safe ntfy notifications</h4>
+    <p class="meta"><code>FLOW-AUTO-005</code></p>
+    <p class="areas"><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 2 commits, 3 files</summary>
+      <ul class="commits"><li><code>823b0da</code> 2026-10-08 FLOW-AUTO-005: reconcile stale notification intent</li><li><code>8cf54a2</code> 2026-10-08 FLOW-AUTO-005: add safe ntfy notifications</li></ul><ul class="files"><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>scripts/workflow/local_runner.py</code></li><li><code>scripts/workflow/test_local_runner.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-auto-004 generalize local flow runner docs/workflow/flow_auto_runner.md scripts/workflow/local_runner.py scripts/workflow/test_local_runner.py">
+  <div class="when">2026-10-08</div>
+  <div class="what">
+    <h4>generalize local flow runner</h4>
+    <p class="meta"><code>FLOW-AUTO-004</code></p>
+    <p class="areas"><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 2 commits, 3 files</summary>
+      <ul class="commits"><li><code>bb58002</code> 2026-10-08 FLOW-AUTO-004: repair runner recovery boundaries</li><li><code>55736dc</code> 2026-10-08 FLOW-AUTO-004: generalize local flow runner</li></ul><ul class="files"><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>scripts/workflow/local_runner.py</code></li><li><code>scripts/workflow/test_local_runner.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-auto-003 make runner effects idempotent docs/workflow/flow_auto_runner.md scripts/workflow/local_runner.py scripts/workflow/test_local_runner.py">
+  <div class="when">2026-10-08</div>
+  <div class="what">
+    <h4>make runner effects idempotent</h4>
+    <p class="meta"><code>FLOW-AUTO-003</code></p>
+    <p class="areas"><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 2 commits, 3 files</summary>
+      <ul class="commits"><li><code>113e911</code> 2026-10-08 FLOW-AUTO-003: validate schema-4 QC fields</li><li><code>0a5289f</code> 2026-10-08 FLOW-AUTO-003: make runner effects idempotent</li></ul><ul class="files"><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>scripts/workflow/local_runner.py</code></li><li><code>scripts/workflow/test_local_runner.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="feat: add bounded local flow runner feat: add bounded local flow runner docs/workflow/flow_auto_runner.md scripts/workflow/local_runner.py scripts/workflow/test_local_runner.py">
+  <div class="when">2026-10-08</div>
+  <div class="what">
+    <h4>feat: add bounded local flow runner</h4>
+    <p class="meta"><code>feat: add bounded local flow runner</code></p>
+    <p class="areas"><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 3 files</summary>
+      <ul class="commits"><li><code>9fa8b0d</code> 2026-10-08 feat: add bounded local flow runner</li></ul><ul class="files"><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>scripts/workflow/local_runner.py</code></li><li><code>scripts/workflow/test_local_runner.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="repair-rule-001 two agents.md rules and decisions 14 agents.md">
+  <div class="when">2026-10-07</div>
+  <div class="what">
+    <h4>two AGENTS.md rules and DECISIONS 14</h4>
+    <p class="meta"><code>REPAIR-RULE-001</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>e62d66e</code> 2026-10-07 REPAIR-RULE-001: two AGENTS.md rules and DECISIONS 14</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="preflight-resume-001 resume_accept_reference for resumed elevated prs .codex/workflow-policy.toml .github/pull_request_template.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-07</div>
+  <div class="what">
+    <h4>resume_accept_reference for resumed ELEVATED PRs</h4>
+    <p class="meta"><code>PREFLIGHT-RESUME-001</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 6 files, 10 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>preflight.resume_accept_comment_on_same_pr</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>preflight.resume_accept_default</code> → <span class="new">&quot;&quot;</span></li><li><span class="k">added</span> <code>preflight.resume_accept_equals_product_owner_accept_reference</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>preflight.resume_accept_identity_is_machine_provable</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>preflight.resume_accept_lanes</code> → <span class="new">[&quot;ELEVATED&quot;]</span></li><li><span class="k">added</span> <code>preflight.resume_accept_not_before_base_commit_time</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>preflight.resume_accept_requires_findings_allowed_path</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>preflight.resume_accept_switch</code> → <span class="new">&quot;resume_accept_reference&quot;</span></li><li><span class="k">added</span> <code>preflight.resume_admits_tasks_md</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>preflight.resume_unreserves_findings_at_start_only</code> → <span class="new">true</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>f6f8544</code> 2026-10-07 PREFLIGHT-RESUME-001: resume_accept_reference for resumed ELEVATED PRs</li></ul><ul class="files"><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="runner-timeout-001 runner default timeout 120 to 300 s scripts/workflow/run_godot_checks.py scripts/workflow/test_run_godot_checks.py">
+  <div class="when">2026-10-06</div>
+  <div class="what">
+    <h4>runner default timeout 120 to 300 s</h4>
+    <p class="meta"><code>RUNNER-TIMEOUT-001</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>ab8acae</code> 2026-10-06 RUNNER-TIMEOUT-001: runner default timeout 120 to 300 s</li></ul><ul class="files"><li><code>scripts/workflow/run_godot_checks.py</code></li><li><code>scripts/workflow/test_run_godot_checks.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-simplify-001 one product, one writer, three skills, po decisions .claude/skills/playtest-package/skill.md .claude/skills/qc-comment/skill.md .claude/skills/ship-contract/skill.md .codex/workflow-policy.toml .github/pull_request_template.md agents.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-05</div>
+  <div class="what">
+    <h4>one product, one writer, three skills, PO decisions</h4>
+    <p class="meta"><code>FLOW-SIMPLIFY-001</code></p>
+    <p class="areas"><span class="chip">Claude tooling</span><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 11 files, 14 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">changed</span> <code>preflight.procedural_writer_lock</code> <span class="old">&quot;open_pr_active_product_scope&quot;</span> → <span class="new">&quot;open_pr_any_active_writer&quot;</span></li><li><span class="k">added</span> <code>products.active_writer_limit</code> → <span class="new">1</span></li><li><span class="k">added</span> <code>products.any_active_writer_holds_lock</code> → <span class="new">true</span></li><li><span class="k">removed</span> <code>products.concurrent_content_paths_disjoint</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>products.main_paths</code> <span class="old">[&quot;products/main/&quot;]</span></li><li><span class="k">removed</span> <code>products.mobile_paths</code> <span class="old">[&quot;products/mobile/&quot;]</span></li><li><span class="k">removed</span> <code>products.per_product_active_writer_limit</code> <span class="old">1</span></li><li><span class="k">removed</span> <code>products.procedural_overlap_exclusions</code> <span class="old">[&quot;TASKS.md&quot;, &quot;docs/verification/{task_id}-findings.md&quot;]</span></li><li><span class="k">changed</span> <code>products.scopes</code> <span class="old">[&quot;main&quot;, &quot;mobile&quot;, &quot;shared&quot;]</span> → <span class="new">[&quot;main&quot;]</span></li><li><span class="k">removed</span> <code>products.shared_affected_products</code> <span class="old">[&quot;main&quot;, &quot;mobile&quot;]</span></li><li><span class="k">removed</span> <code>products.shared_lock_exclusive</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>products.tasks_md_content_not_excluded</code> <span class="old">true</span></li><li><span class="k">changed</span> <code>products.unknown_paths_scope</code> <span class="old">&quot;shared&quot;</span> → <span class="new">&quot;main&quot;</span></li><li><span class="k">changed</span> <code>writer_parallelism</code> <span class="old">2</span> → <span class="new">1</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>c921364</code> 2026-10-05 FLOW-SIMPLIFY-001: one product, one writer, three skills, PO decisions</li></ul><ul class="files"><li><code>.claude/skills/playtest-package/SKILL.md</code></li><li><code>.claude/skills/qc-comment/SKILL.md</code></li><li><code>.claude/skills/ship-contract/SKILL.md</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="ci-tests-007 discover godot test suites with a fail-closed floor scripts/workflow/run_godot_checks.py scripts/workflow/test_run_godot_checks.py">
+  <div class="when">2026-10-04</div>
+  <div class="what">
+    <h4>discover Godot test suites with a fail-closed floor</h4>
+    <p class="meta"><code>CI-TESTS-007</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>618c2e9</code> 2026-10-04 CI-TESTS-007: discover Godot test suites with a fail-closed floor</li></ul><ul class="files"><li><code>scripts/workflow/run_godot_checks.py</code></li><li><code>scripts/workflow/test_run_godot_checks.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="world-presentation-hud-006 add reversible hud mount boundary scripts/workflow/run_godot_checks.py scripts/workflow/test_run_godot_checks.py">
+  <div class="when">2026-10-03</div>
+  <div class="what">
+    <h4>add reversible HUD mount boundary</h4>
+    <p class="meta"><code>WORLD-PRESENTATION-HUD-006</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>346e248</code> 2026-10-03 WORLD-PRESENTATION-HUD-006: add reversible HUD mount boundary</li></ul><ul class="files"><li><code>scripts/workflow/run_godot_checks.py</code></li><li><code>scripts/workflow/test_run_godot_checks.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="world-presentation-gameworld-005 add empty editable world boundary scripts/workflow/run_godot_checks.py scripts/workflow/test_run_godot_checks.py">
+  <div class="when">2026-10-03</div>
+  <div class="what">
+    <h4>add empty editable world boundary</h4>
+    <p class="meta"><code>WORLD-PRESENTATION-GAMEWORLD-005</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>c431a32</code> 2026-10-03 WORLD-PRESENTATION-GAMEWORLD-005: add empty editable world boundary</li></ul><ul class="files"><li><code>scripts/workflow/run_godot_checks.py</code></li><li><code>scripts/workflow/test_run_godot_checks.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-mobile-001 scope delivery locks and qc to products .codex/agents/astra-builder.toml .codex/workflow-policy.toml .github/pull_request_template.md agents.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-03</div>
+  <div class="what">
+    <h4>scope delivery locks and QC to products</h4>
+    <p class="meta"><code>FLOW-MOBILE-001</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 2 commits, 9 files, 37 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>bounded_balance.acceptance_identity_is_machine_provable</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>bounded_balance.allowed_discriminators</code> → <span class="new">[&quot;none&quot;, &quot;bounded_data_only&quot;, &quot;rules_ranges_or_economy&quot;]</span></li><li><span class="k">added</span> <code>bounded_balance.allowed_extensions</code> → <span class="new">[&quot;.json&quot;, &quot;.toml&quot;]</span></li><li><span class="k">added</span> <code>bounded_balance.base_and_new_values_in_range</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>bounded_balance.check_head_index_and_worktree</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>bounded_balance.code_rules_ranges_economy_elevated</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>bounded_balance.existing_numeric_leaves_only</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>bounded_balance.immutable_manifest_in_base_ancestry</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>bounded_balance.manifest_fields</code> → <span class="new">[&quot;schema_version&quot;, &quot;product_scope&quot;, &quot;product_owner_accept_reference&quot;, &quot;ranges&quot;]</span></li><li><span class="k">added</span> <code>bounded_balance.manifest_schema_version</code> → <span class="new">1</span></li><li><span class="k">added</span> <code>bounded_balance.range_fields</code> → <span class="new">[&quot;file&quot;, &quot;key&quot;, &quot;min&quot;, &quot;max&quot;]</span></li><li><span class="k">added</span> <code>bounded_balance.reviewer</code> → <span class="new">&quot;game-design-reviewer&quot;</span></li><li><span class="k">added</span> <code>bounded_balance.standard_data_category</code> → <span class="new">&quot;bounded_balance_data&quot;</span></li><li><span class="k">changed</span> <code>preflight.procedural_writer_lock</code> <span class="old">&quot;open_pr_active_writer&quot;</span> → <span class="new">&quot;open_pr_active_product_scope&quot;</span></li><li><span class="k">added</span> <code>products.concurrent_content_paths_disjoint</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.exact_remote_main_base_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.fresh_accept_tests_qc_after_base_change</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.legacy_active_contracts_fail_closed</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.main_paths</code> → <span class="new">[&quot;products/main/&quot;]</span></li><li><span class="k">added</span> <code>products.mobile_paths</code> → <span class="new">[&quot;products/mobile/&quot;]</span></li><li><span class="k">added</span> <code>products.per_product_active_writer_limit</code> → <span class="new">1</span></li><li><span class="k">added</span> <code>products.procedural_overlap_exclusions</code> → <span class="new">[&quot;TASKS.md&quot;, &quot;docs/verification/{task_id}-findings.md&quot;]</span></li><li><span class="k">added</span> <code>products.product_test_matrix_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.qc_comment_fields</code> → <span class="new">[&quot;verdict&quot;, &quot;task_id&quot;, &quot;verified_head_sha&quot;, &quot;qc_provider&quot;, &quot;qc_session&quot;, &quot;verified_products&quot;, &quot;checks&quot;, &quot;limitations&quot;]</span></li><li><span class="k">added</span> <code>products.qc_verified_products_match_affected</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.qc_verified_products_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.scope_declaration_is_procedural</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.scopes</code> → <span class="new">[&quot;main&quot;, &quot;mobile&quot;, &quot;shared&quot;]</span></li><li><span class="k">added</span> <code>products.semantic_product_coverage_is_machine_provable</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>products.shared_affected_products</code> → <span class="new">[&quot;main&quot;, &quot;mobile&quot;]</span></li><li><span class="k">added</span> <code>products.shared_lock_exclusive</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.tasks_md_content_not_excluded</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>products.unknown_paths_scope</code> → <span class="new">&quot;shared&quot;</span></li><li><span class="k">added</span> <code>reviewer_mapping.bounded_balance_data</code> → <span class="new">&quot;game-design-reviewer&quot;</span></li><li><span class="k">changed</span> <code>schema_version</code> <span class="old">3</span> → <span class="new">4</span></li><li><span class="k">changed</span> <code>writer_parallelism</code> <span class="old">1</span> → <span class="new">2</span></li><li><span class="k">added</span> <code>writer_parallelism_per_task</code> → <span class="new">1</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>b8e8d58</code> 2026-10-03 FLOW-MOBILE-001: reject duplicate active task identities</li><li><code>bc30b69</code> 2026-10-03 FLOW-MOBILE-001: scope delivery locks and QC to products</li></ul><ul class="files"><li><code>.codex/agents/astra-builder.toml</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="world-presentation-boundary-004 isolate legacy presentation values scripts/workflow/run_godot_checks.py scripts/workflow/test_run_godot_checks.py">
+  <div class="when">2026-10-03</div>
+  <div class="what">
+    <h4>isolate legacy presentation values</h4>
+    <p class="meta"><code>WORLD-PRESENTATION-BOUNDARY-004</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>efd637e</code> 2026-10-03 WORLD-PRESENTATION-BOUNDARY-004: isolate legacy presentation values</li></ul><ul class="files"><li><code>scripts/workflow/run_godot_checks.py</code></li><li><code>scripts/workflow/test_run_godot_checks.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="feat: teach and execute finite iho programs feat: teach and execute finite iho programs scripts/workflow/run_godot_checks.py scripts/workflow/test_run_godot_checks.py">
+  <div class="when">2026-10-03</div>
+  <div class="what">
+    <h4>feat: teach and execute finite IHO programs</h4>
+    <p class="meta"><code>feat: teach and execute finite IHO programs</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>a22a2c8</code> 2026-10-03 feat: teach and execute finite IHO programs</li></ul><ul class="files"><li><code>scripts/workflow/run_godot_checks.py</code></li><li><code>scripts/workflow/test_run_godot_checks.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="flow-eff-001 share isolated godot runner and validate metadata offline .github/workflows/godot-headless-ci.yml .github/workflows/workflow-config-validation.yml docs/workflow/godot_local_setup.md scripts/workflow/preflight.py scripts/workflow/run_godot_checks.py scripts/workflow/test_preflight.py scripts/workflow/test_run_godot_checks.py">
+  <div class="when">2026-10-01</div>
+  <div class="what">
+    <h4>share isolated Godot runner and validate metadata offline</h4>
+    <p class="meta"><code>FLOW-EFF-001</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 3 commits, 7 files</summary>
+      <ul class="commits"><li><code>6f03443</code> 2026-10-01 FLOW-EFF-001: use native Python archive extraction for Windows CI</li><li><code>9af1744</code> 2026-10-01 FLOW-EFF-001: repair metadata edge cases and enable Windows QC evidence</li><li><code>dd174b8</code> 2026-10-01 FLOW-EFF-001: share isolated Godot runner and validate metadata offline</li></ul><ul class="files"><li><code>.github/workflows/godot-headless-ci.yml</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>docs/workflow/GODOT_LOCAL_SETUP.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/run_godot_checks.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_run_godot_checks.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="eva-health-002 add delayed storm injury, hypoxia and atomic v2 saves .github/workflows/godot-headless-ci.yml">
+  <div class="when">2026-09-30</div>
+  <div class="what">
+    <h4>add delayed storm injury, hypoxia and atomic v2 saves</h4>
+    <p class="meta"><code>EVA-HEALTH-002</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>74079b9</code> 2026-09-30 EVA-HEALTH-002: add delayed storm injury, hypoxia and atomic v2 saves</li></ul><ul class="files"><li><code>.github/workflows/godot-headless-ci.yml</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: consolidate canon and correct approved audit findings docs: consolidate canon and correct approved audit findings .codex/agents/architect.toml .codex/agents/astra-builder.toml agents.md docs/workflow/ship_workflow.md">
+  <div class="when">2026-09-30</div>
+  <div class="what">
+    <h4>docs: consolidate canon and correct approved audit findings</h4>
+    <p class="meta"><code>docs: consolidate canon and correct approved audit findings</code></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 4 files</summary>
+      <ul class="commits"><li><code>b3454e8</code> 2026-09-30 docs: consolidate canon and correct approved audit findings</li></ul><ul class="files"><li><code>.codex/agents/architect.toml</code></li><li><code>.codex/agents/astra-builder.toml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="pre-core-loop-001 playtest package, canon wording and names, day-length amplitude agents.md docs/workflow/ship_workflow.md">
+  <div class="when">2026-09-29</div>
+  <div class="what">
+    <h4>playtest package, canon wording and names, day-length amplitude</h4>
+    <p class="meta"><code>PRE-CORE-LOOP-001</code></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>22d2b26</code> 2026-09-29 PRE-CORE-LOOP-001: playtest package, canon wording and names, day-length amplitude</li></ul><ul class="files"><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: formalize local godot headless checks as mandatory (infra-headless-local-001) docs: formalize local godot headless checks as mandatory (infra-headless-local-001) agents.md docs/workflow/godot_local_setup.md">
+  <div class="when">2026-09-28</div>
+  <div class="what">
+    <h4>docs: formalize local Godot headless checks as mandatory (INFRA-HEADLESS-LOCAL-001)</h4>
+    <p class="meta"><code>docs: formalize local Godot headless checks as mandatory (INFRA-HEADLESS-LOCAL-001)</code></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>a5d96c4</code> 2026-09-28 docs: formalize local Godot headless checks as mandatory (INFRA-HEADLESS-LOCAL-001)</li></ul><ul class="files"><li><code>AGENTS.md</code></li><li><code>docs/workflow/GODOT_LOCAL_SETUP.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: close task-018-reopen, scope qc reading, add ship read scope docs: close task-018-reopen, scope qc reading, add ship read scope .codex/agents/independent-qc.toml docs/workflow/ship_workflow.md">
+  <div class="when">2026-09-27</div>
+  <div class="what">
+    <h4>docs: close TASK-018-REOPEN, scope QC reading, add SHIP Read scope</h4>
+    <p class="meta"><code>docs: close TASK-018-REOPEN, scope QC reading, add SHIP Read scope</code></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 2 files</summary>
+      <ul class="commits"><li><code>cd5acac</code> 2026-09-27 docs: close TASK-018-REOPEN, scope QC reading, add SHIP Read scope</li></ul><ul class="files"><li><code>.codex/agents/independent-qc.toml</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="repair flow-v3-lite-001 qc findings f1-f4 repair flow-v3-lite-001 qc findings f1-f4 .github/workflows/godot-headless-ci.yml agents.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py">
+  <div class="when">2026-09-27</div>
+  <div class="what">
+    <h4>Repair FLOW-V3-LITE-001 QC findings F1-F4</h4>
+    <p class="meta"><code>Repair FLOW-V3-LITE-001 QC findings F1-F4</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 5 files</summary>
+      <ul class="commits"><li><code>581de44</code> 2026-09-27 Repair FLOW-V3-LITE-001 QC findings F1-F4</li></ul><ul class="files"><li><code>.github/workflows/godot-headless-ci.yml</code></li><li><code>AGENTS.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="feat: simplify flow v3 delivery workflow feat: simplify flow v3 delivery workflow .codex/workflow-policy.toml .github/workflows/godot-headless-ci.yml .github/workflows/workflow-config-validation.yml agents.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-27</div>
+  <div class="what">
+    <h4>feat: simplify Flow V3 delivery workflow</h4>
+    <p class="meta"><code>feat: simplify Flow V3 delivery workflow</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 9 files, 36 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>architect_exception.requires_architect_category_declaration</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>architect_exception.waives_only_conditional_architect_specification</code> → <span class="new">true</span></li><li><span class="k">removed</span> <code>architect_exception.waives_only_pre_accept_architect_specification</code> <span class="old">true</span></li><li><span class="k">added</span> <code>evidence.standard_findings_forbidden_before_first_fail</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>evidence.standard_findings_present_by_pass_sha</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>evidence.standard_findings_required_after_fail</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.elevated_sessions_required</code> → <span class="new">3</span></li><li><span class="k">added</span> <code>identity.elevated_three_distinct_sessions_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.standard_orchestrator_matches_writer</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.standard_sessions_required</code> → <span class="new">2</span></li><li><span class="k">removed</span> <code>identity.three_distinct_sessions_required</code> <span class="old">true</span></li><li><span class="k">changed</span> <code>lanes.ELEVATED.architect_specification_required</code> <span class="old">true</span> → <span class="new">&quot;conditional_by_category&quot;</span></li><li><span class="k">changed</span> <code>lanes.ELEVATED.required_roles</code> <span class="old">[&quot;orchestrator&quot;, &quot;required-reviewers&quot;, &quot;architect&quot;, &quot;selected-writer&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span> → <span class="new">[&quot;orchestrator&quot;, &quot;required-reviewers&quot;, &quot;conditional-architect&quot;, &quot;selected-writer&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span></li><li><span class="k">changed</span> <code>lanes.ELEVATED.sequence</code> <span class="old">[&quot;orchestrator&quot;, &quot;required-reviewers&quot;, &quot;architect-specification-in-pr-contract&quot;, &quot;product-owner-accept-with-writer&quot;, &quot;start-preflight&quot;, &quot;selected-writer&quot;, &quot;validation&quot;, &quot;independent-qc-comment&quot;, &quot;conditional-closeout&quot;, &quot;final-preflight&quot;, &quot;product-owner-playtest-manual-merge&quot;]</span> → <span class="new">[&quot;orchestrator&quot;, &quot;required-reviewers&quot;, &quot;conditional-architect-specification-in-pr-contract&quot;, &quot;product-owner-accept-with-writer&quot;, &quot;start-preflight&quot;, &quot;selected-writer&quot;, &quot;validation&quot;, &quot;independent-qc-comment&quot;, &quot;conditional-closeout&quot;, &quot;final-preflight&quot;, &quot;product-owner-playtest-manual-merge&quot;]</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.sessions_required</code> → <span class="new">3</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.three_distinct_sessions_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.STANDARD.orchestrator_matches_writer</code> → <span class="new">true</span></li><li><span class="k">changed</span> <code>lanes.STANDARD.required_roles</code> <span class="old">[&quot;orchestrator&quot;, &quot;relevant-reviewers&quot;, &quot;selected-writer&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span> → <span class="new">[&quot;relevant-reviewers&quot;, &quot;selected-writer-orchestrator&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span></li><li><span class="k">changed</span> <code>lanes.STANDARD.sequence</code> <span class="old">[&quot;orchestrator&quot;, &quot;relevant-reviewers&quot;, &quot;task-contract-plan&quot;, &quot;product-owner-accept-with-writer&quot;, &quot;start-preflight&quot;, &quot;selected-writer&quot;, &quot;validation&quot;, &quot;independent-qc-comment&quot;, &quot;conditional-closeout&quot;, &quot;final-preflight&quot;, &quot;product-owner-playtest-manual-merge&quot;]</span> → <span class="new">[&quot;relevant-reviewers&quot;, &quot;task-contract-plan&quot;, &quot;product-owner-accept-with-writer&quot;, &quot;start-preflight&quot;, &quot;selected-writer-orchestrator&quot;, &quot;validation&quot;, &quot;independent-qc-comment&quot;, &quot;conditional-closeout&quot;, &quot;final-preflight&quot;, &quot;product-owner-playtest-manual-merge&quot;]</span></li><li><span class="k">added</span> <code>lanes.STANDARD.sessions_required</code> → <span class="new">2</span></li><li><span class="k">added</span> <code>permissions.elevated_orchestrator_is_production_writer</code> → <span class="new">false</span></li><li><span class="k">removed</span> <code>permissions.orchestrator_is_production_writer</code> <span class="old">false</span></li><li><span class="k">added</span> <code>permissions.standard_orchestrator_is_selected_writer</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>repair.history_entry_fields</code> → <span class="new">[&quot;cycle&quot;, &quot;qc_fail_comment_url&quot;, &quot;verified_head_sha&quot;, &quot;repair_scope&quot;]</span></li><li><span class="k">added</span> <code>repair.history_qc_comment_must_precede_repaired_head</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>repair.history_qc_comment_verdict</code> → <span class="new">&quot;FAIL&quot;</span></li><li><span class="k">added</span> <code>repair.history_verified_sha_must_be_ancestor</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>reviewer_mapping.broad_refactor</code> → <span class="new">&quot;architecture-reviewer&quot;</span></li><li><span class="k">added</span> <code>reviewer_mapping.multiple_systems</code> → <span class="new">&quot;architecture-reviewer&quot;</span></li><li><span class="k">added</span> <code>reviewer_mapping.save_or_schema_migration</code> → <span class="new">&quot;architecture-reviewer&quot;</span></li><li><span class="k">added</span> <code>reviewer_mapping.unclear_blast_radius</code> → <span class="new">&quot;architecture-reviewer&quot;</span></li><li><span class="k">added</span> <code>routing.architect_required_categories</code> → <span class="new">[&quot;architecture&quot;, &quot;persistence&quot;, &quot;save_or_schema_migration&quot;, &quot;public_api&quot;, &quot;broad_refactor&quot;, &quot;multiple_systems&quot;, &quot;unclear_blast_radius&quot;]</span></li><li><span class="k">added</span> <code>routing.category_completeness_is_machine_provable</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>routing.category_declaration_is_procedural</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>routing.category_declaration_source</code> → <span class="new">&quot;pull_request_contract.reviewer_coverage.scope&quot;</span></li><li><span class="k">changed</span> <code>schema_version</code> <span class="old">2</span> → <span class="new">3</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>1dcf21c</code> 2026-09-27 feat: simplify Flow V3 delivery workflow</li></ul><ul class="files"><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/workflows/godot-headless-ci.yml</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="tracker-compact-001 compact tasks.md and guard it against retired terms scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-27</div>
+  <div class="what">
+    <h4>compact TASKS.md and guard it against retired terms</h4>
+    <p class="meta"><code>TRACKER-COMPACT-001</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 2 commits, 2 files</summary>
+      <ul class="commits"><li><code>0eff0c5</code> 2026-09-27 TRACKER-COMPACT-001: repair cycle 1/2 after independent QC FAIL</li><li><code>6112d7b</code> 2026-09-27 TRACKER-COMPACT-001: compact TASKS.md and guard it against retired terms</li></ul><ul class="files"><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: align qc comment templates with preflight docs: align qc comment templates with preflight .codex/agents/independent-qc.toml docs/workflow/ship_workflow.md scripts/workflow/test_preflight.py">
+  <div class="when">2026-09-27</div>
+  <div class="what">
+    <h4>docs: align QC comment templates with preflight</h4>
+    <p class="meta"><code>docs: align QC comment templates with preflight</code></p>
+    <p class="areas"><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 3 files</summary>
+      <ul class="commits"><li><code>7fec80f</code> 2026-09-27 docs: align QC comment templates with preflight</li></ul><ul class="files"><li><code>.codex/agents/independent-qc.toml</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/test_preflight.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="clean-dead-001 remove dead files and pipeline.md references agents.md">
+  <div class="when">2026-09-27</div>
+  <div class="what">
+    <h4>remove dead files and pipeline.md references</h4>
+    <p class="meta"><code>CLEAN-DEAD-001</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>39857a7</code> 2026-09-27 CLEAN-DEAD-001: remove dead files and pipeline.md references</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="preflight-fix-001 allow tasks.md content under qc .codex/workflow-policy.toml .github/pull_request_template.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>allow TASKS.md content under QC</h4>
+    <p class="meta"><code>PREFLIGHT-FIX-001</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 6 files, 3 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>architect_exception.findings_remain_procedural_only</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>architect_exception.tasks_md_content_requires_allowed_path</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>architect_exception.tasks_md_content_switch</code> → <span class="new">&quot;tasks_md_content&quot;</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>06e55cb</code> 2026-09-26 PREFLIGHT-FIX-001: allow TASKS.md content under QC</li></ul><ul class="files"><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="cover flow v2 d6-d7 rejection boundaries cover flow v2 d6-d7 rejection boundaries scripts/workflow/test_preflight.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>Cover Flow V2 D6-D7 rejection boundaries</h4>
+    <p class="meta"><code>Cover Flow V2 D6-D7 rejection boundaries</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>aed8777</code> 2026-09-26 Cover Flow V2 D6-D7 rejection boundaries</li></ul><ul class="files"><li><code>scripts/workflow/test_preflight.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="implement flow v2 governance d6-d9 implement flow v2 governance d6-d9 .claude/agents/architect.md .claude/agents/architecture-reviewer.md .claude/agents/canon-reviewer.md .claude/agents/game-design-reviewer.md .claude/agents/independent-qc.md .claude/agents/world-systems-reviewer.md .codex/agents/architect.toml .codex/agents/astra-builder.toml .codex/agents/independent-qc.toml .codex/workflow-policy.toml .github/pull_request_template.md .github/workflows/workflow-config-validation.yml agents.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>Implement Flow V2 governance D6-D9</h4>
+    <p class="meta"><code>Implement Flow V2 governance D6-D9</code></p>
+    <p class="areas"><span class="chip">Claude tooling</span><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 18 files, 22 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>architect_exception.allowed_discriminators</code> → <span class="new">[&quot;&quot;, &quot;canonical_docs_only&quot;]</span></li><li><span class="k">added</span> <code>architect_exception.architecture_md_allowed</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>architect_exception.canonical_docs_only_paths</code> → <span class="new">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;]</span></li><li><span class="k">added</span> <code>architect_exception.fixed_procedural_closeout_paths</code> → <span class="new">[&quot;TASKS.md&quot;, &quot;docs/verification/{task_id}-findings.md&quot;]</span></li><li><span class="k">added</span> <code>architect_exception.requires_exact_reviewer_mapping</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>architect_exception.requires_nonempty_canonical_subset</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>architect_exception.waives_only_pre_accept_architect_specification</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.allowed_tools</code> → <span class="new">[&quot;Read&quot;, &quot;Glob&quot;, &quot;Grep&quot;, &quot;Bash&quot;]</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.bash_repository_writes_prohibited</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.bash_tests_only</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.directory</code> → <span class="new">&quot;.claude/agents&quot;</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.forbidden_tools</code> → <span class="new">[&quot;Write&quot;, &quot;Edit&quot;, &quot;NotebookEdit&quot;]</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.roles</code> → <span class="new">[&quot;game-design-reviewer&quot;, &quot;canon-reviewer&quot;, &quot;world-systems-reviewer&quot;, &quot;architecture-reviewer&quot;, &quot;architect&quot;, &quot;independent-qc&quot;]</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.sandbox_is_guaranteed_security_boundary</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>claude_read_only_wrappers.sole_instruction_source_pattern</code> → <span class="new">&quot;.codex/agents/{role}.toml&quot;</span></li><li><span class="k">added</span> <code>identity.allowed_orchestrators</code> → <span class="new">[&quot;codex&quot;, &quot;claude-code&quot;]</span></li><li><span class="k">added</span> <code>identity.orchestrator_handoff_po_authorization_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.orchestrator_handoff_resets_repair_state</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>identity.orchestrator_handoff_state_source</code> → <span class="new">&quot;pull_request_contract_and_repository&quot;</span></li><li><span class="k">added</span> <code>identity.orchestrator_session_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.three_distinct_sessions_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>orchestrator_identities</code> → <span class="new">[&quot;codex&quot;, &quot;claude-code&quot;]</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>fcdc5b8</code> 2026-09-26 Implement Flow V2 governance D6-D9</li></ul><ul class="files"><li><code>.claude/agents/architect.md</code></li><li><code>.claude/agents/architecture-reviewer.md</code></li><li><code>.claude/agents/canon-reviewer.md</code></li><li><code>.claude/agents/game-design-reviewer.md</code></li><li><code>.claude/agents/independent-qc.md</code></li><li><code>.claude/agents/world-systems-reviewer.md</code></li><li><code>.codex/agents/architect.toml</code></li><li><code>.codex/agents/astra-builder.toml</code></li><li><code>.codex/agents/independent-qc.toml</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="fix flow v2 qc findings cycle 1 fix flow v2 qc findings cycle 1 scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>Fix Flow V2 QC findings cycle 1</h4>
+    <p class="meta"><code>Fix Flow V2 QC findings cycle 1</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 4 files</summary>
+      <ul class="commits"><li><code>54c8322</code> 2026-09-26 Fix Flow V2 QC findings cycle 1</li></ul><ul class="files"><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="cover preflight repository guards cover preflight repository guards scripts/workflow/test_preflight.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>Cover preflight repository guards</h4>
+    <p class="meta"><code>Cover preflight repository guards</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>c5dfa5c</code> 2026-09-26 Cover preflight repository guards</li></ul><ul class="files"><li><code>scripts/workflow/test_preflight.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="keep preflight repository-clean keep preflight repository-clean scripts/workflow/preflight.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>Keep preflight repository-clean</h4>
+    <p class="meta"><code>Keep preflight repository-clean</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>77ee442</code> 2026-09-26 Keep preflight repository-clean</li></ul><ul class="files"><li><code>scripts/workflow/preflight.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="fix direct preflight entry point fix direct preflight entry point scripts/workflow/preflight.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>Fix direct preflight entry point</h4>
+    <p class="meta"><code>Fix direct preflight entry point</code></p>
+    <p class="areas"><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>cbd2178</code> 2026-09-26 Fix direct preflight entry point</li></ul><ul class="files"><li><code>scripts/workflow/preflight.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="implement flow v2 governance pilot implement flow v2 governance pilot .codex/agents/architect.toml .codex/agents/architecture-reviewer.toml .codex/agents/astra-builder.toml .codex/agents/canon-reviewer.toml .codex/agents/dispatcher.toml .codex/agents/game-design-reviewer.toml .codex/agents/independent-qc.toml .codex/agents/world-systems-reviewer.toml .codex/workflow-policy.toml .github/pull_request_template.md .github/workflows/workflow-config-validation.yml agents.md docs/workflow/ship_workflow.md scripts/workflow/preflight.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-26</div>
+  <div class="what">
+    <h4>Implement Flow V2 governance pilot</h4>
+    <p class="meta"><code>Implement Flow V2 governance pilot</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 17 files, 87 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">changed</span> <code>agents</code> <span class="old">[&quot;game-design-reviewer&quot;, &quot;canon-reviewer&quot;, &quot;world-systems-reviewer&quot;, &quot;architecture-reviewer&quot;, &quot;architect&quot;, &quot;dispatcher&quot;, &quot;astra-builder&quot;, &quot;independent-qc&quot;]</span> → <span class="new">[&quot;game-design-reviewer&quot;, &quot;canon-reviewer&quot;, &quot;world-systems-reviewer&quot;, &quot;architecture-reviewer&quot;, &quot;architect&quot;, &quot;astra-builder&quot;, &quot;independent-qc&quot;]</span></li><li><span class="k">removed</span> <code>claude_document_authoring.allowed_paths</code> <span class="old">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;, &quot;ARCHITECTURE.md&quot;]</span></li><li><span class="k">removed</span> <code>claude_document_authoring.branch_commit_and_pr_required</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>claude_document_authoring.code_and_governance_writes</code> <span class="old">false</span></li><li><span class="k">removed</span> <code>claude_document_authoring.document_approval_approves_mechanics</code> <span class="old">false</span></li><li><span class="k">removed</span> <code>claude_document_authoring.existing_files_only</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>claude_document_authoring.explicit_proposal_and_paths_approval</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>claude_document_authoring.manual_product_owner_merge_required</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>claude_document_authoring.read_only_independent_qc_required</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>claude_document_authoring.review_required</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>claude_document_authoring.sole_task_writer</code> <span class="old">true</span></li><li><span class="k">added</span> <code>codex_writer_role</code> → <span class="new">&quot;astra-builder&quot;</span></li><li><span class="k">removed</span> <code>escalation.forced_high_risk_may_downgrade</code> <span class="old">false</span></li><li><span class="k">removed</span> <code>escalation.high_risk_categories</code> <span class="old">[&quot;canon&quot;, &quot;gdd&quot;, &quot;core_loop&quot;, &quot;power_rules&quot;, &quot;survival&quot;, &quot;economy&quot;, &quot;broad_progression&quot;, &quot;persistence&quot;, &quot;quantum_detector_prediction_endgame&quot;, &quot;iro_core&quot;, &quot;public_api&quot;, &quot;broad_refactor&quot;, &quot;multiple_systems&quot;, &quot;unclear_blast_radius&quot;]</span></li><li><span class="k">removed</span> <code>escalation.minimum_standard_categories</code> <span class="old">[&quot;architecture&quot;, &quot;persistence&quot;, &quot;public_api&quot;, &quot;economy&quot;, &quot;core_loop&quot;, &quot;survival&quot;, &quot;power_rules&quot;, &quot;victory_failure_conditions&quot;, &quot;canonical_terminology&quot;, &quot;numerical_gameplay_values&quot;]</span></li><li><span class="k">added</span> <code>evidence.findings_required_lanes</code> → <span class="new">[&quot;ELEVATED&quot;]</span></li><li><span class="k">added</span> <code>evidence.findings_required_verdicts</code> → <span class="new">[&quot;FAIL&quot;]</span></li><li><span class="k">added</span> <code>evidence.qc_comment_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>evidence.standard_pass_findings_required</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>evidence.task_status_authority</code> → <span class="new">&quot;TASKS.md&quot;</span></li><li><span class="k">added</span> <code>evidence.technical_truth_branch</code> → <span class="new">&quot;main&quot;</span></li><li><span class="k">removed</span> <code>fast.allowlist</code> <span class="old">[&quot;technical_comment_typo&quot;, &quot;noncanonical_helper_text_typo&quot;]</span></li><li><span class="k">removed</span> <code>fast.closed_allowlist</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>fast.forbidden_categories</code> <span class="old">[&quot;architecture&quot;, &quot;persistence&quot;, &quot;public_api&quot;, &quot;economy&quot;, &quot;core_loop&quot;, &quot;survival&quot;, &quot;power_rules&quot;, &quot;victory_failure_conditions&quot;, &quot;canonical_terminology&quot;, &quot;numerical_gameplay_values&quot;]</span></li><li><span class="k">removed</span> <code>fast.numerical_gameplay_escalations</code> <span class="old">[&quot;kg&quot;, &quot;kW&quot;, &quot;kWh&quot;, &quot;percentages&quot;, &quot;XP&quot;, &quot;costs&quot;, &quot;times&quot;, &quot;thresholds&quot;, &quot;ranges&quot;, &quot;capacities&quot;, &quot;speeds&quot;, &quot;coefficients&quot;, &quot;other_numbers_affecting_gameplay_behaviour&quot;]</span></li><li><span class="k">removed</span> <code>fast.protected_paths</code> <span class="old">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;, &quot;AGENTS.md&quot;, &quot;CLAUDE.md&quot;, &quot;ARCHITECTURE.md&quot;, &quot;.codex/**&quot;, &quot;.github/workflows/**&quot;, &quot;docs/workflow/**&quot;, &quot;scripts/workflow/**&quot;]</span></li><li><span class="k">added</span> <code>identity.allowed_qc_providers</code> → <span class="new">[&quot;codex&quot;, &quot;claude-code&quot;]</span></li><li><span class="k">added</span> <code>identity.allowed_writers</code> → <span class="new">[&quot;codex&quot;, &quot;claude-code&quot;]</span></li><li><span class="k">added</span> <code>identity.cross_provider_qc_preferred</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.qc_read_only</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.qc_separate_session_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>identity.selected_writer_only_repository_writes</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.architect_specification_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.architecture_uncertainty_status</code> → <span class="new">&quot;NEEDS ARCHITECT DECISION&quot;</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.independent_qc_after_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.manual_product_owner_merge</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.product_owner_accept_before_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.required_roles</code> → <span class="new">[&quot;orchestrator&quot;, &quot;required-reviewers&quot;, &quot;architect&quot;, &quot;selected-writer&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.routine_final_architect_verdict</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>lanes.ELEVATED.sequence</code> → <span class="new">[&quot;orchestrator&quot;, &quot;required-reviewers&quot;, &quot;architect-specification-in-pr-contract&quot;, &quot;product-owner-accept-with-writer&quot;, &quot;start-preflight&quot;, &quot;selected-writer&quot;, &quot;validation&quot;, &quot;independent-qc-comment&quot;, &quot;conditional-closeout&quot;, &quot;final-preflight&quot;, &quot;product-owner-playtest-manual-merge&quot;]</span></li><li>… and 47 more</li></ul><h5>Commits and files</h5><ul class="commits"><li><code>4719597</code> 2026-09-26 Implement Flow V2 governance pilot</li></ul><ul class="files"><li><code>.codex/agents/architect.toml</code></li><li><code>.codex/agents/architecture-reviewer.toml</code></li><li><code>.codex/agents/astra-builder.toml</code></li><li><code>.codex/agents/canon-reviewer.toml</code></li><li><code>.codex/agents/dispatcher.toml</code></li><li><code>.codex/agents/game-design-reviewer.toml</code></li><li><code>.codex/agents/independent-qc.toml</code></li><li><code>.codex/agents/world-systems-reviewer.toml</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="implement plan-1 repository-first governance and claude document scope implement plan-1 repository-first governance and claude document scope .codex/agents/architect.toml .codex/agents/architecture-reviewer.toml .codex/agents/astra-builder.toml .codex/agents/canon-reviewer.toml .codex/agents/game-design-reviewer.toml .codex/agents/world-systems-reviewer.toml .codex/workflow-policy.toml .github/workflows/workflow-config-validation.yml agents.md claude.md docs/workflow/ship_workflow.md scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-25</div>
+  <div class="what">
+    <h4>Implement PLAN-1 repository-first governance and Claude document scope</h4>
+    <p class="meta"><code>Implement PLAN-1 repository-first governance and Claude document scope</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 13 files, 15 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>claude_document_authoring.allowed_paths</code> → <span class="new">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;, &quot;ARCHITECTURE.md&quot;]</span></li><li><span class="k">added</span> <code>claude_document_authoring.branch_commit_and_pr_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_document_authoring.code_and_governance_writes</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>claude_document_authoring.document_approval_approves_mechanics</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>claude_document_authoring.existing_files_only</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_document_authoring.explicit_proposal_and_paths_approval</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_document_authoring.manual_product_owner_merge_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_document_authoring.read_only_independent_qc_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_document_authoring.review_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>claude_document_authoring.sole_task_writer</code> → <span class="new">true</span></li><li><span class="k">changed</span> <code>fast.protected_paths</code> <span class="old">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;, &quot;AGENTS.md&quot;, &quot;.codex/**&quot;, &quot;.github/workflows/**&quot;, &quot;docs/workflow/**&quot;, &quot;scripts/workflow/**&quot;]</span> → <span class="new">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;, &quot;AGENTS.md&quot;, &quot;CLAUDE.md&quot;, &quot;ARCHITECTURE.md&quot;, &quot;.codex/**&quot;, &quot;.github/workflows/**&quot;, &quot;docs/workflow/**&quot;, &quot;scripts/workflow/**&quot;]</span></li><li><span class="k">added</span> <code>repository_sources.check_staged_and_unstaged</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>repository_sources.compare_version_to_commit_date</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>repository_sources.identity_fields</code> → <span class="new">[&quot;repository&quot;, &quot;commit&quot;, &quot;path&quot;, &quot;blob&quot;]</span></li><li><span class="k">added</span> <code>repository_sources.version_is_metadata_only</code> → <span class="new">true</span></li></ul><h5>Commits and files</h5><ul class="commits"><li><code>cbbdb5e</code> 2026-09-25 Implement PLAN-1 repository-first governance and Claude document scope</li></ul><ul class="files"><li><code>.codex/agents/architect.toml</code></li><li><code>.codex/agents/architecture-reviewer.toml</code></li><li><code>.codex/agents/astra-builder.toml</code></li><li><code>.codex/agents/canon-reviewer.toml</code></li><li><code>.codex/agents/game-design-reviewer.toml</code></li><li><code>.codex/agents/world-systems-reviewer.toml</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>AGENTS.md</code></li><li><code>CLAUDE.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="harden workflow automation safety policy harden workflow automation safety policy .codex/agents/architect.toml .codex/agents/architecture-reviewer.toml .codex/agents/astra-builder.toml .codex/agents/canon-reviewer.toml .codex/agents/dispatcher.toml .codex/agents/game-design-reviewer.toml .codex/agents/independent-qc.toml .codex/agents/world-systems-reviewer.toml .codex/workflow-policy.toml .github/workflows/workflow-config-validation.yml agents.md docs/workflow/ship_workflow.md scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-24</div>
+  <div class="what">
+    <h4>Harden workflow automation safety policy</h4>
+    <p class="meta"><code>Harden workflow automation safety policy</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 14 files, 57 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">added</span> <code>agents</code> → <span class="new">[&quot;game-design-reviewer&quot;, &quot;canon-reviewer&quot;, &quot;world-systems-reviewer&quot;, &quot;architecture-reviewer&quot;, &quot;architect&quot;, &quot;dispatcher&quot;, &quot;astra-builder&quot;, &quot;independent-qc&quot;]</span></li><li><span class="k">added</span> <code>auto_if_safe_enabled</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>automatic_merge</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>automatic_repair_limit</code> → <span class="new">2</span></li><li><span class="k">added</span> <code>default_lane</code> → <span class="new">&quot;STANDARD&quot;</span></li><li><span class="k">added</span> <code>design_authority_sources</code> → <span class="new">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;]</span></li><li><span class="k">added</span> <code>escalation.forced_high_risk_may_downgrade</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>escalation.high_risk_categories</code> → <span class="new">[&quot;canon&quot;, &quot;gdd&quot;, &quot;core_loop&quot;, &quot;power_rules&quot;, &quot;survival&quot;, &quot;economy&quot;, &quot;broad_progression&quot;, &quot;persistence&quot;, &quot;quantum_detector_prediction_endgame&quot;, &quot;iro_core&quot;, &quot;public_api&quot;, &quot;broad_refactor&quot;, &quot;multiple_systems&quot;, &quot;unclear_blast_radius&quot;]</span></li><li><span class="k">added</span> <code>escalation.minimum_standard_categories</code> → <span class="new">[&quot;architecture&quot;, &quot;persistence&quot;, &quot;public_api&quot;, &quot;economy&quot;, &quot;core_loop&quot;, &quot;survival&quot;, &quot;power_rules&quot;, &quot;victory_failure_conditions&quot;, &quot;canonical_terminology&quot;, &quot;numerical_gameplay_values&quot;]</span></li><li><span class="k">added</span> <code>fast.allowlist</code> → <span class="new">[&quot;technical_comment_typo&quot;, &quot;noncanonical_helper_text_typo&quot;]</span></li><li><span class="k">added</span> <code>fast.closed_allowlist</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>fast.forbidden_categories</code> → <span class="new">[&quot;architecture&quot;, &quot;persistence&quot;, &quot;public_api&quot;, &quot;economy&quot;, &quot;core_loop&quot;, &quot;survival&quot;, &quot;power_rules&quot;, &quot;victory_failure_conditions&quot;, &quot;canonical_terminology&quot;, &quot;numerical_gameplay_values&quot;]</span></li><li><span class="k">added</span> <code>fast.numerical_gameplay_escalations</code> → <span class="new">[&quot;kg&quot;, &quot;kW&quot;, &quot;kWh&quot;, &quot;percentages&quot;, &quot;XP&quot;, &quot;costs&quot;, &quot;times&quot;, &quot;thresholds&quot;, &quot;ranges&quot;, &quot;capacities&quot;, &quot;speeds&quot;, &quot;coefficients&quot;, &quot;other_numbers_affecting_gameplay_behaviour&quot;]</span></li><li><span class="k">added</span> <code>fast.protected_paths</code> → <span class="new">[&quot;docs/gdd.md&quot;, &quot;docs/LORE_BIBLE.md&quot;, &quot;docs/WORLD_MECHANICS.md&quot;, &quot;AGENTS.md&quot;, &quot;.codex/**&quot;, &quot;.github/workflows/**&quot;, &quot;docs/workflow/**&quot;, &quot;scripts/workflow/**&quot;]</span></li><li><span class="k">added</span> <code>lanes.FAST.independent_qc_after_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.FAST.manual_product_owner_merge</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.FAST.product_owner_accept_before_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.FAST.required_roles</code> → <span class="new">[&quot;orchestrator&quot;, &quot;astra-builder&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span></li><li><span class="k">added</span> <code>lanes.HIGH RISK.independent_qc_after_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.HIGH RISK.manual_product_owner_merge</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.HIGH RISK.product_owner_accept_before_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.HIGH RISK.required_roles</code> → <span class="new">[&quot;orchestrator&quot;, &quot;required-domain-reviewers&quot;, &quot;architect&quot;, &quot;dispatcher&quot;, &quot;astra-builder&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span></li><li><span class="k">added</span> <code>lanes.HIGH RISK.sequence</code> → <span class="new">[&quot;orchestrator&quot;, &quot;required-domain-reviewers&quot;, &quot;plan&quot;, &quot;product-owner-accept&quot;, &quot;architect&quot;, &quot;dispatcher&quot;, &quot;astra-builder&quot;, &quot;validation&quot;, &quot;independent-qc&quot;, &quot;dispatcher&quot;, &quot;architect-verdict&quot;, &quot;product-owner-playtest-merge-decision&quot;]</span></li><li><span class="k">added</span> <code>lanes.STANDARD.independent_qc_after_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.STANDARD.manual_product_owner_merge</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.STANDARD.product_owner_accept_before_write</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>lanes.STANDARD.required_roles</code> → <span class="new">[&quot;orchestrator&quot;, &quot;relevant-reviewers&quot;, &quot;astra-builder&quot;, &quot;independent-qc&quot;, &quot;product-owner&quot;]</span></li><li><span class="k">added</span> <code>lanes.STANDARD.sequence</code> → <span class="new">[&quot;orchestrator&quot;, &quot;relevant-reviewers&quot;, &quot;plan&quot;, &quot;product-owner-accept&quot;, &quot;astra-builder&quot;, &quot;validation&quot;, &quot;independent-qc&quot;, &quot;product-owner-merge-decision&quot;]</span></li><li><span class="k">added</span> <code>live_pilot_validated</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>manual_merge_required</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>permissions.agents_may_merge</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>permissions.builder_may_issue_qc_pass</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>permissions.independent_qc_may_repair</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>permissions.independent_qc_may_write</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>permissions.orchestrator_is_production_writer</code> → <span class="new">false</span></li><li><span class="k">added</span> <code>permissions.product_owner_owns_accept</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>permissions.product_owner_owns_merge</code> → <span class="new">true</span></li><li><span class="k">added</span> <code>production_writer</code> → <span class="new">&quot;astra-builder&quot;</span></li><li><span class="k">added</span> <code>read_only_agents</code> → <span class="new">[&quot;game-design-reviewer&quot;, &quot;canon-reviewer&quot;, &quot;world-systems-reviewer&quot;, &quot;architecture-reviewer&quot;, &quot;architect&quot;, &quot;dispatcher&quot;, &quot;independent-qc&quot;]</span></li><li><span class="k">added</span> <code>repair.required_state_fields</code> → <span class="new">[&quot;repair_cycles_consumed&quot;, &quot;current_cycle&quot;, &quot;previous_qc_verdict&quot;, &quot;repair_reason&quot;, &quot;audited_head_sha&quot;, &quot;repair_head_sha&quot;, &quot;qc_history&quot;]</span></li><li>… and 17 more</li></ul><h5>Commits and files</h5><ul class="commits"><li><code>971ac5e</code> 2026-09-24 Harden workflow automation safety policy</li></ul><ul class="files"><li><code>.codex/agents/architect.toml</code></li><li><code>.codex/agents/architecture-reviewer.toml</code></li><li><code>.codex/agents/astra-builder.toml</code></li><li><code>.codex/agents/canon-reviewer.toml</code></li><li><code>.codex/agents/dispatcher.toml</code></li><li><code>.codex/agents/game-design-reviewer.toml</code></li><li><code>.codex/agents/independent-qc.toml</code></li><li><code>.codex/agents/world-systems-reviewer.toml</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="add workflow automation v1 for solo development add workflow automation v1 for solo development .codex/agents/architect.toml .codex/agents/architecture-reviewer.toml .codex/agents/astra-builder.toml .codex/agents/canon-reviewer.toml .codex/agents/dispatcher.toml .codex/agents/game-design-reviewer.toml .codex/agents/independent-qc.toml .codex/agents/world-systems-reviewer.toml .codex/config.toml .github/workflows/workflow-config-validation.yml agents.md docs/workflow/ship_workflow.md scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-09-23</div>
+  <div class="what">
+    <h4>Add Workflow Automation v1 for solo development</h4>
+    <p class="meta"><code>Add Workflow Automation v1 for solo development</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 13 files</summary>
+      <ul class="commits"><li><code>03e37ee</code> 2026-09-23 Add Workflow Automation v1 for solo development</li></ul><ul class="files"><li><code>.codex/agents/architect.toml</code></li><li><code>.codex/agents/architecture-reviewer.toml</code></li><li><code>.codex/agents/astra-builder.toml</code></li><li><code>.codex/agents/canon-reviewer.toml</code></li><li><code>.codex/agents/dispatcher.toml</code></li><li><code>.codex/agents/game-design-reviewer.toml</code></li><li><code>.codex/agents/independent-qc.toml</code></li><li><code>.codex/agents/world-systems-reviewer.toml</code></li><li><code>.codex/config.toml</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="update design document references in agents.md update design document references in agents.md agents.md">
+  <div class="when">2026-08-28</div>
+  <div class="what">
+    <h4>Update design document references in AGENTS.md</h4>
+    <p class="meta"><code>Update design document references in AGENTS.md</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>2552767</code> 2026-08-28 Update design document references in AGENTS.md</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: align authoritative delivery workflow docs: align authoritative delivery workflow agents.md">
+  <div class="when">2026-08-26</div>
+  <div class="what">
+    <h4>docs: align authoritative delivery workflow</h4>
+    <p class="meta"><code>docs: align authoritative delivery workflow</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>9a9af1e</code> 2026-08-26 docs: align authoritative delivery workflow</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs(governance): close batch 1 and activate current workflow docs(governance): close batch 1 and activate current workflow agents.md">
+  <div class="when">2026-08-26</div>
+  <div class="what">
+    <h4>docs(governance): close Batch 1 and activate current workflow</h4>
+    <p class="meta"><code>docs(governance): close Batch 1 and activate current workflow</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>ac657f7</code> 2026-08-26 docs(governance): close Batch 1 and activate current workflow</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="ci: add godot headless pull request gate ci: add godot headless pull request gate .github/workflows/godot-headless-ci.yml">
+  <div class="when">2026-08-25</div>
+  <div class="what">
+    <h4>ci: add Godot headless pull request gate</h4>
+    <p class="meta"><code>ci: add Godot headless pull request gate</code></p>
+    <p class="areas"><span class="chip">GitHub automation</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>b69f055</code> 2026-08-25 ci: add Godot headless pull request gate</li></ul><ul class="files"><li><code>.github/workflows/godot-headless-ci.yml</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: formalize sequential batch loop discipline docs: formalize sequential batch loop discipline agents.md">
+  <div class="when">2026-08-22</div>
+  <div class="what">
+    <h4>docs: formalize sequential batch loop discipline</h4>
+    <p class="meta"><code>docs: formalize sequential batch loop discipline</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>343773a</code> 2026-08-22 docs: formalize sequential batch loop discipline</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: enforce same-commit verification artifacts docs: enforce same-commit verification artifacts agents.md">
+  <div class="when">2026-08-22</div>
+  <div class="what">
+    <h4>docs: enforce same-commit verification artifacts</h4>
+    <p class="meta"><code>docs: enforce same-commit verification artifacts</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>0f40185</code> 2026-08-22 docs: enforce same-commit verification artifacts</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: formalize verification and tracker roles docs: formalize verification and tracker roles agents.md">
+  <div class="when">2026-08-19</div>
+  <div class="what">
+    <h4>docs: formalize verification and tracker roles</h4>
+    <p class="meta"><code>docs: formalize verification and tracker roles</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>c791ed3</code> 2026-08-19 docs: formalize verification and tracker roles</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li>
+
+<li class="entry" data-search="docs: establish project architecture and agent rules docs: establish project architecture and agent rules agents.md">
+  <div class="when">2026-08-19</div>
+  <div class="what">
+    <h4>docs: establish project architecture and agent rules</h4>
+    <p class="meta"><code>docs: establish project architecture and agent rules</code></p>
+    <p class="areas"><span class="chip">agent rules</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 1 files</summary>
+      <ul class="commits"><li><code>80572f3</code> 2026-08-19 docs: establish project architecture and agent rules</li></ul><ul class="files"><li><code>AGENTS.md</code></li></ul></details>
+  </div>
+</li></ol>
+</section></div>
+
+  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@3370cfcd7336f1db1aaaeb48d7b00c2baf9305b8</code>. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
+</main>
+
+<script>
+(function () {
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  var pages = document.querySelectorAll(".pages button");
+  function page(name) {
+    pages.forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.page === name)); });
+    document.querySelectorAll(".panel").forEach(function (p) { p.hidden = p.id !== name; });
+    store("page", name);
+  }
+  pages.forEach(function (b) { b.addEventListener("click", function () { page(b.dataset.page); }); });
+  var h = (location.hash || "").slice(1);
+  var el = h && document.getElementById(h);
+  var start = el && el.classList.contains("panel") ? h : store("page");
+  if (start && document.getElementById(start)) page(start);
+
+  var tabs = document.querySelectorAll("[data-lane-tab]"), lanes = document.querySelectorAll(".lane");
+  function lane(name) {
+    tabs.forEach(function (t) { t.setAttribute("aria-pressed", String(t.dataset.laneTab === name)); });
+    lanes.forEach(function (l) { l.hidden = l.dataset.lane !== name; });
+    store("lane", name);
+  }
+  tabs.forEach(function (t) { t.addEventListener("click", function () { lane(t.dataset.laneTab); }); });
+  var sl = store("lane");
+  if (sl && document.querySelector('[data-lane-tab="' + sl + '"]')) lane(sl);
+
+  var q = document.getElementById("q");
+  if (q) q.addEventListener("input", function () {
+    var v = q.value.trim().toLowerCase();
+    document.querySelectorAll(".entry").forEach(function (e) { e.hidden = !!v && e.dataset.search.indexOf(v) < 0; });
+  });
+})();
+</script>
+</body></html>

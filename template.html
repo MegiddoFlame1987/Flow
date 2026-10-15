@@ -1,0 +1,339 @@
+<title>Mazor Ship Flow Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: control-room sheet. Source bar, page tabs, route switch, sequence diagram, step cards, status board, timeline. */
+:root {
+  --bg: #eef1f4; --panel: #ffffff; --fg: #18212b; --muted: #5a6876; --line: #c9d1da;
+  --accent: #c2410c; --accent-soft: #fde6d8;
+  --a-po: #b45309; --a-orch: #1d4ed8; --a-rev: #6d28d9; --a-arch: #0f766e;
+  --a-writer: #15803d; --a-ci: #475569; --a-qc: #be123c;
+  --ok: #15803d; --bad: #b91c1c; --warnc: #b45309; --warn-bg: #fff4d6; --warn-fg: #7a4a00;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "Barlow", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f151c; --panel: #17202a; --fg: #e3e9ef; --muted: #93a2b1; --line: #2c3a48;
+  --accent: #fb8a4c; --accent-soft: #3a2216;
+  --a-po: #f2a541; --a-orch: #7aa2ff; --a-rev: #b794f6; --a-arch: #4fd1c5;
+  --a-writer: #5fd38a; --a-ci: #9fb0c2; --a-qc: #ff7a95;
+  --ok: #5fd38a; --bad: #ff8080; --warnc: #f2a541; --warn-bg: #3a2f12; --warn-fg: #ffd98a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f151c; --panel: #17202a; --fg: #e3e9ef; --muted: #93a2b1; --line: #2c3a48;
+  --accent: #fb8a4c; --accent-soft: #3a2216;
+  --a-po: #f2a541; --a-orch: #7aa2ff; --a-rev: #b794f6; --a-arch: #4fd1c5;
+  --a-writer: #5fd38a; --a-ci: #9fb0c2; --a-qc: #ff7a95;
+  --ok: #5fd38a; --bad: #ff8080; --warnc: #f2a541; --warn-bg: #3a2f12; --warn-fg: #ffd98a; color-scheme: dark }
+
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); margin: 0 }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 24px 64px; display: grid; gap: 40px }
+h1, h2, h3, h4 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: .01em }
+h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1; font-weight: 700 }
+h2 { font-size: 1.9rem; font-weight: 600 }
+h3 { font-size: 1.3rem; font-weight: 600 }
+h4 { font-size: 1.15rem; font-weight: 600 }
+h5 { font: 600 .72rem/1 var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 0 0 6px }
+code { font: .86em var(--mono); overflow-wrap: anywhere }
+p { margin: 0 }
+.lede { color: var(--muted); max-width: 68ch }
+.eyebrow { font: 500 .78rem var(--mono); color: var(--accent); letter-spacing: .06em; text-transform: uppercase }
+
+.top { display: grid; gap: 14px }
+.road { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0; counter-reset: r }
+.road li { position: relative; padding: 10px 12px 10px 14px; background: var(--panel); border: 1px solid var(--line); margin-left: -1px; display: grid; gap: 2px; min-width: 0 }
+.road li::before { counter-increment: r; content: counter(r); font: 600 .75rem var(--mono); color: var(--accent) }
+.road b { font: 600 1.05rem var(--display) }
+.road span { font-size: .8rem; color: var(--muted) }
+.source { display: flex; flex-wrap: wrap; gap: 8px 22px; font: .85rem var(--mono); color: var(--muted);
+  border-block: 1px solid var(--line); padding-block: 10px }
+.source b { color: var(--fg); font-weight: 500 }
+
+section > header { display: grid; gap: 6px; margin-bottom: 18px }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap }
+.tab { font: 600 1rem var(--display); letter-spacing: .06em; padding: 8px 18px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--fg); border-radius: 4px; cursor: pointer }
+.tab[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.tab:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+
+.lane { display: grid; gap: 20px; margin-top: 16px }
+.facts { display: flex; flex-wrap: wrap; gap: 0; margin: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--panel) }
+.facts div { padding: 10px 16px; border-right: 1px solid var(--line); min-width: 0 }
+.facts dt { font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted) }
+.facts dd { margin: 2px 0 0; font: 600 1.15rem var(--display); font-variant-numeric: tabular-nums }
+
+.scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px }
+.seq { display: block; max-width: none; height: auto }
+.seq .life { stroke: var(--line); stroke-dasharray: 3 4 }
+.seq .actor { fill: var(--panel); stroke-width: 2 }
+.seq .actor-t { font: 600 14px var(--display); fill: var(--fg); text-anchor: middle; letter-spacing: .03em }
+.seq .msg { stroke: var(--fg); stroke-width: 1.4; fill: none }
+.seq .msg.warn { stroke: var(--accent); stroke-dasharray: 5 3 }
+.seq .ahead { fill: var(--fg) }
+.seq .msg-t { font: 600 13px var(--body); fill: var(--fg) }
+.seq .msg-s { font: 11px var(--mono); fill: var(--muted) }
+.seq .dot { stroke: none }
+.seq .dot-t { font: 600 12px var(--mono); fill: var(--bg); text-anchor: middle }
+.a-po { --c: var(--a-po) } .a-orch { --c: var(--a-orch) } .a-rev { --c: var(--a-rev) } .a-arch { --c: var(--a-arch) }
+.a-writer { --c: var(--a-writer) } .a-ci { --c: var(--a-ci) } .a-qc { --c: var(--a-qc) }
+.seq .actor { stroke: var(--c) } .seq .dot { fill: var(--c) }
+
+.steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 14px }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 12px; align-content: start; min-width: 0 }
+.step header { display: flex; gap: 12px; align-items: flex-start; margin: 0 }
+.step header > div { min-width: 0 }
+.num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--c); color: var(--bg);
+  display: grid; place-items: center; font: 600 .9rem var(--mono) }
+.meta { font-size: .8rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px }
+.who { color: var(--fg); font-weight: 600 }
+.io { display: grid; grid-template-columns: 1fr 1fr; gap: 14px }
+.io ul { margin: 0; padding-left: 16px; font-size: .9rem; display: grid; gap: 4px }
+.io > div { min-width: 0 }
+.gate { font-size: .88rem; border-top: 1px dashed var(--line); padding-top: 10px }
+.gate b { font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .1em; color: var(--accent); margin-right: 6px }
+.warn-t { background: var(--warn-bg); color: var(--warn-fg); padding: 8px 10px; border-radius: 4px; font-size: .88rem }
+
+.loop { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 20px; align-items: start }
+.loop svg { width: 100%; height: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 4px }
+.loop svg text { fill: var(--fg); font: 13px var(--body) }
+.loop svg .s { fill: var(--muted); font: 11px var(--mono) }
+.loop svg rect { fill: var(--panel); stroke: var(--fg); stroke-width: 1.4 }
+.loop svg .pass { stroke: var(--ok) } .loop svg .fail { stroke: var(--bad) }
+.loop svg path, .loop svg line { stroke: var(--fg); fill: none; stroke-width: 1.4 }
+.loop svg .lf { stroke: var(--bad) } .loop svg .lp { stroke: var(--ok) }
+.loop svg .ah { fill: var(--fg) }
+.numbers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px }
+.numbers div { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px }
+.numbers b { display: block; font: 700 2rem/1 var(--display); font-variant-numeric: tabular-nums }
+.numbers span { font-size: .85rem; color: var(--muted) }
+
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 18px }
+.rules > div { min-width: 0; display: grid; gap: 8px; align-content: start }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: .78rem var(--mono); padding: 2px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--panel) }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; background: var(--panel) }
+td { border-bottom: 1px solid var(--line); padding: 6px 10px; vertical-align: top }
+
+.tracker-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; justify-content: space-between }
+.tracker-head input { font: 1rem var(--body); padding: 8px 12px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel); color: var(--fg); width: min(100%, 320px) }
+.log { list-style: none; margin: 0; padding: 0; display: grid; border-left: 2px solid var(--line) }
+.entry { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 12px 0 12px 16px; position: relative }
+.entry::before { content: ""; position: absolute; left: -6px; top: 18px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent) }
+.entry + .entry { border-top: 1px solid var(--line) }
+.when { font: .85rem var(--mono); color: var(--muted); padding-top: 3px; font-variant-numeric: tabular-nums }
+.what { display: grid; gap: 6px; min-width: 0 }
+.pr { font: .8rem var(--mono); color: var(--accent) }
+.areas { display: flex; flex-wrap: wrap; gap: 4px }
+details { font-size: .88rem }
+summary { cursor: pointer; color: var(--muted) }
+details ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px }
+.pol .old { color: var(--bad); font: .8rem var(--mono); overflow-wrap: anywhere }
+.pol .new { color: var(--ok); font: .8rem var(--mono); overflow-wrap: anywhere }
+.k { font: 600 .68rem var(--body); text-transform: uppercase; letter-spacing: .06em; padding: 1px 5px; border-radius: 3px; background: var(--accent-soft) }
+.files code { color: var(--muted) }
+.plain { font-size: 1rem }
+details.tech { font-size: .85rem; border-top: 1px dashed var(--line); padding-top: 8px }
+details.tech summary { color: var(--muted); font-size: .8rem }
+details.tech h5 { margin-top: 10px }
+.gate { font-size: .9rem }
+.auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0 }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: .95rem }
+.pill { display: inline-block; padding: 6px 12px; border-radius: 4px; font-weight: 600; margin-bottom: 14px }
+.pill.ok { background: color-mix(in srgb, var(--ok) 16%, var(--panel)); color: var(--ok) }
+.pill.bad { background: color-mix(in srgb, var(--bad) 16%, var(--panel)); color: var(--bad) }
+.pill.unk { background: var(--warn-bg); color: var(--warn-fg) }
+.pill a { color: inherit }
+.chip { font: .85rem var(--body) }
+.chip.raw { font: .76rem var(--mono) }
+.chip.new { background: var(--warn-bg); color: var(--warn-fg); font: .76rem var(--mono) }
+.chip.hot { border-color: var(--accent); color: var(--accent) }
+.what .meta code { color: var(--muted) }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 14px }
+
+@media (max-width: 760px) {
+  .loop { grid-template-columns: 1fr }
+  .io { grid-template-columns: 1fr }
+  .entry { grid-template-columns: 1fr; gap: 4px }
+}
+.pages { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 2px solid var(--fg); position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); z-index: 5 }
+.pages button { font: 600 1.1rem var(--display); letter-spacing: .04em; padding: 10px 18px; border: 0; background: none; color: var(--muted); cursor: pointer; border-bottom: 4px solid transparent; margin-bottom: -2px }
+.pages button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent) }
+.pages button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px }
+.panel { display: grid; gap: 40px }
+.mt { margin-top: 12px }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 14px }
+.tally { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px }
+.tally div { background: var(--panel); border: 1px solid var(--line); border-top: 4px solid var(--c); border-radius: 4px; padding: 10px 16px; min-width: 120px }
+.tally b { display: block; font: 700 2.2rem/1 var(--display) }
+.tally span { color: var(--muted); font-size: .85rem }
+.t-ok { --c: var(--ok) } .t-warn { --c: var(--warnc) } .t-bad { --c: var(--bad) }
+.badge { font: 600 .7rem var(--body); text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: 3px; white-space: nowrap; color: var(--panel); background: var(--c) }
+.b-ok, .s-ok { --c: var(--ok) } .b-warn, .s-warn { --c: var(--warnc) } .b-bad, .s-bad { --c: var(--bad) } .b-frozen, .s-frozen { --c: var(--muted) }
+.statuses { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 14px }
+.status { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--c); border-radius: 4px; padding: 12px 16px; display: grid; gap: 6px; align-content: start; min-width: 0 }
+.status header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 0 }
+.note { color: var(--muted); font-size: .9rem }
+.src { font-size: .8rem }
+.src a, .chain a { color: var(--accent) }
+.chain { list-style: none; margin: 0; padding: 0; display: grid; gap: 0 }
+.chain .link { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--c); padding: 10px 16px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; position: relative }
+.chain .link + .link { margin-top: 24px }
+.chain .link + .link::before { content: "waits on ↓"; position: absolute; top: -21px; left: 16px; font: .75rem var(--mono); color: var(--muted) }
+.chain .link p { grid-column: 1 / -1; font-size: .9rem; color: var(--muted) }
+.next { margin: 0; padding-left: 22px; display: grid; gap: 6px }
+table.controls th { text-align: left; font: 600 .72rem var(--body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--line) }
+table.controls td p { color: var(--muted); font-size: .85rem; margin-top: 2px }
+table.controls td.maps { font-size: .85rem; min-width: 160px }
+.gaps { margin: 0; padding-left: 18px; display: grid; gap: 10px }
+.gaps p { color: var(--muted); font-size: .9rem }
+.eras { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); display: grid }
+.era { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 14px 0 14px 16px; position: relative }
+.era::before { content: ""; position: absolute; left: -7px; top: 20px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent) }
+.era + .era { border-top: 1px solid var(--line) }
+.era .what { display: grid; gap: 6px }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 14px; font: .8rem var(--mono); color: var(--muted) }
+.bars { display: grid; gap: 8px; max-width: 720px }
+.bar { display: grid; grid-template-columns: 170px minmax(0, 1fr) 40px; gap: 10px; align-items: center; font-size: .9rem }
+.bar .track { height: 14px; background: var(--line); border-radius: 2px; overflow: hidden }
+.bar .track span { display: block; height: 100%; background: var(--accent) }
+.bar .val { font: .85rem var(--mono); font-variant-numeric: tabular-nums; text-align: right }
+.plain { font-size: 1rem }
+details.tech { font-size: .85rem; border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 4px }
+details.tech summary { color: var(--muted); font-size: .8rem }
+details.tech ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px }
+details.tech h5 { margin-top: 10px }
+.pill { display: inline-block; padding: 6px 12px; border-radius: 4px; font-weight: 600; margin-bottom: 14px }
+.pill.ok { background: color-mix(in srgb, var(--ok) 16%, var(--panel)); color: var(--ok) }
+.pill.bad { background: color-mix(in srgb, var(--bad) 16%, var(--panel)); color: var(--bad) }
+.pill.unk { background: var(--warn-bg); color: var(--warn-fg) }
+.pill a { color: inherit }
+.chip { font: .85rem var(--body) }
+.chip.raw { font: .76rem var(--mono) }
+.chip.new { background: var(--warn-bg); color: var(--warn-fg); font: .76rem var(--mono) }
+.chip.hot { border-color: var(--accent); color: var(--accent) }
+.card h4 { margin-bottom: 4px }
+@media (max-width: 760px) { .era { grid-template-columns: 1fr; gap: 4px } .bar { grid-template-columns: 110px minmax(0, 1fr) 36px } }
+
+</style>
+
+<main class="wrap">
+  <div class="top">
+    <p class="eyebrow">factory-that-builds-itself · how every change is made</p>
+    <h1>Mazor Ship Flow Map</h1>
+    <p class="lede">Every change to the game travels the same road: you give the idea, AI plans, you approve, AI builds, a separate AI checks, you play and merge. The map is built from the project's rule file, so it changes when the rules change.</p>
+    {{UNKNOWN}}
+    <div class="source">
+      <span>rules as of <b>{{HEAD_DATE}}</b></span>
+      <span>version <b>{{HEAD}}</b></span>
+      <span>page built <b>{{BUILT}}</b></span>
+    </div>
+  </div>
+
+  <nav class="pages" role="tablist" aria-label="Pages">
+    <button type="button" role="tab" id="t-map" data-page="map" aria-selected="true">Flow map</button>
+    <button type="button" role="tab" id="t-v3" data-page="v3" aria-selected="false">V3 status</button>
+    <button type="button" role="tab" id="t-gov" data-page="gov" aria-selected="false">Governance</button>
+    <button type="button" role="tab" id="t-history" data-page="history" aria-selected="false">History</button>
+  </nav>
+
+  <div class="panel" id="map" role="tabpanel" aria-labelledby="t-map">
+    <ol class="road">
+      <li><b>Idea</b><span>you</span></li><li><b>Plan</b><span>AI</span></li><li><b>Approval</b><span>you</span></li>
+      <li><b>Build</b><span>AI writer</span></li><li><b>Check</b><span>separate AI</span></li><li><b>Playtest and merge</b><span>you</span></li>
+    </ol>
+    <section id="routes">
+      <header>
+        <h2>Two routes</h2>
+        <p class="lede">By default a task takes the <b>{{DEFAULT_LANE}}</b> route. The number on the diagram is the number of the card below it.</p>
+      </header>
+      <div class="tabs" role="group" aria-label="Route">{{LANE_TABS}}</div>
+      {{LANES}}
+    </section>
+
+    {{AUTOMATION}}
+
+    <section id="loop">
+      <header>
+        <h2>When the check finds a problem</h2>
+        <p class="lede">If QC finds a defect (FAIL), a new writer session fixes it, but only with your approval. Every attempt is checked again by a new QC session. After {{REPAIR_LIMIT}} failed checks everything stops and you decide.</p>
+      </header>
+      <div class="loop">
+        <svg viewBox="0 0 560 300" role="img" aria-label="PASS goes to recording the result, FAIL goes to a repair, after the limit it stops">
+          <defs><marker id="lah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+          <rect x="20" y="120" width="130" height="56" rx="6"/><text x="85" y="144" text-anchor="middle">Writer</text><text x="85" y="162" text-anchor="middle" class="s">change ready</text>
+          <rect x="215" y="120" width="130" height="56" rx="6"/><text x="280" y="144" text-anchor="middle">Independent QC</text><text x="280" y="162" text-anchor="middle" class="s">new session</text>
+          <rect x="410" y="30" width="130" height="56" rx="6" class="pass"/><text x="475" y="54" text-anchor="middle">Record result</text><text x="475" y="72" text-anchor="middle" class="s">→ your playtest</text>
+          <rect x="410" y="210" width="130" height="56" rx="6" class="fail"/><text x="475" y="234" text-anchor="middle">Stop</text><text x="475" y="252" text-anchor="middle" class="s">you decide</text>
+          <line x1="150" y1="148" x2="213" y2="148" marker-end="url(#lah)"/>
+          <path d="M345,135 C380,120 380,60 408,58" class="lp" marker-end="url(#lah)"/><text x="372" y="92" class="s">PASS</text>
+          <path d="M345,165 C380,180 380,238 408,238" class="lf" marker-end="url(#lah)"/><text x="326" y="222" class="s">FAIL no. {{REPAIR_LIMIT}} or BLOCKED</text>
+          <path d="M280,176 C280,250 85,250 85,178" class="lf" marker-end="url(#lah)"/><text x="182" y="268" text-anchor="middle" class="s">FAIL: repair with your approval</text>
+        </svg>
+        <div class="numbers">
+          <div><b>{{REPAIR_LIMIT}}</b><span>times QC may reject a change before everything stops</span></div>
+          <div><b>{{WRITER_PAR}}</b><span>tasks that may be built at once, one per writer</span></div>
+          <div><b>0</b><span>times an AI may merge on its own</span></div>
+          <div><b>1</b><span>action the automation takes per wake-up</span></div>
+        </div>
+      </div>
+      <details class="tech"><summary>Technical details</summary>
+        <p>Status after the limit: <code>{{STOP_STATUS}}</code>. QC comment fields:</p><div class="chips mt">{{QC_FIELDS}}</div></details>
+    </section>
+
+    <section id="rules">
+      <header>
+        <h2>When a task counts as large</h2>
+        <p class="lede">If a change touches any of these areas it must take the ELEVATED route. It cannot be downgraded.</p>
+      </header>
+      <div class="rules">
+        <div><h3>Always ELEVATED</h3><div class="chips">{{FORCED}}</div></div>
+        <div><h3>Architect required</h3><div class="chips">{{ARCH_CATS}}</div></div>
+        <div><h3>Who reviews what</h3><div class="scroll" style="padding:0"><table>{{MAPPING}}</table></div></div>
+      </div>
+      <details class="tech"><summary>Technical details: files that need an exclusive writer</summary><div class="chips mt">{{PROTECTED}}</div></details>
+    </section>
+  </div>
+
+  <div class="panel" id="v3" role="tabpanel" aria-labelledby="t-v3" hidden>{{V3}}</div>
+  <div class="panel" id="gov" role="tabpanel" aria-labelledby="t-gov" hidden>{{GOVERNANCE}}</div>
+  <div class="panel" id="history" role="tabpanel" aria-labelledby="t-history" hidden>{{HISTORY}}</div>
+
+  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@{{HEAD_FULL}}</code>. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
+</main>
+
+<script>
+(function () {
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  var pages = document.querySelectorAll(".pages button");
+  function page(name) {
+    pages.forEach(function (b) { b.setAttribute("aria-selected", String(b.dataset.page === name)); });
+    document.querySelectorAll(".panel").forEach(function (p) { p.hidden = p.id !== name; });
+    store("page", name);
+  }
+  pages.forEach(function (b) { b.addEventListener("click", function () { page(b.dataset.page); }); });
+  var h = (location.hash || "").slice(1);
+  var el = h && document.getElementById(h);
+  var start = el && el.classList.contains("panel") ? h : store("page");
+  if (start && document.getElementById(start)) page(start);
+
+  var tabs = document.querySelectorAll("[data-lane-tab]"), lanes = document.querySelectorAll(".lane");
+  function lane(name) {
+    tabs.forEach(function (t) { t.setAttribute("aria-pressed", String(t.dataset.laneTab === name)); });
+    lanes.forEach(function (l) { l.hidden = l.dataset.lane !== name; });
+    store("lane", name);
+  }
+  tabs.forEach(function (t) { t.addEventListener("click", function () { lane(t.dataset.laneTab); }); });
+  var sl = store("lane");
+  if (sl && document.querySelector('[data-lane-tab="' + sl + '"]')) lane(sl);
+
+  var q = document.getElementById("q");
+  if (q) q.addEventListener("input", function () {
+    var v = q.value.trim().toLowerCase();
+    document.querySelectorAll(".entry").forEach(function (e) { e.hidden = !!v && e.dataset.search.indexOf(v) < 0; });
+  });
+})();
+</script>
