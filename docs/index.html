@@ -167,6 +167,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 .pages button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent) }
 .pages button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px }
 .panel { display: grid; gap: 40px }
+.panel > *, .panel section > * { min-width: 0 }
 .mt { margin-top: 12px }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 14px }
 .tally { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px }
@@ -224,29 +225,226 @@ details.tech h5 { margin-top: 10px }
 .card h4 { margin-bottom: 4px }
 @media (max-width: 760px) { .era { grid-template-columns: 1fr; gap: 4px } .bar { grid-template-columns: 110px minmax(0, 1fr) 36px } }
 
+
+.key { display: grid; gap: 1px; margin-bottom: 6px }
+.key span { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em }
+.key.in span { color: var(--ok) }
+.key.out span { color: var(--warnc) }
+.key.out code { color: var(--muted); text-decoration: line-through }
+.timeline { list-style: none; margin: 12px 0 0; padding: 0; border-left: 2px solid var(--line); display: grid; gap: 10px }
+.timeline li { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 12px; padding-left: 14px; position: relative }
+.timeline li::before { content: ""; position: absolute; left: -6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent) }
+.timeline a { color: var(--fg) }
+.notes { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--muted) }
+@media (max-width: 760px) { .timeline li { grid-template-columns: 1fr; gap: 2px } }
 </style>
 
 </head><body><main class="wrap">
   <div class="top">
     <p class="eyebrow">factory-that-builds-itself · how every change is made</p>
     <h1>Mazor Ship Flow Map</h1>
-    <p class="lede">Every change to the game travels the same road: you give the idea, AI plans, you approve, AI builds, a separate AI checks, you play and merge. The map is built from the project's rule file, so it changes when the rules change.</p>
+    <p class="lede">Every change to the game travels the same road: you give the idea, AI plans, you approve, AI builds, a separate AI checks, you play and merge. The page is built from the project's rule file and git history, so it changes when the rules change.</p>
     
     <div class="source">
-      <span>rules as of <b>2026-10-14</b></span>
-      <span>version <b>3370cfc</b></span>
-      <span>page built <b>2026-10-15 06:48 UTC</b></span>
+      <span>rules as of <b>2026-10-21</b></span>
+      <span>version <b>eb65363</b></span>
+      <span>page built <b>2026-10-26 03:31 UTC</b></span>
     </div>
   </div>
 
   <nav class="pages" role="tablist" aria-label="Pages">
-    <button type="button" role="tab" id="t-map" data-page="map" aria-selected="true">Flow map</button>
+    <button type="button" role="tab" id="t-current" data-page="current" aria-selected="true">Current flow</button>
+    <button type="button" role="tab" id="t-map" data-page="map" aria-selected="false">V2/V3 map</button>
     <button type="button" role="tab" id="t-v3" data-page="v3" aria-selected="false">V3 status</button>
     <button type="button" role="tab" id="t-gov" data-page="gov" aria-selected="false">Governance</button>
     <button type="button" role="tab" id="t-history" data-page="history" aria-selected="false">History</button>
   </nav>
 
-  <div class="panel" id="map" role="tabpanel" aria-labelledby="t-map">
+  <div class="panel" id="current" role="tabpanel" aria-labelledby="t-current">
+<section>
+  <header>
+    <p class="eyebrow">In force since 2026-10-21 · schema 6</p>
+    <h2>Current flow (V4, lean)</h2>
+    <p class="lede">After the retreat the flow is a short chain of gates with no automation. You start every task by saying so, approve it with one line, and play and merge it yourself. One writer works at a time.</p>
+    <p class="note">"V4" is this page's name. The repository calls it SHIP, contract schema 6.</p>
+  </header>
+  
+  <dl class="facts"><div><dt>Active writers</dt><dd>1</dd></div><div><dt>Repairs before stop</dt><dd>2</dd></div><div><dt>QC comment lines</dt><dd>7</dd></div><div><dt>Runner</dt><dd>none</dd></div><div><dt>Who merges</dt><dd>only you</dd></div></dl>
+</section>
+<section>
+  <header><h3>The chain</h3><p class="lede">The same chain for both routes. The number on the diagram is the card below it.</p></header>
+  <div class="scroll"><svg class="seq" viewBox="0 0 790 676" width="790" role="img" aria-label="V4 sequence diagram">
+<defs><marker id="ah-V4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ahead"/></marker></defs>
+<line x1="95.0" y1="54" x2="95.0" y2="666" class="life"/>
+<rect x="29.0" y="10" width="132" height="40" rx="6" class="actor a-po"/>
+<text x="95.0" y="35" class="actor-t">You (Product Owner)</text>
+<line x1="245.0" y1="54" x2="245.0" y2="666" class="life"/>
+<rect x="179.0" y="10" width="132" height="40" rx="6" class="actor a-orch"/>
+<text x="245.0" y="35" class="actor-t">Orchestrator</text>
+<line x1="395.0" y1="54" x2="395.0" y2="666" class="life"/>
+<rect x="329.0" y="10" width="132" height="40" rx="6" class="actor a-writer"/>
+<text x="395.0" y="35" class="actor-t">Writer</text>
+<line x1="545.0" y1="54" x2="545.0" y2="666" class="life"/>
+<rect x="479.0" y="10" width="132" height="40" rx="6" class="actor a-ci"/>
+<text x="545.0" y="35" class="actor-t">Automated checks</text>
+<line x1="695.0" y1="54" x2="695.0" y2="666" class="life"/>
+<rect x="629.0" y="10" width="132" height="40" rx="6" class="actor a-qc"/>
+<text x="695.0" y="35" class="actor-t">Independent QC</text>
+<line x1="95.0" y1="100" x2="381.0" y2="100" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="395.0" cy="100" r="11" class="dot a-writer"/>
+<text x="395.0" y="104" class="dot-t">1</text>
+<text x="245.0" y="90" text-anchor="middle" class="msg-t">A brief is written</text>
+<text x="245.0" y="122" text-anchor="middle" class="msg-s">→ Brief file marked READY</text>
+<line x1="95.0" y1="164" x2="231.0" y2="164" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="245.0" cy="164" r="11" class="dot a-orch"/>
+<text x="245.0" y="168" class="dot-t">2</text>
+<text x="170.0" y="154" text-anchor="middle" class="msg-t">Task is started</text>
+<text x="170.0" y="186" text-anchor="middle" class="msg-s">→ Draft PR with the PROPOSED contract</text>
+<line x1="245.0" y1="228" x2="109.0" y2="228" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="95.0" cy="228" r="11" class="dot a-po"/>
+<text x="95.0" y="232" class="dot-t">3</text>
+<text x="170.0" y="218" text-anchor="middle" class="msg-t">You approve (ACCEPT)</text>
+<text x="170.0" y="250" text-anchor="middle" class="msg-s">→ Your ACCEPT comment</text>
+<line x1="95.0" y1="292" x2="531.0" y2="292" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="545.0" cy="292" r="11" class="dot a-ci"/>
+<text x="545.0" y="296" class="dot-t">4</text>
+<text x="320.0" y="282" text-anchor="middle" class="msg-t">Start check</text>
+<text x="320.0" y="314" text-anchor="middle" class="msg-s">→ Go or stop</text>
+<line x1="545.0" y1="356" x2="409.0" y2="356" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="395.0" cy="356" r="11" class="dot a-writer"/>
+<text x="395.0" y="360" class="dot-t">5</text>
+<text x="470.0" y="346" text-anchor="middle" class="msg-t">Writer builds the change</text>
+<text x="470.0" y="378" text-anchor="middle" class="msg-s">→ Change</text>
+<line x1="395.0" y1="420" x2="531.0" y2="420" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="545.0" cy="420" r="11" class="dot a-ci"/>
+<text x="545.0" y="424" class="dot-t">6</text>
+<text x="470.0" y="410" text-anchor="middle" class="msg-t">Automated checks</text>
+<text x="470.0" y="442" text-anchor="middle" class="msg-s">→ Green or red checks</text>
+<line x1="395.0" y1="484" x2="681.0" y2="484" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="695.0" cy="484" r="11" class="dot a-qc"/>
+<text x="695.0" y="488" class="dot-t">7</text>
+<text x="545.0" y="474" text-anchor="middle" class="msg-t">Independent QC</text>
+<text x="545.0" y="506" text-anchor="middle" class="msg-s">→ Seven-line verdict comment</text>
+<line x1="695.0" y1="548" x2="409.0" y2="548" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="395.0" cy="548" r="11" class="dot a-writer"/>
+<text x="395.0" y="552" class="dot-t">8</text>
+<text x="545.0" y="538" text-anchor="middle" class="msg-t">Result recorded, final check</text>
+<text x="545.0" y="570" text-anchor="middle" class="msg-s">→ Task list entry</text>
+<line x1="395.0" y1="612" x2="109.0" y2="612" class="msg" marker-end="url(#ah-V4)"/>
+<circle cx="95.0" cy="612" r="11" class="dot a-po"/>
+<text x="95.0" y="616" class="dot-t">9</text>
+<text x="245.0" y="602" text-anchor="middle" class="msg-t">You playtest and merge</text>
+<text x="245.0" y="634" text-anchor="middle" class="msg-s">→ PO-PLAYTEST receipt</text>
+</svg></div>
+  <div class="steps">
+<article class="step" id="v4-1">
+  <header><span class="num a-writer">1</span>
+    <div><h4>A brief is written</h4><p class="meta"><span class="who">Writer</span></p></div></header>
+  
+  <p class="plain">You say &quot;przygotuj brief X&quot;. An agent writes the brief as DRAFT, then READY.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Your request</li><li>Game documents</li></ul></div><div><h5>Gives</h5><ul><li>Brief file marked READY</li></ul></div></div>
+  
+  <details class="tech"><summary>Technical details</summary><ul><li>File: <code>docs/briefs/X.md</code></li><li>Step id: <code>brief</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-2">
+  <header><span class="num a-orch">2</span>
+    <div><h4>Task is started</h4><p class="meta"><span class="who">Orchestrator</span></p></div></header>
+  
+  <p class="plain">You say &quot;start X&quot;. The orchestrator picks the route, asks the reviewers, gets an Architect specification if needed and opens a draft PR with a PROPOSED contract.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>READY brief</li></ul></div><div><h5>Gives</h5><ul><li>Draft PR with the PROPOSED contract</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> A PROPOSED contract holds no writer slot.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Contract schema 6 from <code>.github/pull_request_template.md</code></li><li>Check: <code>python scripts/workflow/preflight.py check-proposed --body-file &lt;body&gt;</code></li><li>Step id: <code>start</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-3">
+  <header><span class="num a-po">3</span>
+    <div><h4>You approve (ACCEPT)</h4><p class="meta"><span class="who">You (Product Owner)</span></p></div></header>
+  
+  <p class="plain">You comment ACCEPT X on the PR. For changes to process files you add GOVERNANCE. The contract becomes ACTIVE.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>PROPOSED contract</li></ul></div><div><h5>Gives</h5><ul><li>Your ACCEPT comment</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> The governance guard stays red until your GOVERNANCE line exists.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Lines: <code>ACCEPT &lt;task_id&gt;</code>, <code>ACCEPT &lt;task_id&gt; GOVERNANCE</code></li><li>Author checked through the GitHub API</li><li>Status: <code>governance-accept</code></li><li>Step id: <code>accept</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-4">
+  <header><span class="num a-ci">4</span>
+    <div><h4>Start check</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">A script checks the base is current, the tree is clean, Godot is available, no other task is ACTIVE and the change stays inside the allowed files.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>ACTIVE contract</li></ul></div><div><h5>Gives</h5><ul><li>Go or stop</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Only one active writer in the whole repository.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py start --pr N --writer P --writer-session S</code></li><li>Step id: <code>start-preflight</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-5">
+  <header><span class="num a-writer">5</span>
+    <div><h4>Writer builds the change</h4><p class="meta"><span class="who">Writer</span></p></div></header>
+  
+  <p class="plain">The writer makes the smallest accepted change, runs the tests and stops with a comment naming the exact version to check.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>ACTIVE contract</li></ul></div><div><h5>Gives</h5><ul><li>Change</li><li>Test results</li><li>PENDING VERIFICATION comment</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Stops and waits for QC.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Godot headless suites via <code>scripts/workflow/run_godot_checks.py</code></li><li>Step id: <code>implementation</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-6">
+  <header><span class="num a-ci">6</span>
+    <div><h4>Automated checks</h4><p class="meta"><span class="who">Automated checks</span></p></div></header>
+  
+  <p class="plain">GitHub validates the rules, keeps the process code under its size budget and runs the game headless.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Latest version</li></ul></div><div><h5>Gives</h5><ul><li>Green or red checks</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Red checks are the writer&#x27;s to fix.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>validate</code>: policy, the production line budget, all workflow tests</li><li><code>Godot 4.7.1 headless smoke check</code></li><li>Step id: <code>ci</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-7">
+  <header><span class="num a-qc">7</span>
+    <div><h4>Independent QC</h4><p class="meta"><span class="who">Independent QC</span></p></div></header>
+  
+  <p class="plain">A separate read-only session, preferably the other provider, checks the change itself and posts PASS, FAIL or BLOCKED.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>The exact version to check</li></ul></div><div><h5>Gives</h5><ul><li>Seven-line verdict comment</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> FAIL: you say &quot;popraw&quot;, at most two repairs.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>QC session must differ from the writer session</li><li>Step id: <code>qc</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-8">
+  <header><span class="num a-writer">8</span>
+    <div><h4>Result recorded, final check</h4><p class="meta"><span class="who">Writer</span></p></div></header>
+  
+  <p class="plain">After PASS one commit records the result in the task list. A final script checks QC, green CI and that the PR can merge.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>PASS verdict</li></ul></div><div><h5>Gives</h5><ul><li>Task list entry</li><li>Go for playtest</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> Exactly one commit after QC.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...</code></li><li>Step id: <code>closeout</code></li></ul></details>
+</article>
+
+<article class="step" id="v4-9">
+  <header><span class="num a-po">9</span>
+    <div><h4>You playtest and merge</h4><p class="meta"><span class="who">You (Product Owner)</span></p></div></header>
+  
+  <p class="plain">You get four plain points: what to click, what should happen, what changes, what stays open. You play, post a four-line receipt and merge yourself.</p>
+  <div class="io"><div><h5>Gets</h5><ul><li>Playtest package</li></ul></div><div><h5>Gives</h5><ul><li>PO-PLAYTEST receipt</li><li>Your merge</li></ul></div></div>
+  <p class="gate"><b>Stops when</b> A new push or base needs a new receipt. Agents never merge.</p>
+  <details class="tech"><summary>Technical details</summary><ul><li>Receipt: <code>PO-PLAYTEST: PASS</code>, task_id, tested_head_sha, tested_base_sha</li><li>Status: <code>po-playtest</code></li><li>Step id: <code>playtest-merge</code></li></ul></details>
+</article></div>
+  <div class="card mt"><h4>On the ELEVATED route, also</h4><ul><li>Reviewers for the touched areas are mandatory.</li><li>An Architect specification is required for structure, saves, public interfaces, large refactors, several systems or unclear impact.</li><li>A findings file is always written; on STANDARD only after a FAIL.</li><li>The Architect and the writer may use high effort; QC starts low (AGENTS.md, prose rule).</li></ul></div>
+  <details class="tech"><summary>Technical details</summary><ul><li>Contract schema 6, fields: <span class="chip raw">contract_schema_version</span><span class="chip raw">task_id</span><span class="chip raw">base_sha</span><span class="chip raw">lane</span><span class="chip raw">writer</span><span class="chip raw">writer_session</span><span class="chip raw">writer_status</span><span class="chip raw">allowed_paths</span><span class="chip raw">tasks_md_content</span><span class="chip raw">repair_cycles_consumed</span><span class="chip raw">repair_history</span><span class="chip raw">brief_reference</span><span class="chip raw">product_owner_accept_reference</span><span class="chip raw">reviewer_coverage</span><span class="chip raw">architect_specification</span></li><li>Process paths needing GOVERNANCE: <span class="chip raw">.codex/</span><span class="chip raw">.github/</span><span class="chip raw">.claude/</span><span class="chip raw">AGENTS.md</span><span class="chip raw">CLAUDE.md</span><span class="chip raw">docs/workflow/</span><span class="chip raw">scripts/workflow/</span></li><li>QC comment fields: <span class="chip raw">verdict</span><span class="chip raw">task_id</span><span class="chip raw">verified_head_sha</span><span class="chip raw">qc_provider</span><span class="chip raw">qc_session</span><span class="chip raw">checks</span><span class="chip raw">limitations</span></li><li>Production line budget: 2500</li><li>Stop status after the limit: <code>NEEDS PRODUCT OR ARCHITECT DECISION</code></li></ul></details>
+</section>
+<section>
+  <header><h3>What changed from V3</h3></header>
+  <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>Area</th><th>Now</th><th>Where</th></tr></thead><tbody><tr><td><b>Automation</b></td><td>Event controller, self-hosted runner, native adapters and canary removed.</td><td><code>self_hosted_runner = false</code></td></tr><tr><td><b>Parallel work</b></td><td>Two paired writers with server leases replaced by one active writer.</td><td><code>writer_parallelism = 1</code></td></tr><tr><td><b>Starting a task</b></td><td>Queue reader and po-ready markers replaced by you saying &quot;start X&quot;.</td><td><code>brief + start in SHIP</code></td></tr><tr><td><b>Approval</b></td><td>ACCEPT codes replaced by a plain line, ACCEPT X, plus GOVERNANCE for process files, checked by a trusted guard.</td><td><code>contract.accept_line</code></td></tr><tr><td><b>QC comment</b></td><td>Eight keys to seven: the product field is gone.</td><td><code>gates.qc_comment_fields</code></td></tr><tr><td><b>Size limit</b></td><td>New: process code may not exceed a fixed line budget.</td><td><code>gates.production_python_line_budget</code></td></tr></tbody></table></div>
+</section>
+<section class="recovery">
+  <header>
+    <p class="eyebrow">Live check · 2026-10-26</p>
+    <h3><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116">First task through the lean flow: HUD-SPRITE-001 (#116)</a></h3>
+    <p class="lede"><b>Now:</b> Waiting for Independent QC on 065a8b0. No QC verdict on the PR yet.</p>
+  </header>
+  <ol class="timeline"><li><span class="when">2026-10-21 06:31</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116">Draft PR opened with the contract</a></li><li><span class="when">2026-10-23 17:47</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116#issuecomment-6371169433">Your ACCEPT HUD-SPRITE-001</a></li><li><span class="when">2026-10-24 00:30</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116#issuecomment-6377540838">PENDING VERIFICATION at 065a8b0, 31 Godot suites pass, CI 4/4 green</a></li><li><span class="when">2026-10-26 03:24</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116#issuecomment-6407515172">Your decisions &quot;1A i 2B&quot;: accept a measured performance deviation, move the portrait to a follow-up</a></li></ol>
+  <ul class="notes mt"><li>ACCEPT to PENDING VERIFICATION took about 6.7 hours, with no runner and no manual rescue recorded on the PR.</li><li>The task is large: 71 files, +7,647 / −1,786 lines. QC will need time.</li><li>Criterion 1 (retained EVA portrait) is met only by the follow-up task after your decision 2B.</li></ul>
+</section></div>
+
+  <div class="panel" id="map" role="tabpanel" aria-labelledby="t-map" hidden>
+    <p class="warn-t">Archived. Rules at 3370cfc (14 Oct), before FLOW-RECOVERY-001. Replaced by schema 6 on 21 Oct.</p>
     <ol class="road">
       <li><b>Idea</b><span>you</span></li><li><b>Plan</b><span>AI</span></li><li><b>Approval</b><span>you</span></li>
       <li><b>Build</b><span>AI writer</span></li><li><b>Check</b><span>separate AI</span></li><li><b>Playtest and merge</b><span>you</span></li>
@@ -337,7 +535,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">Specialists for gameplay, story, world physics and architecture review the idea. They only read and change nothing.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Brief</li><li>Which areas the change touches</li></ul></div><div><h5>Gives</h5><ul><li>Notes for the plan</li></ul></div></div>
   
-  <details class="tech"><summary>Technical details</summary><ul><li>Mapping: <code>reviewer_mapping</code></li><li>Roles: <code>.codex/agents/*.toml</code></li><li>Policy step: <code>relevant-reviewers</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Mapping: <code>reviewer_mapping</code></li><li>Roles: <code>.codex/agents/*.toml</code></li><li>Step id: <code>relevant-reviewers</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-2">
@@ -347,7 +545,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">The pull request description becomes a contract: which files may change, the plan, how it will be checked and what decision the player gains.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Brief</li><li>Reviewer notes</li><li>Current state of the game</li></ul></div><div><h5>Gives</h5><ul><li>Draft PR with the contract</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Waits for your approval.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Contract schema 5 between <code>&lt;!-- FLOW-V2-CONTRACT:START --&gt;</code> and <code>END</code></li><li>Fields: allowed paths, plan, tests, <code>## Player decision</code>, product_test_matrix</li><li>Base = exact <code>main</code> SHA</li><li>Policy step: <code>task-contract-plan</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Contract schema 5 between <code>&lt;!-- FLOW-V2-CONTRACT:START --&gt;</code> and <code>END</code></li><li>Fields: allowed paths, plan, tests, <code>## Player decision</code>, product_test_matrix</li><li>Base = exact <code>main</code> SHA</li><li>Step id: <code>task-contract-plan</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-3">
@@ -357,7 +555,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">You accept the plan and pick who writes: Codex or Claude Code. Only from this moment may the repository change.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Task contract</li></ul></div><div><h5>Gives</h5><ul><li>Your ACCEPT comment</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Without your approval nobody writes anything.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>ACCEPT names: route, orchestrator, writer + session, allowed paths, plan</li><li>Automation requires a contract code: <code>automation.accept_requires_contract_code</code></li><li>Policy step: <code>product-owner-accept-with-writer</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>ACCEPT names: route, orchestrator, writer + session, allowed paths, plan</li><li>Automation requires a contract code: <code>automation.accept_requires_contract_code</code></li><li>Step id: <code>product-owner-accept-with-writer</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-4">
@@ -367,7 +565,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">A script checks that everything matches and that the writer has a free slot. At most two writers work at once.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Pull request</li><li>Slot grant (lease)</li></ul></div><div><h5>Gives</h5><ul><li>Go or stop</li></ul></div></div>
   <p class="gate"><b>Stops when</b> No go, no writing.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py start --pr N --writer P --writer-session S</code></li><li>Lease from <code>.github/workflows/writer-admission.yml</code></li><li>Policy step: <code>start-preflight</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py start --pr N --writer P --writer-session S</code></li><li>Lease from <code>.github/workflows/writer-admission.yml</code></li><li>Step id: <code>start-preflight</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-5">
@@ -377,7 +575,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">In small tasks one session writes the code and runs the task. It makes the smallest change in the plan, tests it and leaves evidence.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Your approval</li><li>Contract and the list of files it may change</li></ul></div><div><h5>Gives</h5><ul><li>Finished change</li><li>Test results</li><li>Evidence comment</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Stops and waits for QC.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Status: PENDING VERIFICATION + SHA</li><li>Godot headless tests</li><li>Writer no. 2 waits for refresh (pending refresh)</li><li>Policy step: <code>selected-writer-orchestrator</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Status: PENDING VERIFICATION + SHA</li><li>Godot headless tests</li><li>Writer no. 2 waits for refresh (pending refresh)</li><li>Step id: <code>selected-writer-orchestrator</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-6">
@@ -387,7 +585,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">GitHub validates the configuration and runs the game without a screen to catch errors.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Latest version of the change</li></ul></div><div><h5>Gives</h5><ul><li>Green or red checks</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Red checks must be fixed by the writer.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Checks: <code>validate</code>, <code>Godot 4.7.1 headless smoke check</code></li><li>Logs as CI artifacts</li><li>Policy step: <code>validation</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Checks: <code>validate</code>, <code>Godot 4.7.1 headless smoke check</code></li><li>Logs as CI artifacts</li><li>Step id: <code>validation</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-7">
@@ -397,7 +595,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">A new, separate session trusts nothing it is told. It checks the change and the tests itself and gives a verdict: PASS, FAIL or BLOCKED.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>The change to verify</li></ul></div><div><h5>Gives</h5><ul><li>Verdict comment</li><li>Wake-up signal to the orchestrator</li></ul></div></div>
   <p class="gate"><b>Stops when</b> PASS moves on. FAIL or BLOCKED stops and sends you one message.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Start: <code>/qc-comment PR N notify &lt;session&gt;</code></li><li>Comment has 8 keys (see the QC loop)</li><li>Wake-up: <code>send_message</code></li><li>Policy step: <code>independent-qc-comment</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Start: <code>/qc-comment PR N notify &lt;session&gt;</code></li><li>Comment has 8 keys (see the QC loop)</li><li>Wake-up: <code>send_message</code></li><li>Step id: <code>independent-qc-comment</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-8">
@@ -407,7 +605,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">After PASS one commit writes the result into the task list.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>PASS verdict</li></ul></div><div><h5>Gives</h5><ul><li>Task list entry</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Only touches the task list (and the findings report on ELEVATED).</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Paths: <code>TASKS.md</code>, <code>docs/verification/{task_id}-findings.md</code></li><li>Policy step: <code>conditional-closeout</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Paths: <code>TASKS.md</code>, <code>docs/verification/{task_id}-findings.md</code></li><li>Step id: <code>conditional-closeout</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-9">
@@ -417,7 +615,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">A script confirms everything is green and ready to merge. You get short instructions on what to click in the game.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>QC verdict</li><li>Check results</li></ul></div><div><h5>Gives</h5><ul><li>Go</li><li>Playtest package: what to click, what should happen, what changes, what stays open</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Checks must be green on the latest version.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...</code></li><li>Policy step: <code>final-preflight</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...</code></li><li>Step id: <code>final-preflight</code></li></ul></details>
 </article>
 
 <article class="step" id="standard-10">
@@ -427,7 +625,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">You play by the package, confirm with a comment and merge the change yourself. Only then does it enter the game.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Playtest package</li></ul></div><div><h5>Gives</h5><ul><li>Your playtest confirmation</li><li>Merge into the main version</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Agents never merge.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Check <code>po-playtest</code> reads your comment through the GitHub API</li><li>A new code or base version invalidates the confirmation</li><li>Policy step: <code>product-owner-playtest-manual-merge</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Check <code>po-playtest</code> reads your comment through the GitHub API</li><li>A new code or base version invalidates the confirmation</li><li>Step id: <code>product-owner-playtest-manual-merge</code></li></ul></details>
 </article></div>
 </div>
 <div class="lane" data-lane="ELEVATED" hidden>
@@ -520,7 +718,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">Reads your brief and confirms the task is large or risky, so it takes the ELEVATED route.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Your brief: what to change and what the player should see</li><li>Task status from the task list</li><li>Relevant parts of the game documents</li></ul></div><div><h5>Gives</h5><ul><li>Route decision</li><li>Reviewers to ask</li></ul></div></div>
   <p class="gate"><b>Stops when</b> If the brief is unclear, it asks you and waits.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Brief starts with <code>SHIP:</code></li><li>Categories: <code>routing.forced_elevated_categories</code></li><li>Sources: <code>docs/gdd.md</code>, <code>docs/LORE_BIBLE.md</code>, <code>docs/WORLD_MECHANICS.md</code></li><li>Policy step: <code>orchestrator</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Brief starts with <code>SHIP:</code></li><li>Categories: <code>routing.forced_elevated_categories</code></li><li>Sources: <code>docs/gdd.md</code>, <code>docs/LORE_BIBLE.md</code>, <code>docs/WORLD_MECHANICS.md</code></li><li>Step id: <code>orchestrator</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-2">
@@ -530,7 +728,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">For a large change the review is mandatory. Reviewers only read.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Brief</li><li>List of risk areas</li></ul></div><div><h5>Gives</h5><ul><li>Notes for the plan</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Without a required reviewer the task stops.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Mapping: <code>reviewer_mapping</code></li><li>Missing reviewer = BLOCKED</li><li>Policy step: <code>required-reviewers</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Mapping: <code>reviewer_mapping</code></li><li>Missing reviewer = BLOCKED</li><li>Step id: <code>required-reviewers</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-3">
@@ -540,7 +738,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">Only for changes to code structure, saves or public interfaces. The Architect describes how to build it.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Draft contract</li></ul></div><div><h5>Gives</h5><ul><li>Specification inside the contract</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Skipped when only game documentation changes.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Categories: <code>routing.architect_required_categories</code></li><li>Exception: <code>canonical_docs_only</code></li><li>Policy step: <code>conditional-architect-specification-in-pr-contract</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Categories: <code>routing.architect_required_categories</code></li><li>Exception: <code>canonical_docs_only</code></li><li>Step id: <code>conditional-architect-specification-in-pr-contract</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-4">
@@ -550,7 +748,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">You accept the plan and pick who writes: Codex or Claude Code. Only from this moment may the repository change.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Task contract</li></ul></div><div><h5>Gives</h5><ul><li>Your ACCEPT comment</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Without your approval nobody writes anything.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>ACCEPT names: route, orchestrator, writer + session, allowed paths, plan</li><li>Automation requires a contract code: <code>automation.accept_requires_contract_code</code></li><li>Policy step: <code>product-owner-accept-with-writer</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>ACCEPT names: route, orchestrator, writer + session, allowed paths, plan</li><li>Automation requires a contract code: <code>automation.accept_requires_contract_code</code></li><li>Step id: <code>product-owner-accept-with-writer</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-5">
@@ -560,7 +758,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">A script checks that everything matches and that the writer has a free slot. At most two writers work at once.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Pull request</li><li>Slot grant (lease)</li></ul></div><div><h5>Gives</h5><ul><li>Go or stop</li></ul></div></div>
   <p class="gate"><b>Stops when</b> No go, no writing.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py start --pr N --writer P --writer-session S</code></li><li>Lease from <code>.github/workflows/writer-admission.yml</code></li><li>Policy step: <code>start-preflight</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py start --pr N --writer P --writer-session S</code></li><li>Lease from <code>.github/workflows/writer-admission.yml</code></li><li>Step id: <code>start-preflight</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-6">
@@ -570,7 +768,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">A separate writer session makes the change from the plan and specification, tests it and leaves evidence.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Your approval</li><li>Contract, specification and file list</li></ul></div><div><h5>Gives</h5><ul><li>Finished change</li><li>Test results</li><li>Evidence comment</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Stops and waits for QC.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Status: PENDING VERIFICATION + SHA</li><li>Godot headless tests</li><li>Writer no. 2 waits for refresh (pending refresh)</li><li>Policy step: <code>selected-writer</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Status: PENDING VERIFICATION + SHA</li><li>Godot headless tests</li><li>Writer no. 2 waits for refresh (pending refresh)</li><li>Step id: <code>selected-writer</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-7">
@@ -580,7 +778,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">GitHub validates the configuration and runs the game without a screen to catch errors.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Latest version of the change</li></ul></div><div><h5>Gives</h5><ul><li>Green or red checks</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Red checks must be fixed by the writer.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Checks: <code>validate</code>, <code>Godot 4.7.1 headless smoke check</code></li><li>Logs as CI artifacts</li><li>Policy step: <code>validation</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Checks: <code>validate</code>, <code>Godot 4.7.1 headless smoke check</code></li><li>Logs as CI artifacts</li><li>Step id: <code>validation</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-8">
@@ -590,7 +788,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">A new, separate session trusts nothing it is told. It checks the change and the tests itself and gives a verdict: PASS, FAIL or BLOCKED.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>The change to verify</li></ul></div><div><h5>Gives</h5><ul><li>Verdict comment</li><li>Wake-up signal to the orchestrator</li></ul></div></div>
   <p class="gate"><b>Stops when</b> PASS moves on. FAIL or BLOCKED stops and sends you one message.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Start: <code>/qc-comment PR N notify &lt;session&gt;</code></li><li>Comment has 8 keys (see the QC loop)</li><li>Wake-up: <code>send_message</code></li><li>Policy step: <code>independent-qc-comment</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Start: <code>/qc-comment PR N notify &lt;session&gt;</code></li><li>Comment has 8 keys (see the QC loop)</li><li>Wake-up: <code>send_message</code></li><li>Step id: <code>independent-qc-comment</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-9">
@@ -600,7 +798,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">After PASS one commit writes the result into the task list.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>PASS verdict</li></ul></div><div><h5>Gives</h5><ul><li>Task list entry</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Only touches the task list (and the findings report on ELEVATED).</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Paths: <code>TASKS.md</code>, <code>docs/verification/{task_id}-findings.md</code></li><li>Policy step: <code>conditional-closeout</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Paths: <code>TASKS.md</code>, <code>docs/verification/{task_id}-findings.md</code></li><li>Step id: <code>conditional-closeout</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-10">
@@ -610,7 +808,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">A script confirms everything is green and ready to merge. You get short instructions on what to click in the game.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>QC verdict</li><li>Check results</li></ul></div><div><h5>Gives</h5><ul><li>Go</li><li>Playtest package: what to click, what should happen, what changes, what stays open</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Checks must be green on the latest version.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...</code></li><li>Policy step: <code>final-preflight</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li><code>python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...</code></li><li>Step id: <code>final-preflight</code></li></ul></details>
 </article>
 
 <article class="step" id="elevated-11">
@@ -620,7 +818,7 @@ details.tech h5 { margin-top: 10px }
   <p class="plain">You play by the package, confirm with a comment and merge the change yourself. Only then does it enter the game.</p>
   <div class="io"><div><h5>Gets</h5><ul><li>Playtest package</li></ul></div><div><h5>Gives</h5><ul><li>Your playtest confirmation</li><li>Merge into the main version</li></ul></div></div>
   <p class="gate"><b>Stops when</b> Agents never merge.</p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Check <code>po-playtest</code> reads your comment through the GitHub API</li><li>A new code or base version invalidates the confirmation</li><li>Policy step: <code>product-owner-playtest-manual-merge</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Check <code>po-playtest</code> reads your comment through the GitHub API</li><li>A new code or base version invalidates the confirmation</li><li>Step id: <code>product-owner-playtest-manual-merge</code></li></ul></details>
 </article></div>
 </div>
     </section>
@@ -693,17 +891,17 @@ details.tech h5 { margin-top: 10px }
 <section class="recovery">
   <header>
     <p class="eyebrow">Latest · 2026-10-15</p>
-    <h2><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/115">Retreat in progress: FLOW-RECOVERY-001</a></h2>
-    <p class="lede">Accepted by you on 2026-10-15 05:41 UTC (ACCEPT FLOW-RECOVERY-001 GOVERNANCE). Implementation at 3307237; validate and Godot checks green. Waiting for Independent QC, closeout, your playtest receipt and your merge.</p>
+    <h2><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/115">Retreat merged: FLOW-RECOVERY-001</a></h2>
+    <p class="lede">Accepted by you on 2026-10-15 05:41 UTC (ACCEPT FLOW-RECOVERY-001 GOVERNANCE) and merged on 2026-10-21 06:29 UTC as eb65363. Flow V3 is gone; see the Current flow tab.</p>
   </header>
-  <div class="tally nums"><div><b>27</b><span>files changed</span></div><div><b>+2,672</b><span>lines added</span></div><div><b>−12,967</b><span>lines removed</span></div><div><b>−276</b><span>net lines in the policy file</span></div></div>
+  <div class="tally nums"><div><b>28</b><span>files changed</span></div><div><b>+2,724</b><span>lines added</span></div><div><b>−12,967</b><span>lines removed</span></div><div><b>357 → 81</b><span>lines in the policy file</span></div></div>
   <div class="cards mt">
     <div class="card"><h4>Removed</h4><ul><li>Event controller and its workflow (flow-auto-events.yml)</li><li>Local runner and native session adapters</li><li>Paired writer admission (writer-admission.yml)</li><li>Runner documentation (FLOW_AUTO_RUNNER.md)</li><li>Their tests</li></ul></div>
     <div class="card"><h4>Kept</h4><ul><li>Task contract in the PR</li><li>Your ACCEPT before any write</li><li>One active writer at a time</li><li>Independent QC in a separate session</li><li>Start and final preflight</li><li>Your playtest receipt and manual merge</li></ul></div>
     <div class="card"><h4>Added</h4><ul><li>contract.py: one shared contract parser</li><li>governance-guard.yml: trusted check for governance paths</li><li>docs/briefs/HUD-SPRITE-001.md: the HUD brief for #113</li></ul></div>
   </div>
   <p class="src mt"><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/115">PR #115</a> · <a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/115#issuecomment-6185317650">ACCEPT</a> · <a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/114#issuecomment-6185490239">#114 closed</a></p>
-  <details class="tech"><summary>Technical details</summary><ul><li>Numbers: <code>curl -s https://api.github.com/repos/Mozar-Team/factory-that-builds-itself/pulls/115 | jq &#x27;.changed_files,.additions,.deletions&#x27;</code></li></ul></details>
+  <details class="tech"><summary>Technical details</summary><ul><li>Numbers: <code>git diff --shortstat 3370cfc eb65363; git show 3370cfc:.codex/workflow-policy.toml | wc -l; git show eb65363:.codex/workflow-policy.toml | wc -l</code></li></ul></details>
 </section>
 <section>
   <header>
@@ -775,8 +973,8 @@ details.tech h5 { margin-top: 10px }
 </article></div>
 </section>
 <section>
-  <header><h3>Next steps on #115</h3><p class="lede">From the #115 contract and its current state; your merge stays manual.</p></header>
-  <ol class="next"><li>Independent QC on #115 at 3307237, from a session other than the writer.</li><li>Closeout, your playtest receipt, your merge of #115.</li><li>Restart #113 (HUD) by hand under the simpler flow, using the brief that #115 adds.</li></ol>
+  <header><h3>Outcome</h3><p class="lede">What happened after the snapshot, from the PRs.</p></header>
+  <ol class="next"><li>Done: #115 merged on 21 Oct.</li><li>Done: HUD restarted as #116 under the lean flow; #113 closed.</li><li>Open: Independent QC on #116.</li></ol>
 </section></div>
   <div class="panel" id="gov" role="tabpanel" aria-labelledby="t-gov" hidden>
 <section>
@@ -797,29 +995,31 @@ details.tech h5 { margin-top: 10px }
   </ol>
 </section>
 <section>
-  <header><h3>Controls</h3><p class="lede">11 controls, each enforced by a policy key. The policy has 308 keys in total.</p></header>
-  <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>Control</th><th>Related framework idea</th><th>Policy key</th></tr></thead><tbody><tr><td><b>Human approval before any change</b><p>Product Owner ACCEPT names the route, writer and allowed files before the first write.</p></td>
-<td class="maps">Human oversight (EU AI Act Art. 14); NIST AI RMF Govern/Manage</td><td><code>lanes.*.product_owner_accept_before_write</code></td></tr><tr><td><b>Separation of duties</b><p>The writer cannot pass its own work; QC is a separate read-only session, preferably from another provider.</p></td>
-<td class="maps">Four-eyes principle; ISO/IEC 42001 roles and responsibilities</td><td><code>permissions.builder_may_issue_qc_pass = false</code></td></tr><tr><td><b>Least privilege</b><p>Reviewers, Architect and QC are read-only; one writer per task; protected paths need an exclusive slot.</p></td>
-<td class="maps">Access control</td><td><code>read_only_agents, admission.protected_prefixes</code></td></tr><tr><td><b>Scope control</b><p>The contract lists allowed paths; preflight rejects anything outside them.</p></td>
-<td class="maps">Change management</td><td><code>preflight.start_required_before_content_commit</code></td></tr><tr><td><b>Risk-based routing</b><p>Listed categories force the heavier ELEVATED route and cannot be downgraded.</p></td>
-<td class="maps">Risk tiering (EU AI Act, NIST Map)</td><td><code>routing.forced_elevated_categories</code></td></tr><tr><td><b>Bounded retries</b><p>Two failed QC verdicts stop the task until a human decides.</p></td>
-<td class="maps">Incident escalation</td><td><code>repair.limit</code></td></tr><tr><td><b>Evidence trail</b><p>Every verdict is an immutable PR comment bound to a commit SHA; every number needs the command that reproduces it.</p></td>
-<td class="maps">Record keeping and traceability (EU AI Act Art. 12)</td><td><code>evidence.qc_comment_required</code></td></tr><tr><td><b>No autonomous release</b><p>Agents never merge; your playtest receipt is bound to the exact code and base.</p></td>
-<td class="maps">Release approval</td><td><code>automatic_merge = false, playtest.invalidated_by</code></td></tr><tr><td><b>No invented requirements</b><p>Missing product decisions are recommended for you to decide, never applied.</p></td>
-<td class="maps">Accountability of the human owner</td><td><code>replenishment.invent_requirements = false</code></td></tr><tr><td><b>Proof before rollout</b><p>Automation counts as working only after a live canary passes.</p></td>
-<td class="maps">Validation before deployment</td><td><code>automation.capability_canary_required_before_rollout</code></td></tr><tr><td><b>Model and effort discipline</b><p>Each role has a fixed model effort; high effort only for Architect, writer and QC.</p></td>
-<td class="maps">Cost and capability control</td><td><code>session_usage.high_effort_allowed_roles</code></td></tr></tbody></table></div>
+  <header><h3>Controls</h3><p class="lede">12 controls. The key column is checked against the current policy (64 keys): a control whose key is gone is now prose only or removed.</p></header>
+  <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>Control</th><th>Related framework idea</th><th>Policy key</th></tr></thead><tbody><tr><td><b>Human approval before any change</b><p>Your ACCEPT line on the PR, checked by GitHub API author; process files need ACCEPT … GOVERNANCE.</p></td>
+<td class="maps">Human oversight (EU AI Act Art. 14); NIST AI RMF Govern/Manage</td><td><div class="key in"><code>contract.accept_line</code><span>in policy</span></div><div class="key in"><code>contract.governance_accept_line</code><span>in policy</span></div></td></tr><tr><td><b>Separation of duties</b><p>QC is a separate read-only session that must differ from the writer, preferably another provider.</p></td>
+<td class="maps">Four-eyes principle; ISO/IEC 42001 roles and responsibilities</td><td><div class="key in"><code>gates.qc_session_differs_from_writer</code><span>in policy</span></div><div class="key in"><code>gates.cross_provider_qc_preferred</code><span>in policy</span></div></td></tr><tr><td><b>Least privilege</b><p>Reviewers, Architect and QC are read-only; one active writer in the repository.</p></td>
+<td class="maps">Access control</td><td><div class="key in"><code>read_only_agents</code><span>in policy</span></div><div class="key in"><code>gates.one_active_writer</code><span>in policy</span></div></td></tr><tr><td><b>Scope control</b><p>The contract lists allowed files; start preflight rejects anything outside them.</p></td>
+<td class="maps">Change management</td><td><div class="key in"><code>contract.fields</code><span>in policy</span></div><div class="key in"><code>gates.start_command</code><span>in policy</span></div></td></tr><tr><td><b>Risk-based routing</b><p>Listed categories force the heavier ELEVATED route and cannot be downgraded.</p></td>
+<td class="maps">Risk tiering (EU AI Act, NIST Map)</td><td><div class="key in"><code>routing.forced_elevated_categories</code><span>in policy</span></div><div class="key in"><code>routing.forced_elevated_may_downgrade</code><span>in policy</span></div></td></tr><tr><td><b>Bounded retries</b><p>Two failed QC verdicts stop the task until you decide.</p></td>
+<td class="maps">Incident escalation</td><td><div class="key in"><code>repair.limit</code><span>in policy</span></div><div class="key in"><code>repair.stop_status</code><span>in policy</span></div></td></tr><tr><td><b>Evidence trail</b><p>Every verdict is a PR comment bound to an exact commit; every number needs the command that reproduces it.</p></td>
+<td class="maps">Record keeping and traceability (EU AI Act Art. 12)</td><td><div class="key in"><code>gates.qc_comment_fields</code><span>in policy</span></div></td></tr><tr><td><b>No autonomous release</b><p>Agents never merge; your playtest receipt is bound to the exact head and base.</p></td>
+<td class="maps">Release approval</td><td><div class="key in"><code>automatic_merge</code><span>in policy</span></div><div class="key in"><code>playtest.receipt_fields</code><span>in policy</span></div></td></tr><tr><td><b>Governance guard</b><p>A trusted check on main keeps process-file changes red until your GOVERNANCE approval exists.</p></td>
+<td class="maps">Segregation of policy changes</td><td><div class="key in"><code>gates.governance_status</code><span>in policy</span></div><div class="key in"><code>contract.governance_prefixes</code><span>in policy</span></div></td></tr><tr><td><b>Complexity budget</b><p>Process code may not grow past a fixed number of lines. Added after V3 grew to 6,867 lines.</p></td>
+<td class="maps">Cost of control (writer&#x27;s addition, no framework equivalent)</td><td><div class="key in"><code>gates.production_python_line_budget</code><span>in policy</span></div></td></tr><tr><td><b>Model and effort discipline</b><p>High effort only for Architect and writer; QC starts low. Now a prose rule in AGENTS.md, no longer a policy key.</p></td>
+<td class="maps">Cost and capability control</td><td><div class="key out"><code>session_usage.high_effort_allowed_roles</code><span>not in current policy</span></div></td></tr><tr><td><b>Proof before rollout (canary)</b><p>Automation had to pass a live canary. Removed together with the automation.</p></td>
+<td class="maps">Validation before deployment</td><td><div class="key out"><code>automation.capability_canary_required_before_rollout</code><span>not in current policy</span></div></td></tr></tbody></table></div>
 </section>
 <section>
   <header><h3>What a company would still need</h3></header>
-  <ul class="gaps"><li><b>Enforcement depends on agent obedience</b><p>The policy itself says runtime obedience is not machine-provable (<code>runtime_obedience_is_machine_provable = false</code>). Validators check declarations, not behaviour.</p></li><li><b>Single human approver</b><p>Every gate is one person. A company needs roles, delegation and approver rotation.</p></li><li><b>Identity is a GitHub login</b><p>No SSO, no per-user roles beyond the Product Owner ID check in po-playtest.</p></li><li><b>Evidence lives in PR comments</b><p>No retention policy, no export to an audit store, no tamper evidence beyond GitHub history.</p></li><li><b>Governance cost is high</b><p>Process code is about the same size as game code (estimate, see History), and the current stall shows governance can block delivery for days.</p></li><li><b>Tied to one repository and two providers</b><p>Policy keys, paths and adapters are specific to this project.</p></li></ul>
+  <ul class="gaps"><li><b>Enforcement depends on agent obedience</b><p>Validators check declarations, not behaviour. Schema 5 said so explicitly (<code>runtime_obedience_is_machine_provable = false</code>); schema 6 dropped the key, not the limit.</p></li><li><b>Single human approver</b><p>Every gate is one person. A company needs roles, delegation and approver rotation.</p></li><li><b>Identity is a GitHub login</b><p>No SSO, no per-user roles beyond the Product Owner ID check in po-playtest.</p></li><li><b>Evidence lives in PR comments</b><p>No retention policy, no export to an audit store, no tamper evidence beyond GitHub history.</p></li><li><b>Governance cost was high</b><p>V3 had 6,867 lines of production process code and stalled game work for days. Schema 6 cut it to 1,456 and capped it at 2,500 (see History).</p></li><li><b>Tied to one repository and two providers</b><p>Policy keys, paths and adapters are specific to this project.</p></li></ul>
 </section>
 <section>
-  <header><h3>What V3 teaches about the product</h3></header>
+  <header><h3>What V3 and its retreat teach about the product</h3></header>
   <div class="cards">
     <div class="card"><h4>Kept the system safe</h4><p>The writer refused to break a rule ("do not alter policy") even when its own contract asked for it. Nothing unapproved reached main.</p></div>
-    <div class="card"><h4>Stopped delivery</h4><p>That refusal, plus the model/effort defect, left game work waiting since 13 Oct. Safety and throughput pull against each other.</p></div>
+    <div class="card"><h4>Stopped delivery</h4><p>That refusal, plus the model/effort defect, left game work waiting from 13 Oct until the retreat merged on 21 Oct. Safety and throughput pull against each other.</p></div>
+    <div class="card"><h4>The fix was subtraction</h4><p>Schema 6 kept the gates and removed the machinery: 357 → 81 policy lines, 6,867 → 1,456 lines of process code, and a budget so it cannot grow back unnoticed.</p></div>
     <div class="card"><h4>What to sell, if anything</h4><p>Not the code: the contract format, the gate sequence and the evidence rules. Those transfer between companies; runners and adapters do not.</p></div>
   </div>
 </section></div>
@@ -827,7 +1027,7 @@ details.tech h5 { margin-top: 10px }
 <section>
   <header>
     <h2>How the flow evolved</h2>
-    <p class="lede">From written rules in August to an event-driven automation in October. The eras are the writer's reading of the git log; the counts are computed from it.</p>
+    <p class="lede">From written rules in August, to an event-driven automation in October, and back to a lean flow. The eras are the writer's reading of the git log; the counts are computed from it.</p>
   </header>
   <ol class="eras">
 <li class="era">
@@ -885,29 +1085,53 @@ details.tech h5 { margin-top: 10px }
   </div>
 </li>
 <li class="era">
-  <div class="when">10-15 → 10-15</div>
+  <div class="when">10-15 → 10-21</div>
   <div class="what">
-    <h4>Retreat (PR open)</h4>
-    <p>FLOW-RECOVERY-001 (#115) removes the event controller, the local runner, paired admission and their tests, and keeps contract, ACCEPT, one writer, independent QC, preflight and the playtest gate. #114 was closed. Not merged yet, so it is not counted below.</p>
-    <p class="note"><b>Lesson</b> Removing about 13,000 lines is the first flow change that makes the process smaller.</p>
+    <h4>Retreat</h4>
+    <p>FLOW-RECOVERY-001 (#115), accepted 15 Oct and merged 21 Oct, removed the event controller, the local runner, paired admission and their tests, and kept contract, ACCEPT, one writer, independent QC, preflight and the playtest gate.</p>
+    <p class="note"><b>Lesson</b> The first flow change that made the process smaller: production workflow Python went from 6,867 to 1,456 lines.</p>
+    <p class="stats"><span>1 process commits</span><span>1 tasks</span><span>290 policy key changes</span></p>
+  </div>
+</li>
+<li class="era">
+  <div class="when">10-22 → 10-31</div>
+  <div class="what">
+    <h4>Lean flow (V4)</h4>
+    <p>Schema 6: brief, start, ACCEPT, one writer, independent QC, playtest receipt, manual merge. HUD-SPRITE-001 (#116) is the first task through it.</p>
+    <p class="note"><b>Lesson</b> Too early to judge: one task, not yet through QC.</p>
     <p class="stats"><span>0 process commits</span><span>0 tasks</span><span>0 policy key changes</span></p>
   </div>
 </li></ol>
 </section>
 <section>
   <header><h3>Policy size at the end of each era</h3><p class="lede">Number of keys in <code>.codex/workflow-policy.toml</code>. It did not exist before Flow V2.</p></header>
-  <div class="bars"><div class="bar"><span class="lab">Foundations</span><span class="track"><span style="width:0%"></span></span><span class="val">0</span></div><div class="bar"><span class="lab">Flow V2 pilot</span><span class="track"><span style="width:34%"></span></span><span class="val">104</span></div><div class="bar"><span class="lab">Simplify and harden</span><span class="track"><span style="width:54%"></span></span><span class="val">166</span></div><div class="bar"><span class="lab">Local runner</span><span class="track"><span style="width:69%"></span></span><span class="val">211</span></div><div class="bar"><span class="lab">Event-driven Flow (V3)</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Stall</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Retreat (PR open)</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div></div>
+  <div class="bars"><div class="bar"><span class="lab">Foundations</span><span class="track"><span style="width:0%"></span></span><span class="val">0</span></div><div class="bar"><span class="lab">Flow V2 pilot</span><span class="track"><span style="width:34%"></span></span><span class="val">104</span></div><div class="bar"><span class="lab">Simplify and harden</span><span class="track"><span style="width:54%"></span></span><span class="val">166</span></div><div class="bar"><span class="lab">Local runner</span><span class="track"><span style="width:69%"></span></span><span class="val">211</span></div><div class="bar"><span class="lab">Event-driven Flow (V3)</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Stall</span><span class="track"><span style="width:100%"></span></span><span class="val">308</span></div><div class="bar"><span class="lab">Retreat</span><span class="track"><span style="width:21%"></span></span><span class="val">64</span></div><div class="bar"><span class="lab">Lean flow (V4)</span><span class="track"><span style="width:21%"></span></span><span class="val">64</span></div></div>
+</section>
+<section>
+  <header><h3>Process code at the end of each era</h3><p class="lede">Lines of production Python in <code>scripts/workflow/</code>, tests excluded, counted the way the repository's own validator counts them.</p></header>
+  <div class="bars"><div class="bar"><span class="lab">Foundations</span><span class="track"><span style="width:0%"></span></span><span class="val">0</span></div><div class="bar"><span class="lab">Flow V2 pilot</span><span class="track"><span style="width:9%"></span></span><span class="val">625</span></div><div class="bar"><span class="lab">Simplify and harden</span><span class="track"><span style="width:19%"></span></span><span class="val">1,319</span></div><div class="bar"><span class="lab">Local runner</span><span class="track"><span style="width:52%"></span></span><span class="val">3,594</span></div><div class="bar"><span class="lab">Event-driven Flow (V3)</span><span class="track"><span style="width:100%"></span></span><span class="val">6,867</span></div><div class="bar"><span class="lab">Stall</span><span class="track"><span style="width:100%"></span></span><span class="val">6,867</span></div><div class="bar"><span class="lab">Retreat</span><span class="track"><span style="width:21%"></span></span><span class="val">1,456</span></div><div class="bar"><span class="lab">Lean flow (V4)</span><span class="track"><span style="width:21%"></span></span><span class="val">1,456</span></div></div>
 </section>
 <section id="changes">
   <header class="tracker-head">
     <div>
       <h3>Process change log</h3>
-      <p class="lede">Only changes to how the work is done: rules, automation, scripts, process docs. No game changes. 52 tasks, 61 commits.</p>
-      <details class="tech"><summary>Technical details</summary><ul><li>Process paths: <span class="chip raw">.codex/</span><span class="chip raw">.github/</span><span class="chip raw">.claude/</span><span class="chip raw">AGENTS.md</span><span class="chip raw">CLAUDE.md</span><span class="chip raw">docs/workflow/</span><span class="chip raw">scripts/workflow/</span></li><li>Excluded because they record game work: <span class="chip raw">TASKS.md</span><span class="chip raw">docs/verification/</span><span class="chip raw">project.godot</span></li></ul></details>
+      <p class="lede">Only changes to how the work is done: rules, automation, scripts, process docs. No game changes. 53 tasks, 62 commits.</p>
+      <details class="tech"><summary>Technical details</summary><ul><li>Process paths: <span class="chip raw">.claude/</span><span class="chip raw">.codex/</span><span class="chip raw">.github/</span><span class="chip raw">AGENTS.md</span><span class="chip raw">CLAUDE.md</span><span class="chip raw">docs/workflow/</span><span class="chip raw">scripts/workflow/</span></li><li>Excluded because they record game work: <span class="chip raw">TASKS.md</span><span class="chip raw">docs/verification/</span><span class="chip raw">project.godot</span></li></ul></details>
     </div>
     <label for="q"><span class="eyebrow">Search</span><br><input id="q" type="search" placeholder="e.g. runner, QC, playtest"></label>
   </header>
   <ol class="log" id="log">
+<li class="entry" data-search="flow-recovery-001 retreat from flow complexity (proposed) .claude/skills/qc-comment/skill.md .claude/skills/ship-contract/skill.md .codex/agents/astra-builder.toml .codex/workflow-policy.toml .github/pull_request_template.md .github/workflows/flow-auto-events.yml .github/workflows/governance-guard.yml .github/workflows/workflow-config-validation.yml .github/workflows/writer-admission.yml agents.md docs/workflow/flow_auto_runner.md docs/workflow/ship_workflow.md scripts/workflow/admission.py scripts/workflow/contract.py scripts/workflow/event_dispatcher.py scripts/workflow/local_runner.py scripts/workflow/po_playtest.py scripts/workflow/preflight.py scripts/workflow/test_admission.py scripts/workflow/test_event_dispatcher.py scripts/workflow/test_local_runner.py scripts/workflow/test_po_playtest.py scripts/workflow/test_preflight.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
+  <div class="when">2026-10-21</div>
+  <div class="what">
+    <h4>retreat from Flow complexity (PROPOSED)</h4>
+    <p class="meta"><code>FLOW-RECOVERY-001</code> <span class="pr">PR #115</span></p>
+    <p class="areas"><span class="chip">Claude tooling</span><span class="chip">GitHub automation</span><span class="chip">agent rules</span><span class="chip">process docs</span><span class="chip">process scripts</span><span class="chip hot">rule change</span></p>
+    <details class="tech"><summary>Technical details: 1 commits, 25 files, 290 policy keys</summary>
+      <h5>Policy keys changed</h5><ul class="pol"><li><span class="k">removed</span> <code>admission.admission_requires_no_prior_content</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.agents_may_merge</code> <span class="old">false</span></li><li><span class="k">removed</span> <code>admission.claims</code> <span class="old">[&quot;write_claims&quot;, &quot;read_claims&quot;, &quot;dependency_claims&quot;, &quot;derived_sidecars&quot;]</span></li><li><span class="k">removed</span> <code>admission.conflicts_fail_closed</code> <span class="old">[&quot;write_write&quot;, &quot;write_read_both_directions&quot;, &quot;protected_path&quot;, &quot;unresolved_dependency&quot;, &quot;malformed_or_legacy_peer&quot;, &quot;third_writer&quot;, &quot;undeclared_tracked_sidecar&quot;]</span></li><li><span class="k">removed</span> <code>admission.default_mode</code> <span class="old">&quot;exclusive&quot;</span></li><li><span class="k">removed</span> <code>admission.deterministic_payload_sha256</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.fresh_tests_and_qc_after_refresh</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.governance_paths_remain_exclusive</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.join_consumes_survivor_authority_once</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.join_edit_is_server_side</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.join_mutable_fields</code> <span class="old">[&quot;admission_mode&quot;, &quot;admission_peer_pr&quot;, &quot;admission_rank&quot;, &quot;admission_lease&quot;]</span></li><li><span class="k">removed</span> <code>admission.join_receipt_binds</code> <span class="old">[&quot;survivor_prior_authority&quot;, &quot;survivor_pr&quot;, &quot;joiner_pr&quot;, &quot;base&quot;, &quot;contract_digests&quot;, &quot;admission_digests&quot;, &quot;claims&quot;, &quot;providers&quot;]</span></li><li><span class="k">removed</span> <code>admission.join_survivor_states</code> <span class="old">[&quot;exclusive&quot;, &quot;refreshed_exclusive&quot;, &quot;rank_one_with_closed_unmerged_peer&quot;]</span></li><li><span class="k">removed</span> <code>admission.lease_bound</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.legacy_refresh_payload_read_as_lease</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.maximum_authoring_slots</code> <span class="old">2</span></li><li><span class="k">removed</span> <code>admission.operations</code> <span class="old">[&quot;grant&quot;, &quot;join&quot;, &quot;authorize-refresh&quot;]</span></li><li><span class="k">removed</span> <code>admission.original_lease_required_for_refresh</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.paired_accept_author_verified</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.paired_contracts_symmetric</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.paired_sessions_distinct</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.paired_writer_providers</code> <span class="old">[&quot;codex&quot;, &quot;claude-code&quot;]</span></li><li><span class="k">removed</span> <code>admission.pending_joiner_tolerated_by_survivor</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.proposed_holds_slot</code> <span class="old">false</span></li><li><span class="k">removed</span> <code>admission.protected_prefixes</code> <span class="old">[&quot;.codex/&quot;, &quot;.github/&quot;, &quot;.claude/&quot;, &quot;AGENTS.md&quot;, &quot;CLAUDE.md&quot;, &quot;TASKS.md&quot;, &quot;docs/workflow/&quot;, &quot;docs/verification/&quot;, &quot;scripts/workflow/&quot;, &quot;project.godot&quot;]</span></li><li><span class="k">removed</span> <code>admission.rank_one_stages</code> <span class="old">[&quot;author&quot;, &quot;qc&quot;, &quot;closeout&quot;, &quot;manual_merge&quot;]</span></li><li><span class="k">removed</span> <code>admission.rank_two_stages</code> <span class="old">[&quot;author&quot;, &quot;pending_refresh&quot;]</span></li><li><span class="k">removed</span> <code>admission.receipt_authority</code> <span class="old">&quot;github_actions_run_api&quot;</span></li><li><span class="k">removed</span> <code>admission.receipt_event</code> <span class="old">&quot;workflow_dispatch&quot;</span></li><li><span class="k">removed</span> <code>admission.receipt_head_branch</code> <span class="old">&quot;main&quot;</span></li><li><span class="k">removed</span> <code>admission.receipt_job</code> <span class="old">&quot;admission&quot;</span></li><li><span class="k">removed</span> <code>admission.receipt_run_fields</code> <span class="old">[&quot;repository&quot;, &quot;path&quot;, &quot;event&quot;, &quot;head_branch&quot;, &quot;head_sha&quot;, &quot;display_title&quot;, &quot;run_id&quot;, &quot;run_attempt&quot;, &quot;status&quot;, &quot;conclusion&quot;]</span></li><li><span class="k">removed</span> <code>admission.receipt_workflow_path</code> <span class="old">&quot;.github/workflows/writer-admission.yml&quot;</span></li><li><span class="k">removed</span> <code>admission.refresh_binds_lease_or_join</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.refresh_exempts_merged_peer_closeout</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.refresh_invalidates</code> <span class="old">[&quot;ci&quot;, &quot;qc&quot;]</span></li><li><span class="k">removed</span> <code>admission.refresh_is_mechanical</code> <span class="old">true</span></li><li><span class="k">removed</span> <code>admission.refresh_preserves</code> <span class="old">[&quot;contract&quot;, &quot;scope&quot;, &quot;patch&quot;, &quot;output&quot;, &quot;repair_history&quot;]</span></li><li><span class="k">removed</span> <code>admission.serialization</code> <span class="old">&quot;github_actions_concurrency&quot;</span></li><li><span class="k">removed</span> <code>admission.workflow</code> <span class="old">&quot;.github/workflows/writer-admission.yml&quot;</span></li><li>… and 250 more</li></ul><h5>Commits and files</h5><ul class="commits"><li><code>eb65363</code> 2026-10-21 FLOW-RECOVERY-001: retreat from Flow complexity (PROPOSED) (#115)</li></ul><ul class="files"><li><code>.claude/skills/qc-comment/SKILL.md</code></li><li><code>.claude/skills/ship-contract/SKILL.md</code></li><li><code>.codex/agents/astra-builder.toml</code></li><li><code>.codex/workflow-policy.toml</code></li><li><code>.github/pull_request_template.md</code></li><li><code>.github/workflows/flow-auto-events.yml</code></li><li><code>.github/workflows/governance-guard.yml</code></li><li><code>.github/workflows/workflow-config-validation.yml</code></li><li><code>.github/workflows/writer-admission.yml</code></li><li><code>AGENTS.md</code></li><li><code>docs/workflow/FLOW_AUTO_RUNNER.md</code></li><li><code>docs/workflow/SHIP_WORKFLOW.md</code></li><li><code>scripts/workflow/admission.py</code></li><li><code>scripts/workflow/contract.py</code></li><li><code>scripts/workflow/event_dispatcher.py</code></li><li><code>scripts/workflow/local_runner.py</code></li><li><code>scripts/workflow/po_playtest.py</code></li><li><code>scripts/workflow/preflight.py</code></li><li><code>scripts/workflow/test_admission.py</code></li><li><code>scripts/workflow/test_event_dispatcher.py</code></li><li><code>scripts/workflow/test_local_runner.py</code></li><li><code>scripts/workflow/test_po_playtest.py</code></li><li><code>scripts/workflow/test_preflight.py</code></li><li><code>scripts/workflow/test_validate_agent_config.py</code></li><li><code>scripts/workflow/validate_agent_config.py</code></li></ul></details>
+  </div>
+</li>
+
 <li class="entry" data-search="flow-decision-recommend-001 recommend missing product decisions in proposed contracts .codex/workflow-policy.toml agents.md docs/workflow/flow_auto_runner.md docs/workflow/ship_workflow.md scripts/workflow/event_dispatcher.py scripts/workflow/test_event_dispatcher.py scripts/workflow/test_validate_agent_config.py scripts/workflow/validate_agent_config.py">
   <div class="when">2026-10-11</div>
   <div class="what">
@@ -1481,7 +1705,7 @@ details.tech h5 { margin-top: 10px }
 </li></ol>
 </section></div>
 
-  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@3370cfcd7336f1db1aaaeb48d7b00c2baf9305b8</code>. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
+  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@eb6536353570b43cecc976f117b383cf1918fa3f</code>; the V2/V3 map from the archived rules. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
 </main>
 
 <script>

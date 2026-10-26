@@ -211,9 +211,12 @@ ERAS = [
     {"from": "2026-10-12", "to": "2026-10-14", "name": "Stall",
      "what": "Continuity repair #110 used both repairs and was frozen. HUD work #113 is blocked because resumed native sessions do not keep their model and effort. The adapter fix #114 failed twice before writing anything.",
      "lesson": "Green workflow runs did not mean tasks moved. See the V3 status tab."},
-    {"from": "2026-10-15", "to": "2026-10-15", "name": "Retreat (PR open)",
-     "what": "FLOW-RECOVERY-001 (#115) removes the event controller, the local runner, paired admission and their tests, and keeps contract, ACCEPT, one writer, independent QC, preflight and the playtest gate. #114 was closed. Not merged yet, so it is not counted below.",
-     "lesson": "Removing about 13,000 lines is the first flow change that makes the process smaller."},
+    {"from": "2026-10-15", "to": "2026-10-21", "name": "Retreat",
+     "what": "FLOW-RECOVERY-001 (#115), accepted 15 Oct and merged 21 Oct, removed the event controller, the local runner, paired admission and their tests, and kept contract, ACCEPT, one writer, independent QC, preflight and the playtest gate.",
+     "lesson": "The first flow change that made the process smaller: production workflow Python went from 6,867 to 1,456 lines."},
+    {"from": "2026-10-22", "to": "2026-10-31", "name": "Lean flow (V4)",
+     "what": "Schema 6: brief, start, ACCEPT, one writer, independent QC, playtest receipt, manual merge. HUD-SPRITE-001 (#116) is the first task through it.",
+     "lesson": "Too early to judge: one task, not yet through QC."},
 ]
 
 # --- V3 status snapshot. Every row cites its source. Recorded 2026-10-15.
@@ -221,15 +224,15 @@ SNAPSHOT_DATE = "2026-10-15"
 R = "https://github.com/Mozar-Team/factory-that-builds-itself"
 SNAPSHOT_V3 = {
     "recovery": {
-        "title": "Retreat in progress: FLOW-RECOVERY-001",
+        "title": "Retreat merged: FLOW-RECOVERY-001",
         "pr": f"{R}/pull/115",
-        "state": "Accepted by you on 2026-10-15 05:41 UTC (ACCEPT FLOW-RECOVERY-001 GOVERNANCE). Implementation at 3307237; validate and Godot checks green. Waiting for Independent QC, closeout, your playtest receipt and your merge.",
+        "state": "Accepted by you on 2026-10-15 05:41 UTC (ACCEPT FLOW-RECOVERY-001 GOVERNANCE) and merged on 2026-10-21 06:29 UTC as eb65363. Flow V3 is gone; see the Current flow tab.",
         "removes": ["Event controller and its workflow (flow-auto-events.yml)", "Local runner and native session adapters", "Paired writer admission (writer-admission.yml)", "Runner documentation (FLOW_AUTO_RUNNER.md)", "Their tests"],
         "keeps": ["Task contract in the PR", "Your ACCEPT before any write", "One active writer at a time", "Independent QC in a separate session", "Start and final preflight", "Your playtest receipt and manual merge"],
         "adds": ["contract.py: one shared contract parser", "governance-guard.yml: trusted check for governance paths", "docs/briefs/HUD-SPRITE-001.md: the HUD brief for #113"],
-        "numbers": [("27", "files changed"), ("+2,672", "lines added"), ("−12,967", "lines removed"), ("−276", "net lines in the policy file")],
+        "numbers": [("28", "files changed"), ("+2,724", "lines added"), ("−12,967", "lines removed"), ("357 → 81", "lines in the policy file")],
         "src": [("PR #115", f"{R}/pull/115"), ("ACCEPT", f"{R}/pull/115#issuecomment-6185317650"), ("#114 closed", f"{R}/pull/114#issuecomment-6185490239")],
-        "cmd": "curl -s https://api.github.com/repos/Mozar-Team/factory-that-builds-itself/pulls/115 | jq '.changed_files,.additions,.deletions'",
+        "cmd": "git diff --shortstat 3370cfc eb65363; git show 3370cfc:.codex/workflow-policy.toml | wc -l; git show eb65363:.codex/workflow-policy.toml | wc -l",
     },
     "summary": "Before the retreat: the automation ran, but no task could move through it. The event workflow fires and finishes green, yet the two open flow tasks are blocked and game work waits behind them.",
     "components": [
@@ -269,44 +272,134 @@ SNAPSHOT_V3 = {
     ],
     "last_merges": "Last game change merged: GENERATOR-BURN-001 (#111) on 2026-10-13. Last process change merged: GFX-QUEUE-TRACKER-001 (#112) on 2026-10-14.",
     "next": [
-        "Independent QC on #115 at 3307237, from a session other than the writer.",
-        "Closeout, your playtest receipt, your merge of #115.",
-        "Restart #113 (HUD) by hand under the simpler flow, using the brief that #115 adds.",
+        "Done: #115 merged on 21 Oct.",
+        "Done: HUD restarted as #116 under the lean flow; #113 closed.",
+        "Open: Independent QC on #116.",
     ],
 }
 
 # --- Governance view: controls in this repo, read as a reusable AI-delivery governance pattern.
 # The framework column is the writer's mapping, not a certification.
 CONTROLS = [
-    {"control": "Human approval before any change", "how": "Product Owner ACCEPT names the route, writer and allowed files before the first write.",
-     "key": "lanes.*.product_owner_accept_before_write", "maps": "Human oversight (EU AI Act Art. 14); NIST AI RMF Govern/Manage"},
-    {"control": "Separation of duties", "how": "The writer cannot pass its own work; QC is a separate read-only session, preferably from another provider.",
-     "key": "permissions.builder_may_issue_qc_pass = false", "maps": "Four-eyes principle; ISO/IEC 42001 roles and responsibilities"},
-    {"control": "Least privilege", "how": "Reviewers, Architect and QC are read-only; one writer per task; protected paths need an exclusive slot.",
-     "key": "read_only_agents, admission.protected_prefixes", "maps": "Access control"},
-    {"control": "Scope control", "how": "The contract lists allowed paths; preflight rejects anything outside them.",
-     "key": "preflight.start_required_before_content_commit", "maps": "Change management"},
+    {"control": "Human approval before any change", "how": "Your ACCEPT line on the PR, checked by GitHub API author; process files need ACCEPT … GOVERNANCE.",
+     "keys": ["contract.accept_line", "contract.governance_accept_line"], "maps": "Human oversight (EU AI Act Art. 14); NIST AI RMF Govern/Manage"},
+    {"control": "Separation of duties", "how": "QC is a separate read-only session that must differ from the writer, preferably another provider.",
+     "keys": ["gates.qc_session_differs_from_writer", "gates.cross_provider_qc_preferred"], "maps": "Four-eyes principle; ISO/IEC 42001 roles and responsibilities"},
+    {"control": "Least privilege", "how": "Reviewers, Architect and QC are read-only; one active writer in the repository.",
+     "keys": ["read_only_agents", "gates.one_active_writer"], "maps": "Access control"},
+    {"control": "Scope control", "how": "The contract lists allowed files; start preflight rejects anything outside them.",
+     "keys": ["contract.fields", "gates.start_command"], "maps": "Change management"},
     {"control": "Risk-based routing", "how": "Listed categories force the heavier ELEVATED route and cannot be downgraded.",
-     "key": "routing.forced_elevated_categories", "maps": "Risk tiering (EU AI Act, NIST Map)"},
-    {"control": "Bounded retries", "how": "Two failed QC verdicts stop the task until a human decides.",
-     "key": "repair.limit", "maps": "Incident escalation"},
-    {"control": "Evidence trail", "how": "Every verdict is an immutable PR comment bound to a commit SHA; every number needs the command that reproduces it.",
-     "key": "evidence.qc_comment_required", "maps": "Record keeping and traceability (EU AI Act Art. 12)"},
-    {"control": "No autonomous release", "how": "Agents never merge; your playtest receipt is bound to the exact code and base.",
-     "key": "automatic_merge = false, playtest.invalidated_by", "maps": "Release approval"},
-    {"control": "No invented requirements", "how": "Missing product decisions are recommended for you to decide, never applied.",
-     "key": "replenishment.invent_requirements = false", "maps": "Accountability of the human owner"},
-    {"control": "Proof before rollout", "how": "Automation counts as working only after a live canary passes.",
-     "key": "automation.capability_canary_required_before_rollout", "maps": "Validation before deployment"},
-    {"control": "Model and effort discipline", "how": "Each role has a fixed model effort; high effort only for Architect, writer and QC.",
-     "key": "session_usage.high_effort_allowed_roles", "maps": "Cost and capability control"},
+     "keys": ["routing.forced_elevated_categories", "routing.forced_elevated_may_downgrade"], "maps": "Risk tiering (EU AI Act, NIST Map)"},
+    {"control": "Bounded retries", "how": "Two failed QC verdicts stop the task until you decide.",
+     "keys": ["repair.limit", "repair.stop_status"], "maps": "Incident escalation"},
+    {"control": "Evidence trail", "how": "Every verdict is a PR comment bound to an exact commit; every number needs the command that reproduces it.",
+     "keys": ["gates.qc_comment_fields"], "maps": "Record keeping and traceability (EU AI Act Art. 12)"},
+    {"control": "No autonomous release", "how": "Agents never merge; your playtest receipt is bound to the exact head and base.",
+     "keys": ["automatic_merge", "playtest.receipt_fields"], "maps": "Release approval"},
+    {"control": "Governance guard", "how": "A trusted check on main keeps process-file changes red until your GOVERNANCE approval exists.",
+     "keys": ["gates.governance_status", "contract.governance_prefixes"], "maps": "Segregation of policy changes"},
+    {"control": "Complexity budget", "how": "Process code may not grow past a fixed number of lines. Added after V3 grew to 6,867 lines.",
+     "keys": ["gates.production_python_line_budget"], "maps": "Cost of control (writer's addition, no framework equivalent)"},
+    {"control": "Model and effort discipline", "how": "High effort only for Architect and writer; QC starts low. Now a prose rule in AGENTS.md, no longer a policy key.",
+     "keys": ["session_usage.high_effort_allowed_roles"], "maps": "Cost and capability control"},
+    {"control": "Proof before rollout (canary)", "how": "Automation had to pass a live canary. Removed together with the automation.",
+     "keys": ["automation.capability_canary_required_before_rollout"], "maps": "Validation before deployment"},
 ]
 
 GAPS = [
-    ("Enforcement depends on agent obedience", "The policy itself says runtime obedience is not machine-provable (`runtime_obedience_is_machine_provable = false`). Validators check declarations, not behaviour."),
+    ("Enforcement depends on agent obedience", "Validators check declarations, not behaviour. Schema 5 said so explicitly (`runtime_obedience_is_machine_provable = false`); schema 6 dropped the key, not the limit."),
     ("Single human approver", "Every gate is one person. A company needs roles, delegation and approver rotation."),
     ("Identity is a GitHub login", "No SSO, no per-user roles beyond the Product Owner ID check in po-playtest."),
     ("Evidence lives in PR comments", "No retention policy, no export to an audit store, no tamper evidence beyond GitHub history."),
-    ("Governance cost is high", "Process code is about the same size as game code (estimate, see History), and the current stall shows governance can block delivery for days."),
+    ("Governance cost was high", "V3 had 6,867 lines of production process code and stalled game work for days. Schema 6 cut it to 1,456 and capped it at 2,500 (see History)."),
     ("Tied to one repository and two providers", "Policy keys, paths and adapters are specific to this project."),
 ]
+
+# --- Current flow (schema 6, merged 2026-10-21 by FLOW-RECOVERY-001 #115).
+# The policy no longer lists step sequences; the steps below follow
+# docs/workflow/SHIP_WORKFLOW.md ("What the Product Owner does" and "Gates").
+ARCHIVE_REF = "3370cfc"
+ARCHIVE_NOTE = "Rules at 3370cfc (14 Oct), before FLOW-RECOVERY-001. Replaced by schema 6 on 21 Oct."
+
+V4_STEPS = [
+    {"name": "brief", "title": "A brief is written", "actor": "writer", "src": "po",
+     "plain": "You say \"przygotuj brief X\". An agent writes the brief as DRAFT, then READY.",
+     "inputs": ["Your request", "Game documents"], "outputs": ["Brief file marked READY"],
+     "gate": "", "tech": ["File: `docs/briefs/X.md`"]},
+    {"name": "start", "title": "Task is started", "actor": "orch", "src": "po",
+     "plain": "You say \"start X\". The orchestrator picks the route, asks the reviewers, gets an Architect specification if needed and opens a draft PR with a PROPOSED contract.",
+     "inputs": ["READY brief"], "outputs": ["Draft PR with the PROPOSED contract"],
+     "gate": "A PROPOSED contract holds no writer slot.",
+     "tech": ["Contract schema 6 from `.github/pull_request_template.md`", "Check: `python scripts/workflow/preflight.py check-proposed --body-file <body>`"]},
+    {"name": "accept", "title": "You approve (ACCEPT)", "actor": "po", "src": "orch",
+     "plain": "You comment ACCEPT X on the PR. For changes to process files you add GOVERNANCE. The contract becomes ACTIVE.",
+     "inputs": ["PROPOSED contract"], "outputs": ["Your ACCEPT comment"],
+     "gate": "The governance guard stays red until your GOVERNANCE line exists.",
+     "tech": ["Lines: `ACCEPT <task_id>`, `ACCEPT <task_id> GOVERNANCE`", "Author checked through the GitHub API", "Status: `governance-accept`"]},
+    {"name": "start-preflight", "title": "Start check", "actor": "ci", "src": "po",
+     "plain": "A script checks the base is current, the tree is clean, Godot is available, no other task is ACTIVE and the change stays inside the allowed files.",
+     "inputs": ["ACTIVE contract"], "outputs": ["Go or stop"],
+     "gate": "Only one active writer in the whole repository.",
+     "tech": ["`python scripts/workflow/preflight.py start --pr N --writer P --writer-session S`"]},
+    {"name": "implementation", "title": "Writer builds the change", "actor": "writer", "src": "ci",
+     "plain": "The writer makes the smallest accepted change, runs the tests and stops with a comment naming the exact version to check.",
+     "inputs": ["ACTIVE contract"], "outputs": ["Change", "Test results", "PENDING VERIFICATION comment"],
+     "gate": "Stops and waits for QC.", "tech": ["Godot headless suites via `scripts/workflow/run_godot_checks.py`"]},
+    {"name": "ci", "title": "Automated checks", "actor": "ci", "src": "writer",
+     "plain": "GitHub validates the rules, keeps the process code under its size budget and runs the game headless.",
+     "inputs": ["Latest version"], "outputs": ["Green or red checks"],
+     "gate": "Red checks are the writer's to fix.",
+     "tech": ["`validate`: policy, the production line budget, all workflow tests", "`Godot 4.7.1 headless smoke check`"]},
+    {"name": "qc", "title": "Independent QC", "actor": "qc", "src": "writer",
+     "plain": "A separate read-only session, preferably the other provider, checks the change itself and posts PASS, FAIL or BLOCKED.",
+     "inputs": ["The exact version to check"], "outputs": ["Seven-line verdict comment"],
+     "gate": "FAIL: you say \"popraw\", at most two repairs.",
+     "tech": ["QC session must differ from the writer session"]},
+    {"name": "closeout", "title": "Result recorded, final check", "actor": "writer", "src": "qc",
+     "plain": "After PASS one commit records the result in the task list. A final script checks QC, green CI and that the PR can merge.",
+     "inputs": ["PASS verdict"], "outputs": ["Task list entry", "Go for playtest"],
+     "gate": "Exactly one commit after QC.",
+     "tech": ["`python scripts/workflow/preflight.py final --pr N --qc-comment-url URL ...`"]},
+    {"name": "playtest-merge", "title": "You playtest and merge", "actor": "po", "src": "writer",
+     "plain": "You get four plain points: what to click, what should happen, what changes, what stays open. You play, post a four-line receipt and merge yourself.",
+     "inputs": ["Playtest package"], "outputs": ["PO-PLAYTEST receipt", "Your merge"],
+     "gate": "A new push or base needs a new receipt. Agents never merge.",
+     "tech": ["Receipt: `PO-PLAYTEST: PASS`, task_id, tested_head_sha, tested_base_sha", "Status: `po-playtest`"]},
+]
+
+V4_ELEVATED = [
+    "Reviewers for the touched areas are mandatory.",
+    "An Architect specification is required for structure, saves, public interfaces, large refactors, several systems or unclear impact.",
+    "A findings file is always written; on STANDARD only after a FAIL.",
+    "The Architect and the writer may use high effort; QC starts low (AGENTS.md, prose rule).",
+]
+
+V4_WHAT_CHANGED = [
+    ("Automation", "Event controller, self-hosted runner, native adapters and canary removed.", "self_hosted_runner = false"),
+    ("Parallel work", "Two paired writers with server leases replaced by one active writer.", "writer_parallelism = 1"),
+    ("Starting a task", "Queue reader and po-ready markers replaced by you saying \"start X\".", "brief + start in SHIP"),
+    ("Approval", "ACCEPT codes replaced by a plain line, ACCEPT X, plus GOVERNANCE for process files, checked by a trusted guard.", "contract.accept_line"),
+    ("QC comment", "Eight keys to seven: the product field is gone.", "gates.qc_comment_fields"),
+    ("Size limit", "New: process code may not exceed a fixed line budget.", "gates.production_python_line_budget"),
+]
+
+V4_STATUS = {
+    "date": "2026-10-26",
+    "pr": f"{R}/pull/116",
+    "title": "First task through the lean flow: HUD-SPRITE-001 (#116)",
+    "timeline": [
+        ("2026-10-21 06:31", "Draft PR opened with the contract", f"{R}/pull/116"),
+        ("2026-10-23 17:47", "Your ACCEPT HUD-SPRITE-001", f"{R}/pull/116#issuecomment-6371169433"),
+        ("2026-10-24 00:30", "PENDING VERIFICATION at 065a8b0, 31 Godot suites pass, CI 4/4 green", f"{R}/pull/116#issuecomment-6377540838"),
+        ("2026-10-26 03:24", "Your decisions \"1A i 2B\": accept a measured performance deviation, move the portrait to a follow-up", f"{R}/pull/116#issuecomment-6407515172"),
+    ],
+    "now": "Waiting for Independent QC on 065a8b0. No QC verdict on the PR yet.",
+    "notes": [
+        "ACCEPT to PENDING VERIFICATION took about 6.7 hours, with no runner and no manual rescue recorded on the PR.",
+        "The task is large: 71 files, +7,647 / −1,786 lines. QC will need time.",
+        "Criterion 1 (retained EVA portrait) is met only by the follow-up task after your decision 2B.",
+    ],
+}
+
+KNOWN_SECTIONS_V6 = {"routing", "reviewer_mapping", "contract", "gates", "repair", "evidence", "playtest", "automation"}

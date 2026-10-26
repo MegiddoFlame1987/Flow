@@ -164,6 +164,7 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
 .pages button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent) }
 .pages button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px }
 .panel { display: grid; gap: 40px }
+.panel > *, .panel section > * { min-width: 0 }
 .mt { margin-top: 12px }
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 14px }
 .tally { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px }
@@ -221,13 +222,25 @@ details.tech h5 { margin-top: 10px }
 .card h4 { margin-bottom: 4px }
 @media (max-width: 760px) { .era { grid-template-columns: 1fr; gap: 4px } .bar { grid-template-columns: 110px minmax(0, 1fr) 36px } }
 
+
+.key { display: grid; gap: 1px; margin-bottom: 6px }
+.key span { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em }
+.key.in span { color: var(--ok) }
+.key.out span { color: var(--warnc) }
+.key.out code { color: var(--muted); text-decoration: line-through }
+.timeline { list-style: none; margin: 12px 0 0; padding: 0; border-left: 2px solid var(--line); display: grid; gap: 10px }
+.timeline li { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 12px; padding-left: 14px; position: relative }
+.timeline li::before { content: ""; position: absolute; left: -6px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent) }
+.timeline a { color: var(--fg) }
+.notes { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--muted) }
+@media (max-width: 760px) { .timeline li { grid-template-columns: 1fr; gap: 2px } }
 </style>
 
 <main class="wrap">
   <div class="top">
     <p class="eyebrow">factory-that-builds-itself · how every change is made</p>
     <h1>Mazor Ship Flow Map</h1>
-    <p class="lede">Every change to the game travels the same road: you give the idea, AI plans, you approve, AI builds, a separate AI checks, you play and merge. The map is built from the project's rule file, so it changes when the rules change.</p>
+    <p class="lede">Every change to the game travels the same road: you give the idea, AI plans, you approve, AI builds, a separate AI checks, you play and merge. The page is built from the project's rule file and git history, so it changes when the rules change.</p>
     {{UNKNOWN}}
     <div class="source">
       <span>rules as of <b>{{HEAD_DATE}}</b></span>
@@ -237,13 +250,17 @@ details.tech h5 { margin-top: 10px }
   </div>
 
   <nav class="pages" role="tablist" aria-label="Pages">
-    <button type="button" role="tab" id="t-map" data-page="map" aria-selected="true">Flow map</button>
+    <button type="button" role="tab" id="t-current" data-page="current" aria-selected="true">Current flow</button>
+    <button type="button" role="tab" id="t-map" data-page="map" aria-selected="false">V2/V3 map</button>
     <button type="button" role="tab" id="t-v3" data-page="v3" aria-selected="false">V3 status</button>
     <button type="button" role="tab" id="t-gov" data-page="gov" aria-selected="false">Governance</button>
     <button type="button" role="tab" id="t-history" data-page="history" aria-selected="false">History</button>
   </nav>
 
-  <div class="panel" id="map" role="tabpanel" aria-labelledby="t-map">
+  <div class="panel" id="current" role="tabpanel" aria-labelledby="t-current">{{CURRENT}}</div>
+
+  <div class="panel" id="map" role="tabpanel" aria-labelledby="t-map" hidden>
+    <p class="warn-t">Archived. {{ARCHIVE_NOTE}}</p>
     <ol class="road">
       <li><b>Idea</b><span>you</span></li><li><b>Plan</b><span>AI</span></li><li><b>Approval</b><span>you</span></li>
       <li><b>Build</b><span>AI writer</span></li><li><b>Check</b><span>separate AI</span></li><li><b>Playtest and merge</b><span>you</span></li>
@@ -305,7 +322,7 @@ details.tech h5 { margin-top: 10px }
   <div class="panel" id="gov" role="tabpanel" aria-labelledby="t-gov" hidden>{{GOVERNANCE}}</div>
   <div class="panel" id="history" role="tabpanel" aria-labelledby="t-history" hidden>{{HISTORY}}</div>
 
-  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@{{HEAD_FULL}}</code>. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
+  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@{{HEAD_FULL}}</code>; the V2/V3 map from the archived rules. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
 </main>
 
 <script>

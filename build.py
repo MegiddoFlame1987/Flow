@@ -176,7 +176,7 @@ def step_cards(steps, lane):
     for s in steps:
         warn = '<p class="warn-t">This step is in the policy but has no description on this page yet.</p>' if s.get("missing") else ""
         ul = lambda xs: "".join(f"<li>{md(x)}</li>" for x in xs) or "<li>—</li>"
-        t = [md(x) for x in s.get("tech", [])] + [f"Policy step: <code>{e(s['name'])}</code>"]
+        t = [md(x) for x in s.get("tech", [])] + [f"Step id: <code>{e(s['name'])}</code>"]
         cards.append(f"""
 <article class="step" id="{lane.lower()}-{s['n']}">
   <header><span class="num a-{s['actor']}">{s['n']}</span>
@@ -264,12 +264,65 @@ def automation_section(policy, canary):
 </section>"""
 
 
-def unknown_sections(policy):
-    new = [k for k, v in policy.items() if isinstance(v, dict) and k not in M.KNOWN_SECTIONS]
+def unknown_sections(policy, known):
+    new = [k for k, v in policy.items() if isinstance(v, dict) and k not in known]
     if not new:
         return ""
     return ('<p class="warn-t">The policy has new sections this page does not describe yet: '
             + ", ".join(f"<code>{e(k)}</code>" for k in new) + ". Add them to io_map.py.</p>")
+
+
+# ---------- Tab 0: current flow ----------
+
+def current_tab(policy):
+    g, c, r = policy.get("gates", {}), policy.get("contract", {}), policy.get("repair", {})
+    steps = [dict(st, n=i) for i, st in enumerate(M.V4_STEPS, 1)]
+    st = M.V4_STATUS
+    budget = g.get("production_python_line_budget")
+    facts = [("Active writers", policy.get("writer_parallelism")), ("Repairs before stop", r.get("limit")),
+             ("QC comment lines", len(g.get("qc_comment_fields", []))), ("Runner", "none" if policy.get("automation", {}).get("self_hosted_runner") is False else "yes"),
+             ("Who merges", "only you" if policy.get("manual_merge_required") else "?")]
+    facts_html = "".join(f"<div><dt>{e(k)}</dt><dd>{e(v)}</dd></div>" for k, v in facts)
+    changed = "".join(f"<tr><td><b>{e(a)}</b></td><td>{e(b)}</td><td><code>{e(k)}</code></td></tr>" for a, b, k in M.V4_WHAT_CHANGED)
+    tl = "".join(f'<li><span class="when">{e(t)}</span><a href="{e(u)}">{e(x)}</a></li>' for t, x, u in st["timeline"])
+    notes = "".join(f"<li>{e(n)}</li>" for n in st["notes"])
+    elev = "".join(f"<li>{md(x)}</li>" for x in M.V4_ELEVATED)
+    t = [f"Contract schema {e(c.get('schema_version'))}, fields: {chips(c.get('fields', []))}",
+         f"Process paths needing GOVERNANCE: {chips(c.get('governance_prefixes', []))}",
+         f"QC comment fields: {chips(g.get('qc_comment_fields', []))}",
+         f"Production line budget: {e(budget)}",
+         f"Stop status after the limit: <code>{e(r.get('stop_status'))}</code>"]
+    return f"""
+<section>
+  <header>
+    <p class="eyebrow">In force since 2026-10-21 · schema {e(policy.get('schema_version'))}</p>
+    <h2>Current flow (V4, lean)</h2>
+    <p class="lede">After the retreat the flow is a short chain of gates with no automation. You start every task by saying so, approve it with one line, and play and merge it yourself. One writer works at a time.</p>
+    <p class="note">"V4" is this page's name. The repository calls it SHIP, contract schema 6.</p>
+  </header>
+  {unknown_sections(policy, M.KNOWN_SECTIONS_V6)}
+  <dl class="facts">{facts_html}</dl>
+</section>
+<section>
+  <header><h3>The chain</h3><p class="lede">The same chain for both routes. The number on the diagram is the card below it.</p></header>
+  <div class="scroll">{sequence_svg(steps, "V4")}</div>
+  <div class="steps">{step_cards(steps, "V4")}</div>
+  <div class="card mt"><h4>On the ELEVATED route, also</h4><ul>{elev}</ul></div>
+  {tech(t)}
+</section>
+<section>
+  <header><h3>What changed from V3</h3></header>
+  <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>Area</th><th>Now</th><th>Where</th></tr></thead><tbody>{changed}</tbody></table></div>
+</section>
+<section class="recovery">
+  <header>
+    <p class="eyebrow">Live check · {e(st['date'])}</p>
+    <h3><a href="{e(st['pr'])}">{e(st['title'])}</a></h3>
+    <p class="lede"><b>Now:</b> {e(st['now'])}</p>
+  </header>
+  <ol class="timeline">{tl}</ol>
+  <ul class="notes mt">{notes}</ul>
+</section>"""
 
 
 # ---------- Tab 2: V3 status ----------
@@ -335,19 +388,28 @@ def v3_tab():
   <div class="statuses">{comps}</div>
 </section>
 <section>
-  <header><h3>Next steps on #115</h3><p class="lede">From the #115 contract and its current state; your merge stays manual.</p></header>
+  <header><h3>Outcome</h3><p class="lede">What happened after the snapshot, from the PRs.</p></header>
   <ol class="next">{nxt}</ol>
 </section>"""
 
 
 # ---------- Tab 3: governance ----------
 
+def key_cells(keys, flat):
+    out = []
+    for k in keys:
+        present = k in flat or any(f.startswith(k + ".") for f in flat)
+        out.append(f'<div class="key {"in" if present else "out"}"><code>{e(k)}</code>'
+                   f'<span>{"in policy" if present else "not in current policy"}</span></div>')
+    return "".join(out)
+
+
 def governance_tab(policy):
     flat = flatten(policy)
     rows = []
     for c in M.CONTROLS:
         rows.append(f"""<tr><td><b>{e(c['control'])}</b><p>{e(c['how'])}</p></td>
-<td class="maps">{e(c['maps'])}</td><td><code>{e(c['key'])}</code></td></tr>""")
+<td class="maps">{e(c['maps'])}</td><td>{key_cells(c['keys'], flat)}</td></tr>""")
     gaps = "".join(f"<li><b>{e(t)}</b><p>{md(d)}</p></li>" for t, d in M.GAPS)
     n_keys = len(flat)
     return f"""
@@ -369,7 +431,7 @@ def governance_tab(policy):
   </ol>
 </section>
 <section>
-  <header><h3>Controls</h3><p class="lede">{len(M.CONTROLS)} controls, each enforced by a policy key. The policy has {n_keys} keys in total.</p></header>
+  <header><h3>Controls</h3><p class="lede">{len(M.CONTROLS)} controls. The key column is checked against the current policy ({n_keys} keys): a control whose key is gone is now prose only or removed.</p></header>
   <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>Control</th><th>Related framework idea</th><th>Policy key</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 </section>
 <section>
@@ -377,16 +439,28 @@ def governance_tab(policy):
   <ul class="gaps">{gaps}</ul>
 </section>
 <section>
-  <header><h3>What V3 teaches about the product</h3></header>
+  <header><h3>What V3 and its retreat teach about the product</h3></header>
   <div class="cards">
     <div class="card"><h4>Kept the system safe</h4><p>The writer refused to break a rule (\"do not alter policy\") even when its own contract asked for it. Nothing unapproved reached main.</p></div>
-    <div class="card"><h4>Stopped delivery</h4><p>That refusal, plus the model/effort defect, left game work waiting since 13 Oct. Safety and throughput pull against each other.</p></div>
+    <div class="card"><h4>Stopped delivery</h4><p>That refusal, plus the model/effort defect, left game work waiting from 13 Oct until the retreat merged on 21 Oct. Safety and throughput pull against each other.</p></div>
+    <div class="card"><h4>The fix was subtraction</h4><p>Schema 6 kept the gates and removed the machinery: 357 → 81 policy lines, 6,867 → 1,456 lines of process code, and a budget so it cannot grow back unnoticed.</p></div>
     <div class="card"><h4>What to sell, if anything</h4><p>Not the code: the contract format, the gate sequence and the evidence rules. Those transfer between companies; runners and adapters do not.</p></div>
   </div>
 </section>"""
 
 
 # ---------- Tab 4: history ----------
+
+def prod_lines(repo, rev):
+    """Production workflow Python lines at rev, counted like validate_agent_config.production_lines."""
+    names = [n for n in git(repo, "ls-tree", "--name-only", f"{rev}:scripts/workflow").split()
+             if n.endswith(".py") and not n.startswith("test_")] if rev else []
+    return sum(len(git(repo, "show", f"{rev}:scripts/workflow/{n}").splitlines()) for n in names)
+
+
+def bar_rows(rows):
+    top = max(v for _, v in rows) or 1
+    return "".join(f'<div class="bar"><span class="lab">{e(n)}</span><span class="track"><span style="width:{v / top * 100:.0f}%"></span></span><span class="val">{v:,}</span></div>' for n, v in rows)
 
 def tracker(commits):
     groups = {}
@@ -442,25 +516,32 @@ def history_tab(repo, ref, commits, admin_paths):
   </div>
 </li>""")
     # Size of the policy file over time, sampled at the end of each era.
-    bars = []
+    keys_rows, code_rows = [], []
     for era in M.ERAS:
         rev = git(repo, "rev-list", "-1", f"--before={era['to']} 23:59", ref).strip()
-        n = len(policy_at(repo, rev)) if rev else 0
-        bars.append((era["name"], n))
-    top = max(n for _, n in bars) or 1
-    bar_html = "".join(f'<div class="bar"><span class="lab">{e(n)}</span><span class="track"><span style="width:{v / top * 100:.0f}%"></span></span><span class="val">{v}</span></div>' for n, v in bars)
+        keys_rows.append((era["name"], len(policy_at(repo, rev)) if rev else 0))
+        try:
+            code_rows.append((era["name"], prod_lines(repo, rev)))
+        except subprocess.CalledProcessError:
+            code_rows.append((era["name"], 0))
+    bar_html = bar_rows(keys_rows)
+    code_html = bar_rows(code_rows)
     log_html, n_tasks = tracker(commits)
     return f"""
 <section>
   <header>
     <h2>How the flow evolved</h2>
-    <p class="lede">From written rules in August to an event-driven automation in October. The eras are the writer's reading of the git log; the counts are computed from it.</p>
+    <p class="lede">From written rules in August, to an event-driven automation in October, and back to a lean flow. The eras are the writer's reading of the git log; the counts are computed from it.</p>
   </header>
   <ol class="eras">{''.join(era_html)}</ol>
 </section>
 <section>
   <header><h3>Policy size at the end of each era</h3><p class="lede">Number of keys in <code>.codex/workflow-policy.toml</code>. It did not exist before Flow V2.</p></header>
   <div class="bars">{bar_html}</div>
+</section>
+<section>
+  <header><h3>Process code at the end of each era</h3><p class="lede">Lines of production Python in <code>scripts/workflow/</code>, tests excluded, counted the way the repository's own validator counts them.</p></header>
+  <div class="bars">{code_html}</div>
 </section>
 <section id="changes">
   <header class="tracker-head">
@@ -478,31 +559,35 @@ def history_tab(repo, ref, commits, admin_paths):
 # ---------- assemble ----------
 
 def build(repo, ref, out, standalone):
-    policy = tomllib.loads(git(repo, "show", f"{ref}:{POLICY}"))
+    now = tomllib.loads(git(repo, "show", f"{ref}:{POLICY}"))
+    old = tomllib.loads(git(repo, "show", f"{M.ARCHIVE_REF}:{POLICY}"))
     head = git(repo, "rev-parse", ref).strip()
     head_date = git(repo, "log", "-1", "--format=%ad", "--date=short", ref).strip()
-    admin_paths = [p for p in policy["admission"]["protected_prefixes"] if p not in NOT_ADMIN]
+    prefixes = old["admission"]["protected_prefixes"] + now.get("contract", {}).get("governance_prefixes", [])
+    admin_paths = sorted({p for p in prefixes if p not in NOT_ADMIN})
     commits = admin_history(repo, ref, admin_paths)
     slug = os.environ.get("FLOW_REPO", "Mozar-Team/factory-that-builds-itself")
-    canary = canary_status(slug, Path(policy.get("automation", {}).get("event_workflow", "x")).name)
-    lanes = policy["routing"]["lanes"]
+    canary = canary_status(slug, Path(old.get("automation", {}).get("event_workflow", "x")).name)
+    lanes = old["routing"]["lanes"]
     mapping = "".join(f"<tr><td>{e(M.CATEGORY_LABELS.get(k, k))}</td><td>{e(M.REVIEWER_LABELS.get(v, v))}</td></tr>"
-                      for k, v in policy["reviewer_mapping"].items())
+                      for k, v in old["reviewer_mapping"].items())
     repl = {
         "{{HEAD}}": head[:7], "{{HEAD_FULL}}": head, "{{HEAD_DATE}}": head_date,
         "{{BUILT}}": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-        "{{DEFAULT_LANE}}": policy["default_lane"],
-        "{{LANE_TABS}}": "".join(f'<button type="button" class="tab" data-lane-tab="{l}" aria-pressed="{str(l == policy["default_lane"]).lower()}">{l}</button>' for l in lanes),
-        "{{LANES}}": "".join(lane_section(policy, l) for l in lanes),
-        "{{AUTOMATION}}": automation_section(policy, canary),
-        "{{UNKNOWN}}": unknown_sections(policy),
-        "{{REPAIR_LIMIT}}": str(policy["repair"]["limit"]), "{{STOP_STATUS}}": e(policy["repair"]["stop_status"]),
-        "{{WRITER_PAR}}": str(policy["writer_parallelism"]),
-        "{{FORCED}}": chips(policy["routing"]["forced_elevated_categories"], M.CATEGORY_LABELS),
-        "{{ARCH_CATS}}": chips(policy["routing"]["architect_required_categories"], M.CATEGORY_LABELS),
-        "{{PROTECTED}}": chips(policy["admission"]["protected_prefixes"]),
-        "{{MAPPING}}": mapping, "{{QC_FIELDS}}": chips(policy["products"]["qc_comment_fields"]),
-        "{{V3}}": v3_tab(), "{{GOVERNANCE}}": governance_tab(policy),
+        "{{ARCHIVE_NOTE}}": e(M.ARCHIVE_NOTE),
+        "{{CURRENT}}": current_tab(now),
+        "{{DEFAULT_LANE}}": old["default_lane"],
+        "{{LANE_TABS}}": "".join(f'<button type="button" class="tab" data-lane-tab="{l}" aria-pressed="{str(l == old["default_lane"]).lower()}">{l}</button>' for l in lanes),
+        "{{LANES}}": "".join(lane_section(old, l) for l in lanes),
+        "{{AUTOMATION}}": automation_section(old, canary),
+        "{{UNKNOWN}}": "",
+        "{{REPAIR_LIMIT}}": str(old["repair"]["limit"]), "{{STOP_STATUS}}": e(old["repair"]["stop_status"]),
+        "{{WRITER_PAR}}": str(old["writer_parallelism"]),
+        "{{FORCED}}": chips(old["routing"]["forced_elevated_categories"], M.CATEGORY_LABELS),
+        "{{ARCH_CATS}}": chips(old["routing"]["architect_required_categories"], M.CATEGORY_LABELS),
+        "{{PROTECTED}}": chips(old["admission"]["protected_prefixes"]),
+        "{{MAPPING}}": mapping, "{{QC_FIELDS}}": chips(old["products"]["qc_comment_fields"]),
+        "{{V3}}": v3_tab(), "{{GOVERNANCE}}": governance_tab(now),
         "{{HISTORY}}": history_tab(repo, ref, commits, admin_paths),
     }
     page = (HERE / "template.html").read_text()
@@ -512,7 +597,7 @@ def build(repo, ref, out, standalone):
         page = '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n' + page.replace("<main", "</head><body><main", 1) + "</body></html>\n"
     Path(out).parent.mkdir(parents=True, exist_ok=True)
     Path(out).write_text(page)
-    print(f"{out}: {len(commits)} process commits, policy schema {policy['schema_version']} @ {head[:7]}, canary {'unread' if canary is None else canary.get('when')}")
+    print(f"{out}: {len(commits)} process commits, policy schema {now['schema_version']} @ {head[:7]}, canary {'unread' if canary is None else canary.get('when')}")
 
 
 if __name__ == "__main__":

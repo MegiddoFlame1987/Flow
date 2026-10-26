@@ -2,14 +2,15 @@
 
 A generated page that explains the delivery flow of [`Mozar-Team/factory-that-builds-itself`](https://github.com/Mozar-Team/factory-that-builds-itself) in plain language. It lives outside the game repository so the game's git history stays clean; the game repository is only read.
 
-It has four tabs:
+It has five tabs:
 
 | Tab | What it shows | Source |
 | --- | --- | --- |
-| Flow map | The STANDARD and ELEVATED routes, every step with what it gets, gives and when it stops; the automation; the QC loop; routing rules | `.codex/workflow-policy.toml` (read at build time) + `io_map.py` (words only) |
-| V3 status | Snapshot of the event-driven automation on 2026-10-15: what works, what is broken, why nothing moves | `SNAPSHOT_V3` in `io_map.py`; every row links its PR comment or run |
-| Governance | The flow read as a general AI-delivery governance pattern: controls, policy keys, gaps | `CONTROLS` and `GAPS` in `io_map.py`; framework mapping is the author's reading, not a certification |
-| History | Eras of the flow from August to October, policy size per era, and a searchable log of process-only changes | `git log` over the protected process paths, `ERAS` in `io_map.py` |
+| Current flow | The lean flow in force since 2026-10-21 (contract schema 6): the chain of gates, ELEVATED extras, what changed from V3, live check of the first task through it (#116) | `.codex/workflow-policy.toml` on `main` + `V4_*` in `io_map.py` (steps follow `docs/workflow/SHIP_WORKFLOW.md`) |
+| V2/V3 map | Archived map of the STANDARD/ELEVATED routes and the automation, built from the rules at `3370cfc` | policy at `ARCHIVE_REF` |
+| V3 status | Snapshot of the event-driven automation on 2026-10-15 and the merged retreat (#115) | `SNAPSHOT_V3` in `io_map.py`, every row linked |
+| Governance | The flow as an AI-delivery governance pattern; each control's policy key is checked against the current policy | `CONTROLS`, `GAPS` in `io_map.py` |
+| History | Eras from August to today, policy size and process-code size per era, searchable log of process-only changes | `git log`, `ERAS` in `io_map.py` |
 
 The page has no authority. If it disagrees with `.codex/workflow-policy.toml`, the policy wins.
 
@@ -33,15 +34,9 @@ Writes `docs/index.html`. To publish it with GitHub Pages: Settings → Pages �
 
 A new step, category or policy section that `io_map.py` does not describe appears on the page with a warning.
 
-## V3 status on 2026-10-15 (summary)
+## Status on 2026-10-26 (summary)
 
-**Retreat in progress:** [#115](https://github.com/Mozar-Team/factory-that-builds-itself/pull/115) FLOW-RECOVERY-001, accepted 2026-10-15, removes the event controller, local runner and paired admission (27 files, +2,672 / −12,967 lines) and keeps contract, ACCEPT, one writer, independent QC, preflight and the playtest gate. Not merged yet.
+- **Retreat merged.** [#115](https://github.com/Mozar-Team/factory-that-builds-itself/pull/115) FLOW-RECOVERY-001 merged on 2026-10-21: policy 357 → 81 lines, production workflow Python 6,867 → 1,456 lines, event controller, runner and paired admission removed.
+- **Lean flow in use.** [#116](https://github.com/Mozar-Team/factory-that-builds-itself/pull/116) HUD-SPRITE-001: ACCEPT 2026-10-23, PENDING VERIFICATION 2026-10-24, Product Owner decisions 2026-10-26, waiting for Independent QC.
 
-Before the retreat, the automation ran but no task could move through it.
-
-- Game task [#113](https://github.com/Mozar-Team/factory-that-builds-itself/pull/113) (HUD-SPRITE-001) waits for [#114](https://github.com/Mozar-Team/factory-that-builds-itself/pull/114), the fix that pins model and effort when native sessions resume.
-- [#114](https://github.com/Mozar-Team/factory-that-builds-itself/pull/114) (FLOW-NATIVE-ROLE-PIN-001) had two writer attempts, both blocked before any change: first by GitHub HTTP 404/401, then by a conflict between the runner's fixed writer prompt ("Do not … alter policy", `scripts/workflow/local_runner.py:1668`) and a contract that requires a policy edit.
-- [#110](https://github.com/Mozar-Team/factory-that-builds-itself/pull/110) (FLOW-AUTO-CONTINUITY-001) used its two repairs and is frozen.
-- Last workflow canary pass: 2026-10-11 on `4d834d4`; `main` is six merges ahead.
-
-Details and links are on the V3 status tab.
+Details and links are on the Current flow and V3 status tabs.
