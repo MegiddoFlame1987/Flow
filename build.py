@@ -274,6 +274,54 @@ def unknown_sections(policy, known):
 
 # ---------- Tab 0: current flow ----------
 
+def workflow_json(policy):
+    """The current flow as one JSON document, from the same data the page draws."""
+    g, c, r = policy.get("gates", {}), policy.get("contract", {}), policy.get("repair", {})
+    doc = {"workflow": {
+        "name": "Mazor Ship", "contract_schema": c.get("schema_version"),
+        "rules": {"active_writers": policy.get("writer_parallelism"), "repair_limit": r.get("limit"),
+                  "automatic_merge": policy.get("automatic_merge"), "accept_line": c.get("accept_line"),
+                  "governance_accept_line": c.get("governance_accept_line"),
+                  "production_python_line_budget": g.get("production_python_line_budget"),
+                  "qc_comment_fields": g.get("qc_comment_fields")},
+        "groups": [{"id": grp["id"], "name": grp["name"],
+                    "nodes": [dict({"label": n["label"], "actor": M.ACTORS[n["actor"]], "step": n["step"]},
+                                   **({"optional": True} if n.get("optional") else {})) for n in grp["nodes"]]}
+                   for grp in M.V4_CANVAS],
+        "steps": [{"id": i, "name": st["name"], "title": st["title"], "actor": M.ACTORS[st["actor"]],
+                   "inputs": [x.replace("`", "") for x in st["inputs"]],
+                   "outputs": [x.replace("`", "") for x in st["outputs"]],
+                   **({"stops_when": st["gate"].replace("`", "")} if st["gate"] else {})}
+                  for i, st in enumerate(M.V4_STEPS, 1)],
+    }}
+    return json.dumps(doc, indent=2, ensure_ascii=False)
+
+
+def canvas_html(policy):
+    groups = []
+    for gi, grp in enumerate(M.V4_CANVAS):
+        nodes = "".join(
+            f'<a class="node{" opt" if n.get("optional") else ""}" href="#v4-{n["step"]}" title="Step {n["step"]}: {e(M.ACTORS[n["actor"]])}">'
+            f'<span class="ico a-{n["actor"]}">{M.ACTOR_SHORT[n["actor"]]}</span><span class="lbl">{e(n["label"])}</span></a>'
+            for n in grp["nodes"])
+        groups.append(f'<div class="grp g-{grp["color"]}"><h4><span>{gi + 1}</span>{e(grp["name"])}</h4><div class="nodes">{nodes}</div></div>')
+    legend = "".join(f'<span><i class="ico a-{k}">{v}</i>{e(M.ACTORS[k])}</span>' for k, v in M.ACTOR_SHORT.items())
+    return f"""
+<section>
+  <header><h3>The flow as a workflow</h3><p class="lede">Five stages, left to right. Dashed nodes run only when needed. Click a node to jump to its card; the JSON on the right is the same flow as data.</p></header>
+  <div class="board">
+    <div class="canvas">
+      <div class="grps">{''.join(groups)}</div>
+      <p class="loop-note">Verify → Build: a FAIL sends the task back for a repair, at most {e(policy.get('repair', {}).get('limit'))} times, then it stops for your decision.</p>
+      <div class="legend">{legend}</div>
+    </div>
+    <div class="out">
+      <div class="out-h"><span>Output</span><button type="button" id="copy-json">Copy JSON</button></div>
+      <pre id="wf-json">{e(workflow_json(policy))}</pre>
+    </div>
+  </div>
+</section>"""
+
 def current_tab(policy):
     g, c, r = policy.get("gates", {}), policy.get("contract", {}), policy.get("repair", {})
     steps = [dict(st, n=i) for i, st in enumerate(M.V4_STEPS, 1)]
@@ -284,7 +332,8 @@ def current_tab(policy):
              ("Who merges", "only you" if policy.get("manual_merge_required") else "?")]
     facts_html = "".join(f"<div><dt>{e(k)}</dt><dd>{e(v)}</dd></div>" for k, v in facts)
     changed = "".join(f"<tr><td><b>{e(a)}</b></td><td>{e(b)}</td><td><code>{e(k)}</code></td></tr>" for a, b, k in M.V4_WHAT_CHANGED)
-    tl = "".join(f'<li><span class="when">{e(t)}</span><a href="{e(u)}">{e(x)}</a></li>' for t, x, u in st["timeline"])
+    rows = "".join(f'<tr><td><a href="{M.R}/pull/{n}">#{n}</a></td><td>{e(t)}</td><td>{e(a)}</td><td>{e(q)}</td><td>{e(m)}</td><td class="hrs">{h:.1f} h</td></tr>'
+                   for n, t, a, q, m, h in st["rows"])
     notes = "".join(f"<li>{e(n)}</li>" for n in st["notes"])
     elev = "".join(f"<li>{md(x)}</li>" for x in M.V4_ELEVATED)
     t = [f"Contract schema {e(c.get('schema_version'))}, fields: {chips(c.get('fields', []))}",
@@ -303,6 +352,7 @@ def current_tab(policy):
   {unknown_sections(policy, M.KNOWN_SECTIONS_V6)}
   <dl class="facts">{facts_html}</dl>
 </section>
+{canvas_html(policy)}
 <section>
   <header><h3>The chain</h3><p class="lede">The same chain for both routes. The number on the diagram is the card below it.</p></header>
   <div class="scroll">{sequence_svg(steps, "V4")}</div>
@@ -317,11 +367,12 @@ def current_tab(policy):
 <section class="recovery">
   <header>
     <p class="eyebrow">Live check · {e(st['date'])}</p>
-    <h3><a href="{e(st['pr'])}">{e(st['title'])}</a></h3>
-    <p class="lede"><b>Now:</b> {e(st['now'])}</p>
+    <h3>{e(st['title'])}</h3>
+    <p class="lede">{e(st['now'])}</p>
   </header>
-  <ol class="timeline">{tl}</ol>
+  <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>PR</th><th>Task</th><th>ACCEPT</th><th>QC</th><th>Merged</th><th>ACCEPT → merge</th></tr></thead><tbody>{rows}</tbody></table></div>
   <ul class="notes mt">{notes}</ul>
+  {tech([f"Source: {e(st['cmd'])}"])}
 </section>"""
 
 

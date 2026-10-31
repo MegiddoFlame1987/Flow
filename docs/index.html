@@ -237,6 +237,37 @@ details.tech h5 { margin-top: 10px }
 .timeline a { color: var(--fg) }
 .notes { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--muted) }
 @media (max-width: 760px) { .timeline li { grid-template-columns: 1fr; gap: 2px } }
+
+/* Workflow board: a deliberately dark canvas in both themes, like a node editor. */
+.board { --cv-bg: #12171f; --cv-fg: #e6ebf1; --cv-mute: #9aa6b3; --cv-line: #2a3542; --cv-node: #1b222c;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 0; background: var(--cv-bg); color: var(--cv-fg);
+  border-radius: 6px; overflow: hidden; border: 1px solid var(--cv-line) }
+.canvas { padding: 16px; display: grid; gap: 12px; min-width: 0 }
+.grps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 14px; position: relative }
+.grp { border-radius: 6px; padding: 10px; background: color-mix(in srgb, var(--gc) 26%, var(--cv-bg)); border: 1px solid color-mix(in srgb, var(--gc) 60%, var(--cv-bg)); position: relative; min-width: 0 }
+.grp:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: 10px; color: var(--cv-mute); font: 600 14px var(--mono) }
+.grp h4 { font: 600 .95rem var(--display); letter-spacing: .04em; margin: 0 0 8px; display: flex; gap: 8px; align-items: center; color: var(--cv-fg) }
+.grp h4 span { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 600 .7rem var(--mono); background: var(--gc); color: var(--cv-bg) }
+.g-amber { --gc: #c99a2e } .g-red { --gc: #c2414b } .g-green { --gc: #2f9e5b } .g-blue { --gc: #3d6fd6 } .g-teal { --gc: #1f9a96 }
+.nodes { display: grid; gap: 0 }
+.node { display: flex; gap: 8px; align-items: center; padding: 6px 8px; background: var(--cv-node); border: 1px solid var(--cv-line); border-radius: 5px; color: var(--cv-fg); text-decoration: none; font-size: .82rem; position: relative; margin-top: 12px }
+.node:first-child { margin-top: 0 }
+.node + .node::before { content: ""; position: absolute; left: 20px; top: -13px; height: 12px; border-left: 2px solid var(--cv-mute) }
+.node.opt { border-style: dashed; background: transparent }
+.node:hover, .node:focus-visible { border-color: var(--gc); outline: none }
+.node .ico, .legend .ico { flex: none; width: 26px; height: 22px; border-radius: 4px; display: grid; place-items: center; font: 600 .66rem var(--mono); font-style: normal; background: var(--c); color: #0e1218 }
+.board .a-po { --c: #f2a541 } .board .a-orch { --c: #7aa2ff } .board .a-rev { --c: #b794f6 } .board .a-arch { --c: #4fd1c5 }
+.board .a-writer { --c: #5fd38a } .board .a-ci { --c: #9fb0c2 } .board .a-qc { --c: #ff7a95 }
+.node .lbl { min-width: 0; overflow-wrap: anywhere }
+.loop-note { font: .78rem var(--mono); color: var(--cv-mute); border-left: 2px dashed #3d6fd6; padding-left: 8px }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .75rem; color: var(--cv-mute) }
+.legend span { display: flex; gap: 6px; align-items: center }
+.out { border-left: 1px solid var(--cv-line); display: grid; grid-template-rows: auto 1fr; min-width: 0; max-height: 640px }
+.out-h { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--cv-line); font: 600 .8rem var(--mono); color: var(--cv-mute) }
+.out-h button { font: .75rem var(--mono); background: var(--cv-node); color: var(--cv-fg); border: 1px solid var(--cv-line); border-radius: 4px; padding: 3px 8px; cursor: pointer }
+.out pre { margin: 0; padding: 12px; overflow: auto; font: .72rem/1.45 var(--mono); color: #b9c6d3; white-space: pre }
+td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap }
+@media (max-width: 860px) { .board { grid-template-columns: 1fr } .out { border-left: 0; border-top: 1px solid var(--cv-line); max-height: 360px } .grp:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -15px } }
 </style>
 
 </head><body><main class="wrap">
@@ -246,9 +277,9 @@ details.tech h5 { margin-top: 10px }
     <p class="lede">Every change to the game travels the same road: you give the idea, AI plans, you approve, AI builds, a separate AI checks, you play and merge. The page is built from the project's rule file and git history, so it changes when the rules change.</p>
     
     <div class="source">
-      <span>rules as of <b>2026-10-21</b></span>
-      <span>version <b>eb65363</b></span>
-      <span>page built <b>2026-10-26 03:31 UTC</b></span>
+      <span>rules as of <b>2026-10-30</b></span>
+      <span>version <b>1c4d1c6</b></span>
+      <span>page built <b>2026-10-31 02:55 UTC</b></span>
     </div>
   </div>
 
@@ -270,6 +301,298 @@ details.tech h5 { margin-top: 10px }
   </header>
   
   <dl class="facts"><div><dt>Active writers</dt><dd>1</dd></div><div><dt>Repairs before stop</dt><dd>2</dd></div><div><dt>QC comment lines</dt><dd>7</dd></div><div><dt>Runner</dt><dd>none</dd></div><div><dt>Who merges</dt><dd>only you</dd></div></dl>
+</section>
+
+<section>
+  <header><h3>The flow as a workflow</h3><p class="lede">Five stages, left to right. Dashed nodes run only when needed. Click a node to jump to its card; the JSON on the right is the same flow as data.</p></header>
+  <div class="board">
+    <div class="canvas">
+      <div class="grps"><div class="grp g-amber"><h4><span>1</span>Prepare</h4><div class="nodes"><a class="node" href="#v4-1" title="Step 1: Writer"><span class="ico a-writer">WR</span><span class="lbl">Brief</span></a><a class="node" href="#v4-2" title="Step 2: You (Product Owner)"><span class="ico a-po">PO</span><span class="lbl">Start X</span></a><a class="node opt" href="#v4-2" title="Step 2: Reviewers"><span class="ico a-rev">RV</span><span class="lbl">Reviewers</span></a><a class="node opt" href="#v4-2" title="Step 2: Architect"><span class="ico a-arch">AR</span><span class="lbl">Architect spec</span></a><a class="node" href="#v4-2" title="Step 2: Orchestrator"><span class="ico a-orch">OR</span><span class="lbl">PROPOSED contract</span></a></div></div><div class="grp g-red"><h4><span>2</span>Approve</h4><div class="nodes"><a class="node" href="#v4-3" title="Step 3: You (Product Owner)"><span class="ico a-po">PO</span><span class="lbl">ACCEPT X</span></a><a class="node opt" href="#v4-3" title="Step 3: You (Product Owner)"><span class="ico a-po">PO</span><span class="lbl">GOVERNANCE line</span></a><a class="node opt" href="#v4-3" title="Step 3: Automated checks"><span class="ico a-ci">CI</span><span class="lbl">Governance guard</span></a></div></div><div class="grp g-green"><h4><span>3</span>Build</h4><div class="nodes"><a class="node" href="#v4-4" title="Step 4: Automated checks"><span class="ico a-ci">CI</span><span class="lbl">Start check</span></a><a class="node" href="#v4-5" title="Step 5: Writer"><span class="ico a-writer">WR</span><span class="lbl">Implementation</span></a><a class="node" href="#v4-6" title="Step 6: Automated checks"><span class="ico a-ci">CI</span><span class="lbl">CI checks</span></a><a class="node" href="#v4-5" title="Step 5: Writer"><span class="ico a-writer">WR</span><span class="lbl">PENDING VERIFICATION</span></a></div></div><div class="grp g-blue"><h4><span>4</span>Verify</h4><div class="nodes"><a class="node" href="#v4-7" title="Step 7: Independent QC"><span class="ico a-qc">QC</span><span class="lbl">Independent QC</span></a><a class="node opt" href="#v4-7" title="Step 7: Writer"><span class="ico a-writer">WR</span><span class="lbl">Repair (max 2)</span></a></div></div><div class="grp g-teal"><h4><span>5</span>Release</h4><div class="nodes"><a class="node" href="#v4-8" title="Step 8: Writer"><span class="ico a-writer">WR</span><span class="lbl">Closeout</span></a><a class="node" href="#v4-8" title="Step 8: Automated checks"><span class="ico a-ci">CI</span><span class="lbl">Final check</span></a><a class="node" href="#v4-9" title="Step 9: Writer"><span class="ico a-writer">WR</span><span class="lbl">Playtest package</span></a><a class="node" href="#v4-9" title="Step 9: You (Product Owner)"><span class="ico a-po">PO</span><span class="lbl">PO-PLAYTEST receipt</span></a><a class="node" href="#v4-9" title="Step 9: You (Product Owner)"><span class="ico a-po">PO</span><span class="lbl">Manual merge</span></a></div></div></div>
+      <p class="loop-note">Verify → Build: a FAIL sends the task back for a repair, at most 2 times, then it stops for your decision.</p>
+      <div class="legend"><span><i class="ico a-po">PO</i>You (Product Owner)</span><span><i class="ico a-orch">OR</i>Orchestrator</span><span><i class="ico a-rev">RV</i>Reviewers</span><span><i class="ico a-arch">AR</i>Architect</span><span><i class="ico a-writer">WR</i>Writer</span><span><i class="ico a-ci">CI</i>Automated checks</span><span><i class="ico a-qc">QC</i>Independent QC</span></div>
+    </div>
+    <div class="out">
+      <div class="out-h"><span>Output</span><button type="button" id="copy-json">Copy JSON</button></div>
+      <pre id="wf-json">{
+  &quot;workflow&quot;: {
+    &quot;name&quot;: &quot;Mazor Ship&quot;,
+    &quot;contract_schema&quot;: 6,
+    &quot;rules&quot;: {
+      &quot;active_writers&quot;: 1,
+      &quot;repair_limit&quot;: 2,
+      &quot;automatic_merge&quot;: false,
+      &quot;accept_line&quot;: &quot;ACCEPT &lt;task_id&gt;&quot;,
+      &quot;governance_accept_line&quot;: &quot;ACCEPT &lt;task_id&gt; GOVERNANCE&quot;,
+      &quot;production_python_line_budget&quot;: 2500,
+      &quot;qc_comment_fields&quot;: [
+        &quot;verdict&quot;,
+        &quot;task_id&quot;,
+        &quot;verified_head_sha&quot;,
+        &quot;qc_provider&quot;,
+        &quot;qc_session&quot;,
+        &quot;checks&quot;,
+        &quot;limitations&quot;
+      ]
+    },
+    &quot;groups&quot;: [
+      {
+        &quot;id&quot;: &quot;prepare&quot;,
+        &quot;name&quot;: &quot;Prepare&quot;,
+        &quot;nodes&quot;: [
+          {
+            &quot;label&quot;: &quot;Brief&quot;,
+            &quot;actor&quot;: &quot;Writer&quot;,
+            &quot;step&quot;: 1
+          },
+          {
+            &quot;label&quot;: &quot;Start X&quot;,
+            &quot;actor&quot;: &quot;You (Product Owner)&quot;,
+            &quot;step&quot;: 2
+          },
+          {
+            &quot;label&quot;: &quot;Reviewers&quot;,
+            &quot;actor&quot;: &quot;Reviewers&quot;,
+            &quot;step&quot;: 2,
+            &quot;optional&quot;: true
+          },
+          {
+            &quot;label&quot;: &quot;Architect spec&quot;,
+            &quot;actor&quot;: &quot;Architect&quot;,
+            &quot;step&quot;: 2,
+            &quot;optional&quot;: true
+          },
+          {
+            &quot;label&quot;: &quot;PROPOSED contract&quot;,
+            &quot;actor&quot;: &quot;Orchestrator&quot;,
+            &quot;step&quot;: 2
+          }
+        ]
+      },
+      {
+        &quot;id&quot;: &quot;approve&quot;,
+        &quot;name&quot;: &quot;Approve&quot;,
+        &quot;nodes&quot;: [
+          {
+            &quot;label&quot;: &quot;ACCEPT X&quot;,
+            &quot;actor&quot;: &quot;You (Product Owner)&quot;,
+            &quot;step&quot;: 3
+          },
+          {
+            &quot;label&quot;: &quot;GOVERNANCE line&quot;,
+            &quot;actor&quot;: &quot;You (Product Owner)&quot;,
+            &quot;step&quot;: 3,
+            &quot;optional&quot;: true
+          },
+          {
+            &quot;label&quot;: &quot;Governance guard&quot;,
+            &quot;actor&quot;: &quot;Automated checks&quot;,
+            &quot;step&quot;: 3,
+            &quot;optional&quot;: true
+          }
+        ]
+      },
+      {
+        &quot;id&quot;: &quot;build&quot;,
+        &quot;name&quot;: &quot;Build&quot;,
+        &quot;nodes&quot;: [
+          {
+            &quot;label&quot;: &quot;Start check&quot;,
+            &quot;actor&quot;: &quot;Automated checks&quot;,
+            &quot;step&quot;: 4
+          },
+          {
+            &quot;label&quot;: &quot;Implementation&quot;,
+            &quot;actor&quot;: &quot;Writer&quot;,
+            &quot;step&quot;: 5
+          },
+          {
+            &quot;label&quot;: &quot;CI checks&quot;,
+            &quot;actor&quot;: &quot;Automated checks&quot;,
+            &quot;step&quot;: 6
+          },
+          {
+            &quot;label&quot;: &quot;PENDING VERIFICATION&quot;,
+            &quot;actor&quot;: &quot;Writer&quot;,
+            &quot;step&quot;: 5
+          }
+        ]
+      },
+      {
+        &quot;id&quot;: &quot;verify&quot;,
+        &quot;name&quot;: &quot;Verify&quot;,
+        &quot;nodes&quot;: [
+          {
+            &quot;label&quot;: &quot;Independent QC&quot;,
+            &quot;actor&quot;: &quot;Independent QC&quot;,
+            &quot;step&quot;: 7
+          },
+          {
+            &quot;label&quot;: &quot;Repair (max 2)&quot;,
+            &quot;actor&quot;: &quot;Writer&quot;,
+            &quot;step&quot;: 7,
+            &quot;optional&quot;: true
+          }
+        ]
+      },
+      {
+        &quot;id&quot;: &quot;release&quot;,
+        &quot;name&quot;: &quot;Release&quot;,
+        &quot;nodes&quot;: [
+          {
+            &quot;label&quot;: &quot;Closeout&quot;,
+            &quot;actor&quot;: &quot;Writer&quot;,
+            &quot;step&quot;: 8
+          },
+          {
+            &quot;label&quot;: &quot;Final check&quot;,
+            &quot;actor&quot;: &quot;Automated checks&quot;,
+            &quot;step&quot;: 8
+          },
+          {
+            &quot;label&quot;: &quot;Playtest package&quot;,
+            &quot;actor&quot;: &quot;Writer&quot;,
+            &quot;step&quot;: 9
+          },
+          {
+            &quot;label&quot;: &quot;PO-PLAYTEST receipt&quot;,
+            &quot;actor&quot;: &quot;You (Product Owner)&quot;,
+            &quot;step&quot;: 9
+          },
+          {
+            &quot;label&quot;: &quot;Manual merge&quot;,
+            &quot;actor&quot;: &quot;You (Product Owner)&quot;,
+            &quot;step&quot;: 9
+          }
+        ]
+      }
+    ],
+    &quot;steps&quot;: [
+      {
+        &quot;id&quot;: 1,
+        &quot;name&quot;: &quot;brief&quot;,
+        &quot;title&quot;: &quot;A brief is written&quot;,
+        &quot;actor&quot;: &quot;Writer&quot;,
+        &quot;inputs&quot;: [
+          &quot;Your request&quot;,
+          &quot;Game documents&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Brief file marked READY&quot;
+        ]
+      },
+      {
+        &quot;id&quot;: 2,
+        &quot;name&quot;: &quot;start&quot;,
+        &quot;title&quot;: &quot;Task is started&quot;,
+        &quot;actor&quot;: &quot;Orchestrator&quot;,
+        &quot;inputs&quot;: [
+          &quot;READY brief&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Draft PR with the PROPOSED contract&quot;
+        ],
+        &quot;stops_when&quot;: &quot;A PROPOSED contract holds no writer slot.&quot;
+      },
+      {
+        &quot;id&quot;: 3,
+        &quot;name&quot;: &quot;accept&quot;,
+        &quot;title&quot;: &quot;You approve (ACCEPT)&quot;,
+        &quot;actor&quot;: &quot;You (Product Owner)&quot;,
+        &quot;inputs&quot;: [
+          &quot;PROPOSED contract&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Your ACCEPT comment&quot;
+        ],
+        &quot;stops_when&quot;: &quot;The governance guard stays red until your GOVERNANCE line exists.&quot;
+      },
+      {
+        &quot;id&quot;: 4,
+        &quot;name&quot;: &quot;start-preflight&quot;,
+        &quot;title&quot;: &quot;Start check&quot;,
+        &quot;actor&quot;: &quot;Automated checks&quot;,
+        &quot;inputs&quot;: [
+          &quot;ACTIVE contract&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Go or stop&quot;
+        ],
+        &quot;stops_when&quot;: &quot;Only one active writer in the whole repository.&quot;
+      },
+      {
+        &quot;id&quot;: 5,
+        &quot;name&quot;: &quot;implementation&quot;,
+        &quot;title&quot;: &quot;Writer builds the change&quot;,
+        &quot;actor&quot;: &quot;Writer&quot;,
+        &quot;inputs&quot;: [
+          &quot;ACTIVE contract&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Change&quot;,
+          &quot;Test results&quot;,
+          &quot;PENDING VERIFICATION comment&quot;
+        ],
+        &quot;stops_when&quot;: &quot;Stops and waits for QC.&quot;
+      },
+      {
+        &quot;id&quot;: 6,
+        &quot;name&quot;: &quot;ci&quot;,
+        &quot;title&quot;: &quot;Automated checks&quot;,
+        &quot;actor&quot;: &quot;Automated checks&quot;,
+        &quot;inputs&quot;: [
+          &quot;Latest version&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Green or red checks&quot;
+        ],
+        &quot;stops_when&quot;: &quot;Red checks are the writer&#x27;s to fix.&quot;
+      },
+      {
+        &quot;id&quot;: 7,
+        &quot;name&quot;: &quot;qc&quot;,
+        &quot;title&quot;: &quot;Independent QC&quot;,
+        &quot;actor&quot;: &quot;Independent QC&quot;,
+        &quot;inputs&quot;: [
+          &quot;The exact version to check&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Seven-line verdict comment&quot;
+        ],
+        &quot;stops_when&quot;: &quot;FAIL: you say \&quot;popraw\&quot;, at most two repairs.&quot;
+      },
+      {
+        &quot;id&quot;: 8,
+        &quot;name&quot;: &quot;closeout&quot;,
+        &quot;title&quot;: &quot;Result recorded, final check&quot;,
+        &quot;actor&quot;: &quot;Writer&quot;,
+        &quot;inputs&quot;: [
+          &quot;PASS verdict&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;Task list entry&quot;,
+          &quot;Go for playtest&quot;
+        ],
+        &quot;stops_when&quot;: &quot;Exactly one commit after QC.&quot;
+      },
+      {
+        &quot;id&quot;: 9,
+        &quot;name&quot;: &quot;playtest-merge&quot;,
+        &quot;title&quot;: &quot;You playtest and merge&quot;,
+        &quot;actor&quot;: &quot;You (Product Owner)&quot;,
+        &quot;inputs&quot;: [
+          &quot;Playtest package&quot;
+        ],
+        &quot;outputs&quot;: [
+          &quot;PO-PLAYTEST receipt&quot;,
+          &quot;Your merge&quot;
+        ],
+        &quot;stops_when&quot;: &quot;A new push or base needs a new receipt. Agents never merge.&quot;
+      }
+    ]
+  }
+}</pre>
+    </div>
+  </div>
 </section>
 <section>
   <header><h3>The chain</h3><p class="lede">The same chain for both routes. The number on the diagram is the card below it.</p></header>
@@ -435,12 +758,13 @@ details.tech h5 { margin-top: 10px }
 </section>
 <section class="recovery">
   <header>
-    <p class="eyebrow">Live check · 2026-10-26</p>
-    <h3><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116">First task through the lean flow: HUD-SPRITE-001 (#116)</a></h3>
-    <p class="lede"><b>Now:</b> Waiting for Independent QC on 065a8b0. No QC verdict on the PR yet.</p>
+    <p class="eyebrow">Live check · 2026-10-31</p>
+    <h3>Delivery since the retreat</h3>
+    <p class="lede">Five game tasks merged in three days (28–30 Oct). No process file changed after the retreat.</p>
   </header>
-  <ol class="timeline"><li><span class="when">2026-10-21 06:31</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116">Draft PR opened with the contract</a></li><li><span class="when">2026-10-23 17:47</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116#issuecomment-6371169433">Your ACCEPT HUD-SPRITE-001</a></li><li><span class="when">2026-10-24 00:30</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116#issuecomment-6377540838">PENDING VERIFICATION at 065a8b0, 31 Godot suites pass, CI 4/4 green</a></li><li><span class="when">2026-10-26 03:24</span><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116#issuecomment-6407515172">Your decisions &quot;1A i 2B&quot;: accept a measured performance deviation, move the portrait to a follow-up</a></li></ol>
-  <ul class="notes mt"><li>ACCEPT to PENDING VERIFICATION took about 6.7 hours, with no runner and no manual rescue recorded on the PR.</li><li>The task is large: 71 files, +7,647 / −1,786 lines. QC will need time.</li><li>Criterion 1 (retained EVA portrait) is met only by the follow-up task after your decision 2B.</li></ul>
+  <div class="scroll" style="padding:0"><table class="controls"><thead><tr><th>PR</th><th>Task</th><th>ACCEPT</th><th>QC</th><th>Merged</th><th>ACCEPT → merge</th></tr></thead><tbody><tr><td><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/116">#116</a></td><td>HUD-SPRITE-001</td><td>10-23 17:47</td><td>BLOCKED → PASS</td><td>10-28 15:11</td><td class="hrs">117.4 h</td></tr><tr><td><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/117">#117</a></td><td>MVP-GAMEOVER-001</td><td>10-28 15:32</td><td>BLOCKED → PASS</td><td>10-28 18:12</td><td class="hrs">2.7 h</td></tr><tr><td><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/118">#118</a></td><td>GFX-EVA-GEOM-001</td><td>10-28 18:13</td><td>PASS</td><td>10-28 22:55</td><td class="hrs">4.7 h</td></tr><tr><td><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/121">#121</a></td><td>CAMERA-ZOOM-MAX-001</td><td>10-29 02:41</td><td>PASS</td><td>10-29 12:35</td><td class="hrs">9.9 h</td></tr><tr><td><a href="https://github.com/Mozar-Team/factory-that-builds-itself/pull/119">#119</a></td><td>M1-SCRIPT-LOOP-001</td><td>10-29 13:44</td><td>PASS</td><td>10-30 02:25</td><td class="hrs">12.7 h</td></tr></tbody></table></div>
+  <ul class="notes mt"><li>No QC FAIL, so no repair cycle was needed. Two tasks had a BLOCKED verdict first, then PASS.</li><li>#116 waited about five days. My reading of its timeline: most of that was waiting for your two product decisions (26 Oct), not the flow itself.</li><li>On #119 my search found no PO-PLAYTEST comment before the merge. Worth checking that the playtest gate held.</li></ul>
+  <details class="tech"><summary>Technical details</summary><ul><li>Source: GitHub API: pulls/N (created_at, merged_at) and issues/N/comments (first line starting with ACCEPT, lines starting with verdict:)</li></ul></details>
 </section></div>
 
   <div class="panel" id="map" role="tabpanel" aria-labelledby="t-map" hidden>
@@ -1705,7 +2029,7 @@ details.tech h5 { margin-top: 10px }
 </li></ol>
 </section></div>
 
-  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@eb6536353570b43cecc976f117b383cf1918fa3f</code>; the V2/V3 map from the archived rules. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
+  <footer>Built from <code>.codex/workflow-policy.toml</code> and the history of <code>main@1c4d1c60d6511be94db930708aa3ffff59838df8</code>; the V2/V3 map from the archived rules. Canary status comes from GitHub Actions; the V3 status tab is a recorded snapshot with linked sources. This page only shows the rules: if it disagrees with the rule file, the rule file wins.</footer>
 </main>
 
 <script>
@@ -1738,6 +2062,14 @@ details.tech h5 { margin-top: 10px }
     var v = q.value.trim().toLowerCase();
     document.querySelectorAll(".entry").forEach(function (e) { e.hidden = !!v && e.dataset.search.indexOf(v) < 0; });
   });
+  var cb = document.getElementById("copy-json");
+  if (cb) cb.addEventListener("click", function () {
+    var pre = document.getElementById("wf-json");
+    var done = function () { cb.textContent = "Copied"; setTimeout(function () { cb.textContent = "Copy JSON"; }, 1500); };
+    try { navigator.clipboard.writeText(pre.textContent).then(done, function () { selectPre(pre); }); } catch (e) { selectPre(pre); }
+  });
+  function selectPre(el) { var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); cb.textContent = "Selected, press Ctrl+C"; }
+  document.querySelectorAll('.node').forEach(function (n) { n.addEventListener("click", function () { page("current"); }); });
 })();
 </script>
 </body></html>

@@ -6,7 +6,7 @@ It has five tabs:
 
 | Tab | What it shows | Source |
 | --- | --- | --- |
-| Current flow | The lean flow in force since 2026-10-21 (contract schema 6): the chain of gates, ELEVATED extras, what changed from V3, live check of the first task through it (#116) | `.codex/workflow-policy.toml` on `main` + `V4_*` in `io_map.py` (steps follow `docs/workflow/SHIP_WORKFLOW.md`) |
+| Current flow | The lean flow in force since 2026-10-21 (contract schema 6): a node-editor style workflow board with the same flow as JSON, the chain of gates, ELEVATED extras, what changed from V3, and delivery since the retreat | `.codex/workflow-policy.toml` on `main` + `V4_*` in `io_map.py` (steps follow `docs/workflow/SHIP_WORKFLOW.md`) |
 | V2/V3 map | Archived map of the STANDARD/ELEVATED routes and the automation, built from the rules at `3370cfc` | policy at `ARCHIVE_REF` |
 | V3 status | Snapshot of the event-driven automation on 2026-10-15 and the merged retreat (#115) | `SNAPSHOT_V3` in `io_map.py`, every row linked |
 | Governance | The flow as an AI-delivery governance pattern; each control's policy key is checked against the current policy | `CONTROLS`, `GAPS` in `io_map.py` |
@@ -34,9 +34,9 @@ Writes `docs/index.html`. To publish it with GitHub Pages: Settings → Pages �
 
 A new step, category or policy section that `io_map.py` does not describe appears on the page with a warning.
 
-## Status on 2026-10-26 (summary)
+## Status on 2026-10-31 (summary)
 
-- **Retreat merged.** [#115](https://github.com/Mozar-Team/factory-that-builds-itself/pull/115) FLOW-RECOVERY-001 merged on 2026-10-21: policy 357 → 81 lines, production workflow Python 6,867 → 1,456 lines, event controller, runner and paired admission removed.
-- **Lean flow in use.** [#116](https://github.com/Mozar-Team/factory-that-builds-itself/pull/116) HUD-SPRITE-001: ACCEPT 2026-10-23, PENDING VERIFICATION 2026-10-24, Product Owner decisions 2026-10-26, waiting for Independent QC.
+- **Retreat merged.** [#115](https://github.com/Mozar-Team/factory-that-builds-itself/pull/115) FLOW-RECOVERY-001 merged on 2026-10-21: policy 357 → 81 lines, production workflow Python 6,867 → 1,456 lines.
+- **Lean flow delivers.** Five game tasks merged 28–30 Oct (#116, #117, #118, #121, #119). ACCEPT to merge: 2.7–12.7 hours for four of them, about five days for #116. No QC FAIL.
 
 Details and links are on the Current flow and V3 status tabs.

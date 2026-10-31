@@ -234,6 +234,37 @@ details.tech h5 { margin-top: 10px }
 .timeline a { color: var(--fg) }
 .notes { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--muted) }
 @media (max-width: 760px) { .timeline li { grid-template-columns: 1fr; gap: 2px } }
+
+/* Workflow board: a deliberately dark canvas in both themes, like a node editor. */
+.board { --cv-bg: #12171f; --cv-fg: #e6ebf1; --cv-mute: #9aa6b3; --cv-line: #2a3542; --cv-node: #1b222c;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 0; background: var(--cv-bg); color: var(--cv-fg);
+  border-radius: 6px; overflow: hidden; border: 1px solid var(--cv-line) }
+.canvas { padding: 16px; display: grid; gap: 12px; min-width: 0 }
+.grps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 14px; position: relative }
+.grp { border-radius: 6px; padding: 10px; background: color-mix(in srgb, var(--gc) 26%, var(--cv-bg)); border: 1px solid color-mix(in srgb, var(--gc) 60%, var(--cv-bg)); position: relative; min-width: 0 }
+.grp:not(:last-child)::after { content: "→"; position: absolute; right: -13px; top: 10px; color: var(--cv-mute); font: 600 14px var(--mono) }
+.grp h4 { font: 600 .95rem var(--display); letter-spacing: .04em; margin: 0 0 8px; display: flex; gap: 8px; align-items: center; color: var(--cv-fg) }
+.grp h4 span { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font: 600 .7rem var(--mono); background: var(--gc); color: var(--cv-bg) }
+.g-amber { --gc: #c99a2e } .g-red { --gc: #c2414b } .g-green { --gc: #2f9e5b } .g-blue { --gc: #3d6fd6 } .g-teal { --gc: #1f9a96 }
+.nodes { display: grid; gap: 0 }
+.node { display: flex; gap: 8px; align-items: center; padding: 6px 8px; background: var(--cv-node); border: 1px solid var(--cv-line); border-radius: 5px; color: var(--cv-fg); text-decoration: none; font-size: .82rem; position: relative; margin-top: 12px }
+.node:first-child { margin-top: 0 }
+.node + .node::before { content: ""; position: absolute; left: 20px; top: -13px; height: 12px; border-left: 2px solid var(--cv-mute) }
+.node.opt { border-style: dashed; background: transparent }
+.node:hover, .node:focus-visible { border-color: var(--gc); outline: none }
+.node .ico, .legend .ico { flex: none; width: 26px; height: 22px; border-radius: 4px; display: grid; place-items: center; font: 600 .66rem var(--mono); font-style: normal; background: var(--c); color: #0e1218 }
+.board .a-po { --c: #f2a541 } .board .a-orch { --c: #7aa2ff } .board .a-rev { --c: #b794f6 } .board .a-arch { --c: #4fd1c5 }
+.board .a-writer { --c: #5fd38a } .board .a-ci { --c: #9fb0c2 } .board .a-qc { --c: #ff7a95 }
+.node .lbl { min-width: 0; overflow-wrap: anywhere }
+.loop-note { font: .78rem var(--mono); color: var(--cv-mute); border-left: 2px dashed #3d6fd6; padding-left: 8px }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .75rem; color: var(--cv-mute) }
+.legend span { display: flex; gap: 6px; align-items: center }
+.out { border-left: 1px solid var(--cv-line); display: grid; grid-template-rows: auto 1fr; min-width: 0; max-height: 640px }
+.out-h { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--cv-line); font: 600 .8rem var(--mono); color: var(--cv-mute) }
+.out-h button { font: .75rem var(--mono); background: var(--cv-node); color: var(--cv-fg); border: 1px solid var(--cv-line); border-radius: 4px; padding: 3px 8px; cursor: pointer }
+.out pre { margin: 0; padding: 12px; overflow: auto; font: .72rem/1.45 var(--mono); color: #b9c6d3; white-space: pre }
+td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap }
+@media (max-width: 860px) { .board { grid-template-columns: 1fr } .out { border-left: 0; border-top: 1px solid var(--cv-line); max-height: 360px } .grp:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -15px } }
 </style>
 
 <main class="wrap">
@@ -355,5 +386,13 @@ details.tech h5 { margin-top: 10px }
     var v = q.value.trim().toLowerCase();
     document.querySelectorAll(".entry").forEach(function (e) { e.hidden = !!v && e.dataset.search.indexOf(v) < 0; });
   });
+  var cb = document.getElementById("copy-json");
+  if (cb) cb.addEventListener("click", function () {
+    var pre = document.getElementById("wf-json");
+    var done = function () { cb.textContent = "Copied"; setTimeout(function () { cb.textContent = "Copy JSON"; }, 1500); };
+    try { navigator.clipboard.writeText(pre.textContent).then(done, function () { selectPre(pre); }); } catch (e) { selectPre(pre); }
+  });
+  function selectPre(el) { var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); cb.textContent = "Selected, press Ctrl+C"; }
+  document.querySelectorAll('.node').forEach(function (n) { n.addEventListener("click", function () { page("current"); }); });
 })();
 </script>

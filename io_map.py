@@ -385,21 +385,57 @@ V4_WHAT_CHANGED = [
 ]
 
 V4_STATUS = {
-    "date": "2026-10-26",
-    "pr": f"{R}/pull/116",
-    "title": "First task through the lean flow: HUD-SPRITE-001 (#116)",
-    "timeline": [
-        ("2026-10-21 06:31", "Draft PR opened with the contract", f"{R}/pull/116"),
-        ("2026-10-23 17:47", "Your ACCEPT HUD-SPRITE-001", f"{R}/pull/116#issuecomment-6371169433"),
-        ("2026-10-24 00:30", "PENDING VERIFICATION at 065a8b0, 31 Godot suites pass, CI 4/4 green", f"{R}/pull/116#issuecomment-6377540838"),
-        ("2026-10-26 03:24", "Your decisions \"1A i 2B\": accept a measured performance deviation, move the portrait to a follow-up", f"{R}/pull/116#issuecomment-6407515172"),
+    "date": "2026-10-31",
+    "title": "Delivery since the retreat",
+    "now": "Five game tasks merged in three days (28–30 Oct). No process file changed after the retreat.",
+    # (PR, task, ACCEPT, QC verdicts, merged, ACCEPT→merge hours). First ACCEPT comment to merge, from the PR timeline.
+    "rows": [
+        (116, "HUD-SPRITE-001", "10-23 17:47", "BLOCKED → PASS", "10-28 15:11", 117.4),
+        (117, "MVP-GAMEOVER-001", "10-28 15:32", "BLOCKED → PASS", "10-28 18:12", 2.7),
+        (118, "GFX-EVA-GEOM-001", "10-28 18:13", "PASS", "10-28 22:55", 4.7),
+        (121, "CAMERA-ZOOM-MAX-001", "10-29 02:41", "PASS", "10-29 12:35", 9.9),
+        (119, "M1-SCRIPT-LOOP-001", "10-29 13:44", "PASS", "10-30 02:25", 12.7),
     ],
-    "now": "Waiting for Independent QC on 065a8b0. No QC verdict on the PR yet.",
+    "cmd": "GitHub API: pulls/N (created_at, merged_at) and issues/N/comments (first line starting with ACCEPT, lines starting with verdict:)",
     "notes": [
-        "ACCEPT to PENDING VERIFICATION took about 6.7 hours, with no runner and no manual rescue recorded on the PR.",
-        "The task is large: 71 files, +7,647 / −1,786 lines. QC will need time.",
-        "Criterion 1 (retained EVA portrait) is met only by the follow-up task after your decision 2B.",
+        "No QC FAIL, so no repair cycle was needed. Two tasks had a BLOCKED verdict first, then PASS.",
+        "#116 waited about five days. My reading of its timeline: most of that was waiting for your two product decisions (26 Oct), not the flow itself.",
+        "On #119 my search found no PO-PLAYTEST comment before the merge. Worth checking that the playtest gate held.",
     ],
 }
+
+# Canvas view of the current flow: groups left to right, nodes inside. step = card it links to.
+V4_CANVAS = [
+    {"id": "prepare", "name": "Prepare", "color": "amber", "nodes": [
+        {"label": "Brief", "actor": "writer", "step": 1},
+        {"label": "Start X", "actor": "po", "step": 2},
+        {"label": "Reviewers", "actor": "rev", "step": 2, "optional": True},
+        {"label": "Architect spec", "actor": "arch", "step": 2, "optional": True},
+        {"label": "PROPOSED contract", "actor": "orch", "step": 2},
+    ]},
+    {"id": "approve", "name": "Approve", "color": "red", "nodes": [
+        {"label": "ACCEPT X", "actor": "po", "step": 3},
+        {"label": "GOVERNANCE line", "actor": "po", "step": 3, "optional": True},
+        {"label": "Governance guard", "actor": "ci", "step": 3, "optional": True},
+    ]},
+    {"id": "build", "name": "Build", "color": "green", "nodes": [
+        {"label": "Start check", "actor": "ci", "step": 4},
+        {"label": "Implementation", "actor": "writer", "step": 5},
+        {"label": "CI checks", "actor": "ci", "step": 6},
+        {"label": "PENDING VERIFICATION", "actor": "writer", "step": 5},
+    ]},
+    {"id": "verify", "name": "Verify", "color": "blue", "nodes": [
+        {"label": "Independent QC", "actor": "qc", "step": 7},
+        {"label": "Repair (max 2)", "actor": "writer", "step": 7, "optional": True},
+    ]},
+    {"id": "release", "name": "Release", "color": "teal", "nodes": [
+        {"label": "Closeout", "actor": "writer", "step": 8},
+        {"label": "Final check", "actor": "ci", "step": 8},
+        {"label": "Playtest package", "actor": "writer", "step": 9},
+        {"label": "PO-PLAYTEST receipt", "actor": "po", "step": 9},
+        {"label": "Manual merge", "actor": "po", "step": 9},
+    ]},
+]
+ACTOR_SHORT = {"po": "PO", "orch": "OR", "rev": "RV", "arch": "AR", "writer": "WR", "ci": "CI", "qc": "QC"}
 
 KNOWN_SECTIONS_V6 = {"routing", "reviewer_mapping", "contract", "gates", "repair", "evidence", "playtest", "automation"}
