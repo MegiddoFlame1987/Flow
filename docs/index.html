@@ -268,6 +268,22 @@ details.tech h5 { margin-top: 10px }
 .out pre { margin: 0; padding: 12px; overflow: auto; font: .72rem/1.45 var(--mono); color: #b9c6d3; white-space: pre }
 td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap }
 @media (max-width: 860px) { .board { grid-template-columns: 1fr } .out { border-left: 0; border-top: 1px solid var(--cv-line); max-height: 360px } .grp:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -15px } }
+
+.arts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start }
+.art-stage { grid-column: 1 / -1; margin-top: 10px; font-size: 1.1rem }
+.art { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--c); border-radius: 4px; padding: 12px 14px; display: grid; gap: 8px; min-width: 0 }
+.art header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 0 }
+.art header code { color: var(--muted); font-size: .8rem }
+.lay { margin: 0; padding-left: 18px; font-size: .88rem; display: grid; gap: 2px }
+.pr { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; min-width: 0 }
+.pr-h { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: var(--bg); font: .75rem var(--mono); color: var(--muted) }
+.pr pre { margin: 0; padding: 8px 10px; color: var(--fg); font: .74rem/1.45 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 220px; overflow: auto }
+.copy { font: .72rem var(--mono); padding: 2px 8px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 3px; cursor: pointer }
+.frames summary { cursor: pointer; color: var(--muted); font-size: .85rem }
+.frames .pr { margin-top: 8px }
+.b-todo, .s-todo, .t-todo { --c: var(--muted) } .b-generated, .s-generated, .t-generated { --c: var(--warnc) }
+.b-approved, .s-approved, .t-approved { --c: var(--accent) } .b-swapped, .s-swapped, .t-swapped { --c: var(--ok) }
+.b-blocked, .s-blocked, .t-blocked { --c: var(--bad) }
 </style>
 
 </head><body><main class="wrap">
@@ -279,12 +295,13 @@ td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: now
     <div class="source">
       <span>rules as of <b>2026-10-30</b></span>
       <span>version <b>1c4d1c6</b></span>
-      <span>page built <b>2026-10-31 02:55 UTC</b></span>
+      <span>page built <b>2026-11-11 04:54 UTC</b></span>
     </div>
   </div>
 
   <nav class="pages" role="tablist" aria-label="Pages">
     <button type="button" role="tab" id="t-current" data-page="current" aria-selected="true">Current flow</button>
+    <button type="button" role="tab" id="t-art" data-page="art" aria-selected="false">Art</button>
     <button type="button" role="tab" id="t-map" data-page="map" aria-selected="false">V2/V3 map</button>
     <button type="button" role="tab" id="t-v3" data-page="v3" aria-selected="false">V3 status</button>
     <button type="button" role="tab" id="t-gov" data-page="gov" aria-selected="false">Governance</button>
@@ -1211,6 +1228,384 @@ td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: now
     </section>
   </div>
 
+  <div class="panel" id="art" role="tabpanel" aria-labelledby="t-art" hidden>
+<section>
+  <header>
+    <p class="eyebrow">Graphics programme · brief at 1c4d1c6</p>
+    <h2>Art production</h2>
+    <p class="lede">One card per world asset: the size it must have, how to lay it out and a ready prompt. You generate and approve; at the end of each stage the approved files are swapped into the game.</p>
+  </header>
+  <div class="tally"><div class="t-todo"><b>22</b><span>to do</span></div><div class="t-generated"><b>1</b><span>generated</span></div><div class="t-blocked"><b>2</b><span>blocked</span></div></div>
+</section>
+<section>
+  <header><h3>Steps for every asset</h3></header>
+  <ol class="next"><li><b>Generate</b> Copy the card&#x27;s prompt into your image generator. Ask for PNG.</li><li><b>Send</b> Send the image here. Magenta background, any size with the card&#x27;s proportions.</li><li><b>Cut and size</b> I remove the background, fit it to the card&#x27;s canvas with an 8 px margin and show a preview on regolith.</li><li><b>Approve</b> You approve or ask for another try. The card&#x27;s status changes on this page.</li><li><b>Swap in the game</b> At the end of each stage one STANDARD task swaps the approved files, adds the computed normal maps and shadows, and takes screenshots in the game.</li></ol>
+</section>
+<section>
+  <header><h3>Shared style</h3><p class="lede">Part of every prompt. Taken from your reference screenshots and the chosen MOXIE v2.</p></header>
+  <div class="cards">
+    <div class="card"><h4>From the reference</h4><ul><li>Weathered white modules with orange diagonal hazard stripes and dark iron frames.</li><li>Tall cylindrical tanks, black antenna masts, small crates around the buildings.</li><li>Radial solar farm: dark blue-black panels around a central mast.</li><li>Lander: domed body on legs with a ladder; mine: round walled pit with a gantry drill.</li><li>Not painted into sprites: the cyan rings on the towers, labels and status lights (the game draws them).</li></ul></div>
+    <div class="card"><div class="pr"><div class="pr-h"><span>Style block</span><button type="button" class="copy" data-copy="p-style">Copy</button></div><pre id="p-style">Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.</pre></div></div>
+  </div>
+  <p class="note mt">Descriptions of the objects are my proposals from the canon (what each machine does), not the Product Owner's words: change them before generating if you see it differently.</p>
+</section>
+<section>
+  <header><h3>Assets</h3></header>
+  <div class="arts"><h3 class="art-stage">Stage 0.2 · <code>GFX-PIPELINE-PROOF-001</code></h3>
+<article class="art s-generated" id="art-moxie">
+  <header><div><h4>MOXIE</h4><code>moxie</code></div><span class="badge b-generated">generated</span></header>
+  <ul class="lay"><li>Canvas <b>896 × 896 px</b>, 1 frame</li><li>Physical size 4 × 5 × 3.5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <p class="note">Style chosen (v2, 11 Nov). Retry on magenta for a clean cut.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-moxie">Copy</button></div><pre id="p-moxie">MOXIE, a solid-oxide CO2 electrolysis unit working at about 800 °C: low insulated hot-core housing, heavy steel frame with chamfered corners, truss supports and four foot pads, CO2 intake duct, radiator grilles on top, bundled pipes and cables on the side. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 4 × 5 × 3.5 m. Image proportions 1:1 (final canvas 896x896 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 1.1 · <code>GFX-TERRAIN-PROPS-001</code></h3>
+<article class="art s-todo" id="art-terrain_ground">
+  <header><div><h4>Ground tile</h4><code>terrain_ground</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>2048 × 2048 px</b>, 1 frame</li><li>Physical size about 8.9 × 8.9 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Opaque, seamless on all four edges; no magenta background</li><li>No LED housing</li></ul>
+  <p class="note">Opaque seamless tile: no magenta background, edges must tile.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-terrain_ground">Copy</button></div><pre id="p-terrain_ground">Seamless top-down-at-30-degrees Mars ground texture: dusty tan and rust regolith, small pebbles, faint wind ripples, no large rocks or craters, no tracks.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Seen from the same 3/4 camera, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Seamless tileable square texture that fills the whole image edge to edge, opaque, no border, no isolated objects, no text. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-prop_rock">
+  <header><div><h4>Rock</h4><code>prop_rock</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>384 × 320 px</b>, 1 frame</li><li>Physical size about 1.5 × 1.2 × 1 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-prop_rock">Copy</button></div><pre id="p-prop_rock">A single weathered basalt rock, dark grey-brown with rust dust in the cracks, partly buried.
+
+Physical size about 1.5 × 1.2 × 1 m. Image proportions 6:5 (final canvas 384x320 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-prop_crater">
+  <header><div><h4>Small crater</h4><code>prop_crater</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1024 × 640 px</b>, 1 frame</li><li>Physical size about 6 m across; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-prop_crater">Copy</button></div><pre id="p-prop_crater">A small shallow impact crater about 6 m across: raised rim of loose regolith and scattered stones, darker floor.
+
+Physical size about 6 m across. Image proportions 8:5 (final canvas 1024x640 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 1.2 · <code>GFX-RELAY-001</code></h3>
+<article class="art s-todo" id="art-tesla_relay">
+  <header><div><h4>Power relay</h4><code>tesla_relay</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>768 × 1280 px</b>, 1 frame</li><li>Physical size 2.5 × 2.5 × 7.5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">Canon name for the slot is still open (D13).</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-tesla_relay">Copy</button></div><pre id="p-tesla_relay">A power relay tower 7.5 m tall: lattice steel mast on a heavy square base with feet, stacked copper-coloured coil rings near the top, cable conduit down the side.
+
+Physical size 2.5 × 2.5 × 7.5 m. Image proportions 3:5 (final canvas 768x1280 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 1.3 · <code>GFX-RAIL-001</code></h3>
+<article class="art s-todo" id="art-rail_straight">
+  <header><div><h4>Maglev rail, straight</h4><code>rail_straight</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>512 × 256 px</b>, 1 frame</li><li>Physical size 1.4 × 0.8 m segment; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">Rail and cart look still open (D15). Direction: the writer&#x27;s proposal is along the down-right diagonal.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-rail_straight">Copy</button></div><pre id="p-rail_straight">A straight segment of powered maglev rail on low concrete sleepers, running along the down-right diagonal.
+
+Physical size 1.4 × 0.8 m segment. Image proportions 2:1 (final canvas 512x256 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-rail_corner">
+  <header><div><h4>Maglev rail, corner</h4><code>rail_corner</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>512 × 512 px</b>, 1 frame</li><li>Physical size 1.4 × 1.4 m segment; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">Same rail as the straight piece.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-rail_corner">Copy</button></div><pre id="p-rail_corner">A 90-degree corner segment of the same powered maglev rail on low concrete sleepers.
+
+Physical size 1.4 × 1.4 m segment. Image proportions 1:1 (final canvas 512x512 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-cart">
+  <header><div><h4>Maglev cart</h4><code>cart</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>640 × 512 px</b>, 1 frame</li><li>Physical size 1.6 × 3 × 1.2 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-cart">Copy</button></div><pre id="p-cart">A small open maglev cargo cart 3 m long with a regolith bin, no wheels, hovering just above the rail line, along the down-right diagonal.
+
+Physical size 1.6 × 3 × 1.2 m. Image proportions 5:4 (final canvas 640x512 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 1.4 · <code>GFX-SOLAR-001</code></h3>
+<article class="art s-todo" id="art-solar_farm">
+  <header><div><h4>Solar farm</h4><code>solar_farm</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1536 × 1024 px</b>, 5 frames, sheet 7680 × 1024</li><li>Physical size 12 × 12 × 2.2 m deployed; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">5 frames, one prompt per frame. Dust mask is made by the tool. Dust look still open (D6).</p><details class="frames"><summary>5 prompts, one per frame</summary><div class="pr"><div class="pr-h"><span>Frame 1: fully folded and stacked, 0 % deployed</span><button type="button" class="copy" data-copy="p-solar_farm-0">Copy</button></div><pre id="p-solar_farm-0">A radial solar farm 12 m across: dark blue-black photovoltaic petals around a central mast on a tripod base. Panels fold and stack, the farm is never scaled.
+
+This frame: fully folded and stacked, 0 % deployed. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 12 × 12 × 2.2 m deployed. Image proportions 3:2 (final canvas 1536x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 2: 25 % deployed</span><button type="button" class="copy" data-copy="p-solar_farm-1">Copy</button></div><pre id="p-solar_farm-1">A radial solar farm 12 m across: dark blue-black photovoltaic petals around a central mast on a tripod base. Panels fold and stack, the farm is never scaled.
+
+This frame: 25 % deployed. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 12 × 12 × 2.2 m deployed. Image proportions 3:2 (final canvas 1536x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 3: 50 % deployed</span><button type="button" class="copy" data-copy="p-solar_farm-2">Copy</button></div><pre id="p-solar_farm-2">A radial solar farm 12 m across: dark blue-black photovoltaic petals around a central mast on a tripod base. Panels fold and stack, the farm is never scaled.
+
+This frame: 50 % deployed. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 12 × 12 × 2.2 m deployed. Image proportions 3:2 (final canvas 1536x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 4: 75 % deployed</span><button type="button" class="copy" data-copy="p-solar_farm-3">Copy</button></div><pre id="p-solar_farm-3">A radial solar farm 12 m across: dark blue-black photovoltaic petals around a central mast on a tripod base. Panels fold and stack, the farm is never scaled.
+
+This frame: 75 % deployed. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 12 × 12 × 2.2 m deployed. Image proportions 3:2 (final canvas 1536x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 5: 100 % deployed, all petals open</span><button type="button" class="copy" data-copy="p-solar_farm-4">Copy</button></div><pre id="p-solar_farm-4">A radial solar farm 12 m across: dark blue-black photovoltaic petals around a central mast on a tripod base. Panels fold and stack, the farm is never scaled.
+
+This frame: 100 % deployed, all petals open. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 12 × 12 × 2.2 m deployed. Image proportions 3:2 (final canvas 1536x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div></details>
+</article><h3 class="art-stage">Stage 2.1 · <code>GFX-GAS-001</code></h3>
+<article class="art s-todo" id="art-compressor">
+  <header><div><h4>Atmospheric Compressor</h4><code>compressor</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>896 × 896 px</b>, 1 frame</li><li>Physical size 4 × 5 × 3.5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-compressor">Copy</button></div><pre id="p-compressor">An atmospheric compressor that pulls thin CO2 air: large filtered intake grilles, two compressor drums, a pressure tank, steel frame and pipes. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 4 × 5 × 3.5 m. Image proportions 1:1 (final canvas 896x896 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-electrolyzer">
+  <header><div><h4>Electrolyzer</h4><code>electrolyzer</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1024 × 896 px</b>, 1 frame</li><li>Physical size 4 × 6 × 3.5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-electrolyzer">Copy</button></div><pre id="p-electrolyzer">A water electrolyzer: stacked cell modules in a long insulated housing, water feed pipe, two separate gas outlets to small hydrogen and oxygen tanks. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 4 × 6 × 3.5 m. Image proportions 8:7 (final canvas 1024x896 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-generator">
+  <header><div><h4>H2/O2 Generator</h4><code>generator</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1024 × 896 px</b>, 1 frame</li><li>Physical size 4 × 6 × 3.5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">Never freezes, no STANDBY: no LED housing.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-generator">Copy</button></div><pre id="p-generator">A hydrogen-oxygen generator that burns stored H2 and O2 at night: two upright gas cylinders, a compact power unit with exhaust stack, thick power cables.
+
+Physical size 4 × 6 × 3.5 m. Image proportions 8:7 (final canvas 1024x896 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 2.2 · <code>GFX-CHEM-001</code></h3>
+<article class="art s-todo" id="art-sabatier">
+  <header><div><h4>Sabatier Reactor</h4><code>sabatier</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1024 × 896 px</b>, 1 frame</li><li>Physical size 4 × 6 × 3.5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-sabatier">Copy</button></div><pre id="p-sabatier">A Sabatier reactor at 300–400 °C: horizontal catalytic reactor vessel, heat exchanger coils, water separator, small methane tank. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 4 × 6 × 3.5 m. Image proportions 8:7 (final canvas 1024x896 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-sinterer">
+  <header><div><h4>Sinterer</h4><code>sinterer</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1536 × 1280 px</b>, 1 frame</li><li>Physical size 6 × 8 × 4.5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-sinterer">Copy</button></div><pre id="p-sinterer">A regolith sinterer: three conical feed hoppers above a long insulated kiln, short conveyor, stack of sintered bricks at the outlet. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 6 × 8 × 4.5 m. Image proportions 6:5 (final canvas 1536x1280 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-reduction">
+  <header><div><h4>Hydrogen Reduction Furnace</h4><code>reduction</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1536 × 1280 px</b>, 1 frame</li><li>Physical size 6 × 8 × 5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-reduction">Copy</button></div><pre id="p-reduction">A hydrogen reduction furnace for iron oxide: tall insulated furnace tower, hydrogen feed lines, ore hopper, iron output chute. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 6 × 8 × 5 m. Image proportions 6:5 (final canvas 1536x1280 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-printer">
+  <header><div><h4>Structural Printer</h4><code>printer</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1536 × 1152 px</b>, 1 frame</li><li>Physical size 6 × 8 × 4 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-printer">Copy</button></div><pre id="p-printer">An industrial structural printer: rectangular steel gantry over a print bed, print head on a crossbeam, feed hose, a half-printed beam on the bed. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 6 × 8 × 4 m. Image proportions 4:3 (final canvas 1536x1152 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 2.3 · <code>GFX-STRUCT-001</code></h3>
+<article class="art s-todo" id="art-research_lab">
+  <header><div><h4>Research Lab</h4><code>research_lab</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1536 × 1024 px</b>, 1 frame</li><li>Physical size 8 × 6 × 4 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-research_lab">Copy</button></div><pre id="p-research_lab">A research lab module: insulated pressurised container with a small airlock, sample port, a dish antenna and a weather mast on the roof. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 8 × 6 × 4 m. Image proportions 3:2 (final canvas 1536x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-habitat">
+  <header><div><h4>Habitat</h4><code>habitat</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1792 × 1280 px</b>, 1 frame</li><li>Physical size 8 × 12 × 5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">Never freezes, no STANDBY: no LED housing.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-habitat">Copy</button></div><pre id="p-habitat">A pressurised habitat 12 m long: linked cylindrical modules under dust-covered shielding, an airlock with steps, small round windows, radiator panels.
+
+Physical size 8 × 12 × 5 m. Image proportions 7:5 (final canvas 1792x1280 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-mine">
+  <header><div><h4>Mine</h4><code>mine</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1792 × 1536 px</b>, 1 frame</li><li>Physical size 8 × 10 × 6 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-mine">Copy</button></div><pre id="p-mine">A surface mine: round walled pit with a gantry drill above it, regolith hopper and a short conveyor out.
+
+Physical size 8 × 10 × 6 m. Image proportions 7:6 (final canvas 1792x1536 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 3.2 · <code>GFX-EVA-IDLE-001</code></h3>
+<article class="art s-todo" id="art-eva">
+  <header><div><h4>EVA</h4><code>eva</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>280 × 570 px</b>, 8 frames, sheet 2240 × 570</li><li>Physical size 0.8 × 0.5 × 2.0 m suited; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">8 frames, one direction per prompt, same pose and lighting in all of them.</p><details class="frames"><summary>8 prompts, one per frame</summary><div class="pr"><div class="pr-h"><span>Frame 1: facing down (towards the camera)</span><button type="button" class="copy" data-copy="p-eva-0">Copy</button></div><pre id="p-eva-0">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing down (towards the camera). Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 2: facing down-right</span><button type="button" class="copy" data-copy="p-eva-1">Copy</button></div><pre id="p-eva-1">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing down-right. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 3: facing right</span><button type="button" class="copy" data-copy="p-eva-2">Copy</button></div><pre id="p-eva-2">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing right. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 4: facing up-right</span><button type="button" class="copy" data-copy="p-eva-3">Copy</button></div><pre id="p-eva-3">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing up-right. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 5: facing up (away from the camera)</span><button type="button" class="copy" data-copy="p-eva-4">Copy</button></div><pre id="p-eva-4">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing up (away from the camera). Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 6: facing up-left</span><button type="button" class="copy" data-copy="p-eva-5">Copy</button></div><pre id="p-eva-5">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing up-left. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 7: facing left</span><button type="button" class="copy" data-copy="p-eva-6">Copy</button></div><pre id="p-eva-6">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing left. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div><div class="pr"><div class="pr-h"><span>Frame 8: facing down-left</span><button type="button" class="copy" data-copy="p-eva-7">Copy</button></div><pre id="p-eva-7">EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body.
+
+This frame: facing down-left. Keep exactly the same object, scale, camera and lighting as the other frames.
+
+Physical size 0.8 × 0.5 × 2.0 m suited. Image proportions 28:57 (final canvas 280x570 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div></details>
+</article><h3 class="art-stage">Stage 4.1 · <code>GFX-LANDER-001</code></h3>
+<article class="art s-todo" id="art-argo">
+  <header><div><h4>Lander</h4><code>argo</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>2048 × 2048 px</b>, 1 frame</li><li>Physical size 8 × 10 × 7 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">No national markings until decided (D1/D2).</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-argo">Copy</button></div><pre id="p-argo">A human Mars lander 7 m tall: domed body on four legs (rear leg hidden), hatch with a ramp and ladder, antenna mast on top.
+
+Physical size 8 × 10 × 7 m. Image proportions 1:1 (final canvas 2048x2048 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article>
+<article class="art s-todo" id="art-capsule">
+  <header><div><h4>Escape capsule</h4><code>capsule</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1024 × 1024 px</b>, 1 frame</li><li>Physical size 3.2 × 3.2 × 2.4 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="note">EVA&#x27;s own escape capsule, airbags absent.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-capsule">Copy</button></div><pre id="p-capsule">A small landed escape capsule: blunt cone with a scorched heat shield, open side hatch, no airbags, a few scattered parachute lines.
+
+Physical size 3.2 × 3.2 × 2.4 m. Image proportions 1:1 (final canvas 1024x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article><h3 class="art-stage">Stage 4.2 · <code>GFX-IHO-001</code></h3>
+<article class="art s-blocked" id="art-iho">
+  <header><div><h4>IHO</h4><code>iho</code></div><span class="badge b-blocked">blocked</span></header>
+  <ul class="lay"><li>Canvas <b>1280 × 1024 px</b>, 1 frame</li><li>Physical size 2.1 × 5.2 × 2.4 m, van-sized; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>No LED housing</li></ul>
+  <p class="warn-t">Waits for the direction/state decision (D12).</p>
+</article><h3 class="art-stage">Stage 4.3 · <code>GFX-RESEARCH-ROBOT-001</code></h3>
+<article class="art s-blocked" id="art-research_robot">
+  <header><div><h4>Research robot</h4><code>research_robot</code></div><span class="badge b-blocked">blocked</span></header>
+  <ul class="lay"><li>Canvas <b>768 × 640 px</b>, 1 frame</li><li>Physical size 1.8 × 3 × 1.7 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <p class="warn-t">Waits for D12 and D16 (is it IRO or the IHO Researcher).</p>
+</article><h3 class="art-stage">Stage — · <code>not in the programme</code></h3>
+<article class="art s-todo" id="art-ice_extractor">
+  <header><div><h4>Ice Extractor</h4><code>ice_extractor</code></div><span class="badge b-todo">to do</span></header>
+  <ul class="lay"><li>Canvas <b>1024 × 1024 px</b>, 1 frame</li><li>Physical size 5 × 6 × 5 m; the in-game height is fixed by the descriptor, not by pixels</li><li>Object centred, base near the bottom, at least 8 px empty margin on every side</li><li>Empty LED bar housing on the front face (the game lights it)</li></ul>
+  <p class="note">In the 25 catalog keys but in no stage of the graphics programme: needs your decision where it goes.</p><div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-ice_extractor">Copy</button></div><pre id="p-ice_extractor">A subsurface ice extractor 5 m tall: drill derrick over a heated borehole casing, insulated condensation tank, water pipe out. One empty dark vertical housing for an LED bar on the front face, with no light inside it.
+
+Physical size 5 × 6 × 5 m. Image proportions 1:1 (final canvas 1024x1024 px), object filling about 80 % of the width, its base near the bottom edge.
+
+Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. Modular off-white industrial containers and panels with rust streaks, red dust and orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, small amber Kapton patches. Detailed but readable from a high camera. Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. Warm low sun from the top-left, soft shading. Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite.
+
+Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, no gradient, no texture, no checkerboard, no shadow or reflection on the background. Object centred with a clear empty margin. No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, no long cast shadows, no ground plane, no scenery. Output as PNG.</pre></div>
+</article></div>
+</section></div>
   <div class="panel" id="v3" role="tabpanel" aria-labelledby="t-v3" hidden>
 <section class="recovery">
   <header>
@@ -2061,6 +2456,14 @@ td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: now
   if (q) q.addEventListener("input", function () {
     var v = q.value.trim().toLowerCase();
     document.querySelectorAll(".entry").forEach(function (e) { e.hidden = !!v && e.dataset.search.indexOf(v) < 0; });
+  });
+  document.querySelectorAll('.copy[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var pre = document.getElementById(b.dataset.copy), label = b.textContent;
+      var ok = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = label; }, 1500); };
+      var sel = function () { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; };
+      try { navigator.clipboard.writeText(pre.textContent).then(ok, sel); } catch (e) { sel(); }
+    });
   });
   var cb = document.getElementById("copy-json");
   if (cb) cb.addEventListener("click", function () {

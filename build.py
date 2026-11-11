@@ -8,6 +8,7 @@ import argparse
 import datetime as dt
 import html
 import json
+import math
 import os
 import re
 import subprocess
@@ -376,6 +377,99 @@ def current_tab(policy):
 </section>"""
 
 
+
+# ---------- Tab: art production ----------
+
+ART_STATUS = {"todo": "to do", "generated": "generated", "approved": "approved", "swapped": "in the game", "blocked": "blocked"}
+
+
+def art_prompt(a, frame=None):
+    stage, task, key, name, (w, h), frames, phys, thermal, status, note, desc = a
+    if key == "terrain_ground":
+        return (desc + "\n\n" + M.ART_STYLE.replace("Orthographic 3/4 view", "Seen from the same 3/4 camera") +
+                "\n\nSeamless tileable square texture that fills the whole image edge to edge, opaque, "
+                "no border, no isolated objects, no text. Output as PNG.")
+    parts = [desc + (" " + M.ART_LED if thermal else "")]
+    if frame:
+        parts.append("This frame: " + frame + ". Keep exactly the same object, scale, camera and lighting as the other frames.")
+    g = math.gcd(w, h)
+    parts.append(f"Physical size {phys}. Image proportions {w // g}:{h // g} (final canvas {w}x{h} px), object filling about 80 % of the width, its base near the bottom edge.")
+    parts.append(M.ART_STYLE)
+    parts.append(M.ART_BG)
+    return "\n\n".join(parts)
+
+
+def art_layout(a):
+    stage, task, key, name, (w, h), frames, phys, thermal, status, note, desc = a
+    out = [f"Canvas <b>{w} × {h} px</b>" + (f", {frames} frames, sheet {w * frames} × {h}" if frames > 1 else ", 1 frame"),
+           f"Physical size {e(phys)}; the in-game height is fixed by the descriptor, not by pixels"]
+    if key == "terrain_ground":
+        out.append("Opaque, seamless on all four edges; no magenta background")
+    else:
+        out.append("Object centred, base near the bottom, at least 8 px empty margin on every side")
+    out.append("Empty LED bar housing on the front face (the game lights it)" if thermal else "No LED housing")
+    return out
+
+
+def art_tab():
+    counts = {k: sum(1 for a in M.ART_ASSETS if a[8] == k) for k in ART_STATUS}
+    tally = "".join(f'<div class="t-{k}"><b>{counts[k]}</b><span>{e(v)}</span></div>' for k, v in ART_STATUS.items() if counts[k])
+    steps = "".join(f"<li><b>{e(t)}</b> {e(d)}</li>" for t, d in M.ART_STEPS)
+    ref = "".join(f"<li>{e(r)}</li>" for r in M.ART_REFERENCE)
+    cards, stage_seen = [], None
+    for i, a in enumerate(sorted(M.ART_ASSETS, key=lambda x: (x[0] == "—", x[0]))):
+        stage, task, key, name, (w, h), frames, phys, thermal, status, note, desc = a
+        if stage != stage_seen:
+            stage_seen = stage
+            cards.append(f'<h3 class="art-stage">Stage {e(stage)} · <code>{e(task)}</code></h3>')
+        lay = "".join(f"<li>{x}</li>" for x in art_layout(a))
+        if status == "blocked":
+            body = f'<p class="warn-t">{e(note)}</p>'
+        else:
+            fl = M.ART_FRAMES.get(key)
+            if fl:
+                prompts = "".join(
+                    f'<div class="pr"><div class="pr-h"><span>Frame {j + 1}: {e(f)}</span><button type="button" class="copy" data-copy="p-{key}-{j}">Copy</button></div>'
+                    f'<pre id="p-{key}-{j}">{e(art_prompt(a, f))}</pre></div>' for j, f in enumerate(fl))
+                body = f'<details class="frames"><summary>{len(fl)} prompts, one per frame</summary>{prompts}</details>'
+            else:
+                body = (f'<div class="pr"><div class="pr-h"><span>Prompt</span><button type="button" class="copy" data-copy="p-{key}">Copy</button></div>'
+                        f'<pre id="p-{key}">{e(art_prompt(a))}</pre></div>')
+            if note:
+                body = f'<p class="note">{e(note)}</p>' + body
+        cards.append(f"""
+<article class="art s-{status}" id="art-{key}">
+  <header><div><h4>{e(name)}</h4><code>{e(key)}</code></div><span class="badge b-{status}">{e(ART_STATUS[status])}</span></header>
+  <ul class="lay">{lay}</ul>
+  {body}
+</article>""")
+    return f"""
+<section>
+  <header>
+    <p class="eyebrow">Graphics programme · brief at {e(M.ART_REF)}</p>
+    <h2>Art production</h2>
+    <p class="lede">One card per world asset: the size it must have, how to lay it out and a ready prompt. You generate and approve; at the end of each stage the approved files are swapped into the game.</p>
+  </header>
+  <div class="tally">{tally}</div>
+</section>
+<section>
+  <header><h3>Steps for every asset</h3></header>
+  <ol class="next">{steps}</ol>
+</section>
+<section>
+  <header><h3>Shared style</h3><p class="lede">Part of every prompt. Taken from your reference screenshots and the chosen MOXIE v2.</p></header>
+  <div class="cards">
+    <div class="card"><h4>From the reference</h4><ul>{ref}</ul></div>
+    <div class="card"><div class="pr"><div class="pr-h"><span>Style block</span><button type="button" class="copy" data-copy="p-style">Copy</button></div><pre id="p-style">{e(M.ART_STYLE)}</pre></div></div>
+  </div>
+  <p class="note mt">Descriptions of the objects are my proposals from the canon (what each machine does), not the Product Owner's words: change them before generating if you see it differently.</p>
+</section>
+<section>
+  <header><h3>Assets</h3></header>
+  <div class="arts">{''.join(cards)}</div>
+</section>"""
+
+
 # ---------- Tab 2: V3 status ----------
 
 STATE_LABEL = {"ok": "working", "warn": "needs attention", "bad": "broken", "frozen": "frozen"}
@@ -638,7 +732,7 @@ def build(repo, ref, out, standalone):
         "{{ARCH_CATS}}": chips(old["routing"]["architect_required_categories"], M.CATEGORY_LABELS),
         "{{PROTECTED}}": chips(old["admission"]["protected_prefixes"]),
         "{{MAPPING}}": mapping, "{{QC_FIELDS}}": chips(old["products"]["qc_comment_fields"]),
-        "{{V3}}": v3_tab(), "{{GOVERNANCE}}": governance_tab(now),
+        "{{V3}}": v3_tab(), "{{ART}}": art_tab(), "{{GOVERNANCE}}": governance_tab(now),
         "{{HISTORY}}": history_tab(repo, ref, commits, admin_paths),
     }
     page = (HERE / "template.html").read_text()

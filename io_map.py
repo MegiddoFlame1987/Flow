@@ -439,3 +439,109 @@ V4_CANVAS = [
 ACTOR_SHORT = {"po": "PO", "orch": "OR", "rev": "RV", "arch": "AR", "writer": "WR", "ci": "CI", "qc": "QC"}
 
 KNOWN_SECTIONS_V6 = {"routing", "reviewer_mapping", "contract", "gates", "repair", "evidence", "playtest", "automation"}
+
+# --- Art production: one card per world asset. Spec values come from
+# docs/briefs/BRIEF-GRAPHICS-001.md (section 3.2 matrix, per-key sections) and the
+# GRAPHICS PROGRAMME in TASKS.md at 1c4d1c6. Object descriptions are the writer's
+# proposals: edit them before generating. Status is updated by hand when art arrives.
+ART_REF = "1c4d1c6"
+ART_STYLE = (
+    "Style: semi-realistic isometric strategy-game sprite matching a weathered Mars base. "
+    "Modular off-white industrial containers and panels with rust streaks, red dust and "
+    "orange diagonal hazard stripes, dark iron frames with bolts, black antenna masts, "
+    "small amber Kapton patches. Detailed but readable from a high camera. "
+    "Orthographic 3/4 view, camera about 30 degrees above the ground, no perspective. "
+    "Warm low sun from the top-left, soft shading. "
+    "Low-saturation Mars palette: off-white, tan, ochre, rust, dark grey-brown, graphite."
+)
+ART_BG = (
+    "Isolated object on a solid flat pure magenta background (#FF00FF), uniform colour, "
+    "no gradient, no texture, no checkerboard, no shadow or reflection on the background. "
+    "Object centred with a clear empty margin. "
+    "No text, no labels, no logos, no flags, no cyan, no glowing lights or rings, no UI, "
+    "no long cast shadows, no ground plane, no scenery. Output as PNG."
+)
+ART_LED = "One empty dark vertical housing for an LED bar on the front face, with no light inside it."
+ART_REFERENCE = [
+    "Weathered white modules with orange diagonal hazard stripes and dark iron frames.",
+    "Tall cylindrical tanks, black antenna masts, small crates around the buildings.",
+    "Radial solar farm: dark blue-black panels around a central mast.",
+    "Lander: domed body on legs with a ladder; mine: round walled pit with a gantry drill.",
+    "Not painted into sprites: the cyan rings on the towers, labels and status lights (the game draws them).",
+]
+ART_STEPS = [
+    ("Generate", "Copy the card's prompt into your image generator. Ask for PNG."),
+    ("Send", "Send the image here. Magenta background, any size with the card's proportions."),
+    ("Cut and size", "I remove the background, fit it to the card's canvas with an 8 px margin and show a preview on regolith."),
+    ("Approve", "You approve or ask for another try. The card's status changes on this page."),
+    ("Swap in the game", "At the end of each stage one STANDARD task swaps the approved files, adds the computed normal maps and shadows, and takes screenshots in the game."),
+]
+# status: todo | generated | approved | swapped | blocked
+ART_ASSETS = [
+    # stage, task, key, name, canvas, frames, physical, thermal, status, note, desc
+    ("0.2", "GFX-PIPELINE-PROOF-001", "moxie", "MOXIE", (896, 896), 1, "4 × 5 × 3.5 m", True, "generated",
+     "Style chosen (v2, 11 Nov). Retry on magenta for a clean cut.",
+     "MOXIE, a solid-oxide CO2 electrolysis unit working at about 800 °C: low insulated hot-core housing, heavy steel frame with chamfered corners, truss supports and four foot pads, CO2 intake duct, radiator grilles on top, bundled pipes and cables on the side."),
+    ("1.1", "GFX-TERRAIN-PROPS-001", "terrain_ground", "Ground tile", (2048, 2048), 1, "about 8.9 × 8.9 m", False, "todo",
+     "Opaque seamless tile: no magenta background, edges must tile.",
+     "Seamless top-down-at-30-degrees Mars ground texture: dusty tan and rust regolith, small pebbles, faint wind ripples, no large rocks or craters, no tracks."),
+    ("1.1", "GFX-TERRAIN-PROPS-001", "prop_rock", "Rock", (384, 320), 1, "about 1.5 × 1.2 × 1 m", False, "todo", "",
+     "A single weathered basalt rock, dark grey-brown with rust dust in the cracks, partly buried."),
+    ("1.1", "GFX-TERRAIN-PROPS-001", "prop_crater", "Small crater", (1024, 640), 1, "about 6 m across", False, "todo", "",
+     "A small shallow impact crater about 6 m across: raised rim of loose regolith and scattered stones, darker floor."),
+    ("1.2", "GFX-RELAY-001", "tesla_relay", "Power relay", (768, 1280), 1, "2.5 × 2.5 × 7.5 m", False, "todo",
+     "Canon name for the slot is still open (D13).",
+     "A power relay tower 7.5 m tall: lattice steel mast on a heavy square base with feet, stacked copper-coloured coil rings near the top, cable conduit down the side."),
+    ("1.3", "GFX-RAIL-001", "rail_straight", "Maglev rail, straight", (512, 256), 1, "1.4 × 0.8 m segment", False, "todo",
+     "Rail and cart look still open (D15). Direction: the writer's proposal is along the down-right diagonal.",
+     "A straight segment of powered maglev rail on low concrete sleepers, running along the down-right diagonal."),
+    ("1.3", "GFX-RAIL-001", "rail_corner", "Maglev rail, corner", (512, 512), 1, "1.4 × 1.4 m segment", False, "todo", "Same rail as the straight piece.",
+     "A 90-degree corner segment of the same powered maglev rail on low concrete sleepers."),
+    ("1.3", "GFX-RAIL-001", "cart", "Maglev cart", (640, 512), 1, "1.6 × 3 × 1.2 m", False, "todo", "",
+     "A small open maglev cargo cart 3 m long with a regolith bin, no wheels, hovering just above the rail line, along the down-right diagonal."),
+    ("1.4", "GFX-SOLAR-001", "solar_farm", "Solar farm", (1536, 1024), 5, "12 × 12 × 2.2 m deployed", False, "todo",
+     "5 frames, one prompt per frame. Dust mask is made by the tool. Dust look still open (D6).",
+     "A radial solar farm 12 m across: dark blue-black photovoltaic petals around a central mast on a tripod base. Panels fold and stack, the farm is never scaled."),
+    ("2.1", "GFX-GAS-001", "compressor", "Atmospheric Compressor", (896, 896), 1, "4 × 5 × 3.5 m", True, "todo", "",
+     "An atmospheric compressor that pulls thin CO2 air: large filtered intake grilles, two compressor drums, a pressure tank, steel frame and pipes."),
+    ("2.1", "GFX-GAS-001", "electrolyzer", "Electrolyzer", (1024, 896), 1, "4 × 6 × 3.5 m", True, "todo", "",
+     "A water electrolyzer: stacked cell modules in a long insulated housing, water feed pipe, two separate gas outlets to small hydrogen and oxygen tanks."),
+    ("2.1", "GFX-GAS-001", "generator", "H2/O2 Generator", (1024, 896), 1, "4 × 6 × 3.5 m", False, "todo",
+     "Never freezes, no STANDBY: no LED housing.",
+     "A hydrogen-oxygen generator that burns stored H2 and O2 at night: two upright gas cylinders, a compact power unit with exhaust stack, thick power cables."),
+    ("2.2", "GFX-CHEM-001", "sabatier", "Sabatier Reactor", (1024, 896), 1, "4 × 6 × 3.5 m", True, "todo", "",
+     "A Sabatier reactor at 300–400 °C: horizontal catalytic reactor vessel, heat exchanger coils, water separator, small methane tank."),
+    ("2.2", "GFX-CHEM-001", "sinterer", "Sinterer", (1536, 1280), 1, "6 × 8 × 4.5 m", True, "todo", "",
+     "A regolith sinterer: three conical feed hoppers above a long insulated kiln, short conveyor, stack of sintered bricks at the outlet."),
+    ("2.2", "GFX-CHEM-001", "reduction", "Hydrogen Reduction Furnace", (1536, 1280), 1, "6 × 8 × 5 m", True, "todo", "",
+     "A hydrogen reduction furnace for iron oxide: tall insulated furnace tower, hydrogen feed lines, ore hopper, iron output chute."),
+    ("2.2", "GFX-CHEM-001", "printer", "Structural Printer", (1536, 1152), 1, "6 × 8 × 4 m", True, "todo", "",
+     "An industrial structural printer: rectangular steel gantry over a print bed, print head on a crossbeam, feed hose, a half-printed beam on the bed."),
+    ("—", "not in the programme", "ice_extractor", "Ice Extractor", (1024, 1024), 1, "5 × 6 × 5 m", True, "todo",
+     "In the 25 catalog keys but in no stage of the graphics programme: needs your decision where it goes.",
+     "A subsurface ice extractor 5 m tall: drill derrick over a heated borehole casing, insulated condensation tank, water pipe out."),
+    ("2.3", "GFX-STRUCT-001", "research_lab", "Research Lab", (1536, 1024), 1, "8 × 6 × 4 m", True, "todo", "",
+     "A research lab module: insulated pressurised container with a small airlock, sample port, a dish antenna and a weather mast on the roof."),
+    ("2.3", "GFX-STRUCT-001", "habitat", "Habitat", (1792, 1280), 1, "8 × 12 × 5 m", False, "todo",
+     "Never freezes, no STANDBY: no LED housing.",
+     "A pressurised habitat 12 m long: linked cylindrical modules under dust-covered shielding, an airlock with steps, small round windows, radiator panels."),
+    ("2.3", "GFX-STRUCT-001", "mine", "Mine", (1792, 1536), 1, "8 × 10 × 6 m", False, "todo", "",
+     "A surface mine: round walled pit with a gantry drill above it, regolith hopper and a short conveyor out."),
+    ("3.2", "GFX-EVA-IDLE-001", "eva", "EVA", (280, 570), 8, "0.8 × 0.5 × 2.0 m suited", False, "todo",
+     "8 frames, one direction per prompt, same pose and lighting in all of them.",
+     "EVA, a woman in a white and orange Mars surface suit with a life-support backpack, standing idle, full body."),
+    ("4.1", "GFX-LANDER-001", "argo", "Lander", (2048, 2048), 1, "8 × 10 × 7 m", False, "todo",
+     "No national markings until decided (D1/D2).",
+     "A human Mars lander 7 m tall: domed body on four legs (rear leg hidden), hatch with a ramp and ladder, antenna mast on top."),
+    ("4.1", "GFX-LANDER-001", "capsule", "Escape capsule", (1024, 1024), 1, "3.2 × 3.2 × 2.4 m", False, "todo",
+     "EVA's own escape capsule, airbags absent.",
+     "A small landed escape capsule: blunt cone with a scorched heat shield, open side hatch, no airbags, a few scattered parachute lines."),
+    ("4.2", "GFX-IHO-001", "iho", "IHO", (1280, 1024), 0, "2.1 × 5.2 × 2.4 m, van-sized", False, "blocked",
+     "Waits for the direction/state decision (D12).", ""),
+    ("4.3", "GFX-RESEARCH-ROBOT-001", "research_robot", "Research robot", (768, 640), 0, "1.8 × 3 × 1.7 m", True, "blocked",
+     "Waits for D12 and D16 (is it IRO or the IHO Researcher).", ""),
+]
+ART_FRAMES = {
+    "solar_farm": ["fully folded and stacked, 0 % deployed", "25 % deployed", "50 % deployed", "75 % deployed", "100 % deployed, all petals open"],
+    "eva": ["facing down (towards the camera)", "facing down-right", "facing right", "facing up-right", "facing up (away from the camera)", "facing up-left", "facing left", "facing down-left"],
+}

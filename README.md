@@ -2,11 +2,12 @@
 
 A generated page that explains the delivery flow of [`Mozar-Team/factory-that-builds-itself`](https://github.com/Mozar-Team/factory-that-builds-itself) in plain language. It lives outside the game repository so the game's git history stays clean; the game repository is only read.
 
-It has five tabs:
+It has six tabs:
 
 | Tab | What it shows | Source |
 | --- | --- | --- |
 | Current flow | The lean flow in force since 2026-10-21 (contract schema 6): a node-editor style workflow board with the same flow as JSON, the chain of gates, ELEVATED extras, what changed from V3, and delivery since the retreat | `.codex/workflow-policy.toml` on `main` + `V4_*` in `io_map.py` (steps follow `docs/workflow/SHIP_WORKFLOW.md`) |
+| Art | One card per world asset (25 catalog keys): canvas, frames, layout, a ready prompt with the shared style block, and the asset's status | `ART_*` in `io_map.py`, spec from `docs/briefs/BRIEF-GRAPHICS-001.md` and the GRAPHICS PROGRAMME in `TASKS.md` |
 | V2/V3 map | Archived map of the STANDARD/ELEVATED routes and the automation, built from the rules at `3370cfc` | policy at `ARCHIVE_REF` |
 | V3 status | Snapshot of the event-driven automation on 2026-10-15 and the merged retreat (#115) | `SNAPSHOT_V3` in `io_map.py`, every row linked |
 | Governance | The flow as an AI-delivery governance pattern; each control's policy key is checked against the current policy | `CONTROLS`, `GAPS` in `io_map.py` |

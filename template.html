@@ -265,6 +265,22 @@ details.tech h5 { margin-top: 10px }
 .out pre { margin: 0; padding: 12px; overflow: auto; font: .72rem/1.45 var(--mono); color: #b9c6d3; white-space: pre }
 td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap }
 @media (max-width: 860px) { .board { grid-template-columns: 1fr } .out { border-left: 0; border-top: 1px solid var(--cv-line); max-height: 360px } .grp:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -15px } }
+
+.arts { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 14px; align-items: start }
+.art-stage { grid-column: 1 / -1; margin-top: 10px; font-size: 1.1rem }
+.art { background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--c); border-radius: 4px; padding: 12px 14px; display: grid; gap: 8px; min-width: 0 }
+.art header { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin: 0 }
+.art header code { color: var(--muted); font-size: .8rem }
+.lay { margin: 0; padding-left: 18px; font-size: .88rem; display: grid; gap: 2px }
+.pr { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; min-width: 0 }
+.pr-h { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: var(--bg); font: .75rem var(--mono); color: var(--muted) }
+.pr pre { margin: 0; padding: 8px 10px; color: var(--fg); font: .74rem/1.45 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 220px; overflow: auto }
+.copy { font: .72rem var(--mono); padding: 2px 8px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 3px; cursor: pointer }
+.frames summary { cursor: pointer; color: var(--muted); font-size: .85rem }
+.frames .pr { margin-top: 8px }
+.b-todo, .s-todo, .t-todo { --c: var(--muted) } .b-generated, .s-generated, .t-generated { --c: var(--warnc) }
+.b-approved, .s-approved, .t-approved { --c: var(--accent) } .b-swapped, .s-swapped, .t-swapped { --c: var(--ok) }
+.b-blocked, .s-blocked, .t-blocked { --c: var(--bad) }
 </style>
 
 <main class="wrap">
@@ -282,6 +298,7 @@ td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: now
 
   <nav class="pages" role="tablist" aria-label="Pages">
     <button type="button" role="tab" id="t-current" data-page="current" aria-selected="true">Current flow</button>
+    <button type="button" role="tab" id="t-art" data-page="art" aria-selected="false">Art</button>
     <button type="button" role="tab" id="t-map" data-page="map" aria-selected="false">V2/V3 map</button>
     <button type="button" role="tab" id="t-v3" data-page="v3" aria-selected="false">V3 status</button>
     <button type="button" role="tab" id="t-gov" data-page="gov" aria-selected="false">Governance</button>
@@ -349,6 +366,7 @@ td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: now
     </section>
   </div>
 
+  <div class="panel" id="art" role="tabpanel" aria-labelledby="t-art" hidden>{{ART}}</div>
   <div class="panel" id="v3" role="tabpanel" aria-labelledby="t-v3" hidden>{{V3}}</div>
   <div class="panel" id="gov" role="tabpanel" aria-labelledby="t-gov" hidden>{{GOVERNANCE}}</div>
   <div class="panel" id="history" role="tabpanel" aria-labelledby="t-history" hidden>{{HISTORY}}</div>
@@ -385,6 +403,14 @@ td.hrs { font-variant-numeric: tabular-nums; text-align: right; white-space: now
   if (q) q.addEventListener("input", function () {
     var v = q.value.trim().toLowerCase();
     document.querySelectorAll(".entry").forEach(function (e) { e.hidden = !!v && e.dataset.search.indexOf(v) < 0; });
+  });
+  document.querySelectorAll('.copy[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var pre = document.getElementById(b.dataset.copy), label = b.textContent;
+      var ok = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = label; }, 1500); };
+      var sel = function () { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; };
+      try { navigator.clipboard.writeText(pre.textContent).then(ok, sel); } catch (e) { sel(); }
+    });
   });
   var cb = document.getElementById("copy-json");
   if (cb) cb.addEventListener("click", function () {
